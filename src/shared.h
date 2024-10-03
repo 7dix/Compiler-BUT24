@@ -1,0 +1,33 @@
+//FILE: shared.h
+//PROJEKT: IFJ24 - Compiler for the IFJ24 lang @ FIT BUT 2BIT
+//TEAM: Martin Zůbek (253226)
+//AUTHORS:
+// Otakar Kočí (xkocio00, 247555)
+//
+//YEAR: 2024
+//NOTES: 
+
+
+#ifndef H_DEFINITIONS
+#define H_DEFINITIONS
+
+typedef enum {
+    
+    OK = 0,
+    LEXICAL_ERROR = 1,
+    SYNTAX_ERR = 2,
+    SEMANTIC_UNDEFINED_ERR = 3,
+    SEMANTIC_FUNCTION_ERR = 4,
+    SEMANTIC_REDEF_OR_BAD_ASSIGN_ERR = 5,
+    SEMANTIC_EXPRESSION_ERR = 6,
+    SEMANTIC_TYPE_COMPATIBILITY_ERR = 7,
+    SEMANTIC_TYPE_DERIVATION_ERR = 8,
+    SEMANTIC_UNUSED_VAR_ERR = 9,
+    SEMANTIC_OTHER_ERR = 10,
+    INTERNAL_ERR = 99
+};
+
+
+
+
+#endif // H_DEFINITIONS
