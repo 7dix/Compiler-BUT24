@@ -20,7 +20,7 @@ typedef enum TOKEN_TYPE{
     IMPORT,
     NOT_EQUAL,
     STRING, // MULTILINE_STRING by spadal pod string
-    INTEGER,
+    INT,
     FLOAT,
     LESS_THAN,
     GREATER_THAN,
