@@ -10,11 +10,13 @@ CFLAGS = -Wall -Wextra -Werror
 DEBUG_FLAGS = -g -O0
 
 # Source files
-SRC = $(wildcard src/*.c)
+SRC = src/main.c src/scanner.c
+SRC_SCANNER_TEST = src/main_test_scanner.c src/scanner.c
 
 # Output executables
 OUTPUT = bin/ifj24
 DEBUG_OUTPUT = bin/ifj24debug
+DEBUG_SCANNER_OUTPUT = bin/scannerdebug
 
 # Default target
 all: $(OUTPUT)
@@ -30,6 +32,11 @@ $(OUTPUT): bin $(SRC)
 # Debug target
 debug: bin $(SRC)
 	$(CC) $(CFLAGS) $(DEBUG_FLAGS) -o $(DEBUG_OUTPUT) $(SRC)
+
+# Debug target for scanner test
+debug_scanner: bin $(SRC_SCANNER_TEST)
+	$(CC) $(CFLAGS) $(DEBUG_FLAGS) -o $(DEBUG_SCANNER_OUTPUT) $(SRC_SCANNER_TEST)
+
 
 # Clean target to remove the executables
 clean:
