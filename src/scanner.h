@@ -94,7 +94,7 @@ int get_token(T_TOKEN *token);
  * @param type The token type.
  * @return const char* The string representation.
  */
-const char* tt_to_str(TOKEN_TYPE type)
+const char* tt_to_str(TOKEN_TYPE type);
 
 
 #endif // H_SCANNER
