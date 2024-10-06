@@ -50,7 +50,7 @@ typedef enum TOKEN_TYPE{
     PIPE, // |
     CONST,
     VAR,
-    NULL,
+    NULL_TOKEN,
     FN,
     IF,
     ELSE,
@@ -61,18 +61,29 @@ typedef enum TOKEN_TYPE{
     IFJ,
 } TOKEN_TYPE;
 
+/**
+ * @brief Structure representing a token.
+ */
 typedef struct T_TOKEN {
-    TOKEN_TYPE type;
-    char *lexeme;
-    int line;
-    int length;
+    TOKEN_TYPE type;     // The type of the token
+    char *lexeme;        // The lexeme (string representation)
+    int line;            // Line number where the token was found
+    int length;          // Length of the lexeme
     union {
-        int intVal;
-        float floatVal;
-        char *stringVal; // change?
-    } value;
+        int intVal;      // Integer value for INT tokens
+        float floatVal;  // Float value for FLOAT tokens
+        char *stringVal; // String value for STRING tokens
+    } value;             // Union to hold the token's value
 } T_TOKEN;
 
-//
+/**
+ * @brief Gets the next token from the source file.
+ *
+ * This function implements the FSM described and returns the next token.
+ *
+ * @param token Pointer to T_TOKEN structure to store the token.
+ * @return int Return value indicating success or error.
+ */
+int get_token(T_TOKEN *token);
 
 #endif // H_SCANNER
