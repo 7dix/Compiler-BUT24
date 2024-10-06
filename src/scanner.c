@@ -266,12 +266,14 @@ int get_token(T_TOKEN *token) {
                     // Transition to dot
                     token->type = DOT;
                     token->lexeme = strdup(".");
+                    token->length = 1;
                     free(lexeme);
                     return RET_VAL_OK;
                 } else if (c == '|') {
                     // Transition to pipe
                     token->type = PIPE;
                     token->lexeme = strdup("|");
+                    token->length = 1;
                     free(lexeme);
                     return RET_VAL_OK;
                 } else if (isalpha(c)) {
@@ -295,6 +297,7 @@ int get_token(T_TOKEN *token) {
                     if (c == '=') {
                         token->type = NOT_EQUAL;
                         token->lexeme = strdup("!=");
+                        token->length = 2;
                         free(lexeme);
                         return RET_VAL_OK;
                     } else {
@@ -327,6 +330,8 @@ int get_token(T_TOKEN *token) {
                     lexeme[lexeme_length++] = c;
                     lexeme[lexeme_length] = '\0';
                     token->lexeme = strdup(lexeme);
+                            token->length = lexeme_length;
+
                     free(lexeme);
                     return RET_VAL_OK;
                 } else if (c == '{' || c == '}') {
@@ -335,6 +340,7 @@ int get_token(T_TOKEN *token) {
                     lexeme[lexeme_length++] = c;
                     lexeme[lexeme_length] = '\0';
                     token->lexeme = strdup(lexeme);
+                            token->length = lexeme_length;
                     free(lexeme);
                     return RET_VAL_OK;
                 } else if (c == '[') {
@@ -345,6 +351,7 @@ int get_token(T_TOKEN *token) {
                     // Semicolon
                     token->type = SEMICOLON;
                     token->lexeme = strdup(";");
+                    token->length = 1;
                     free(lexeme);
                     return RET_VAL_OK;
                 }
@@ -352,6 +359,7 @@ int get_token(T_TOKEN *token) {
                     // Colon
                     token->type = COLON;
                     token->lexeme = strdup(":");
+                    token->length = 1;
                     free(lexeme);
                     return RET_VAL_OK;
                 } else if (c == '+' || c == '-' || c == '*') {
@@ -360,6 +368,7 @@ int get_token(T_TOKEN *token) {
                     lexeme[lexeme_length++] = c;
                     lexeme[lexeme_length] = '\0';
                     token->lexeme = strdup(lexeme);
+                            token->length = lexeme_length;
                     free(lexeme);
                     return RET_VAL_OK;
                 } else if (c == '/') {
@@ -374,6 +383,7 @@ int get_token(T_TOKEN *token) {
                         unget_char(c);
                         token->type = DIVIDE;
                         token->lexeme = strdup("/");
+                        token->length = 1;
                         free(lexeme);
                         return RET_VAL_OK;
                     }
@@ -381,6 +391,7 @@ int get_token(T_TOKEN *token) {
                     // Comma
                     token->type = COMMA;
                     token->lexeme = strdup(",");
+                    token->length = 1;
                     free(lexeme);
                     return RET_VAL_OK;
                 } else {
@@ -420,6 +431,7 @@ int get_token(T_TOKEN *token) {
                         token->type = IDENTIFIER;
                     }
                     token->lexeme = strdup(lexeme);
+                            token->length = lexeme_length;
                     free(lexeme);
                     return RET_VAL_OK;
                 }
@@ -457,6 +469,7 @@ int get_token(T_TOKEN *token) {
                     if (strcmp(lexeme, "@import") == 0) {
                         token->type = IMPORT;
                         token->lexeme = strdup("@import");
+                        token->length = 7;
                         free(lexeme);
                         return RET_VAL_OK;
                     } else {
@@ -479,6 +492,7 @@ int get_token(T_TOKEN *token) {
                     lexeme[lexeme_length] = '\0';
                     token->type = STRING;
                     token->lexeme = strdup(lexeme);
+                            token->length = lexeme_length;
                     free(lexeme);
                     return RET_VAL_OK;
                 } else if (c == '\\') {
@@ -521,6 +535,7 @@ int get_token(T_TOKEN *token) {
                         return RET_VAL_LEXICAL_ERR;
                     }
                     token->lexeme = strdup(lexeme);
+                            token->length = lexeme_length;
                     free(lexeme);
                     return RET_VAL_OK;
                 } else {
@@ -540,6 +555,7 @@ int get_token(T_TOKEN *token) {
                         return RET_VAL_LEXICAL_ERR;
                     }
                     token->lexeme = strdup(lexeme);
+                            token->length = lexeme_length;
                     free(lexeme);
                     return RET_VAL_OK;
                 }
@@ -570,6 +586,7 @@ int get_token(T_TOKEN *token) {
                     lexeme[lexeme_length] = '\0';
                     token->type = INT;
                     token->lexeme = strdup(lexeme);
+                            token->length = lexeme_length;
                     token->value.intVal = atoi(lexeme);
                     free(lexeme);
                     return RET_VAL_OK;
@@ -591,6 +608,7 @@ int get_token(T_TOKEN *token) {
                     lexeme[lexeme_length] = '\0';
                     token->type = INT;
                     token->lexeme = strdup(lexeme);
+                            token->length = lexeme_length;
                     token->value.intVal = 0;
                     free(lexeme);
                     return RET_VAL_OK;
@@ -618,6 +636,7 @@ int get_token(T_TOKEN *token) {
                     lexeme[lexeme_length] = '\0';
                     token->type = FLOAT;
                     token->lexeme = strdup(lexeme);
+                            token->length = lexeme_length;
                     token->value.floatVal = atof(lexeme);
                     free(lexeme);
                     return RET_VAL_OK;
@@ -642,6 +661,7 @@ int get_token(T_TOKEN *token) {
                     if (is_nullable_type_identifier(lexeme)) {
                         token->type = get_nullable_type_identifier_token_type(lexeme);
                         token->lexeme = strdup(lexeme);
+                            token->length = lexeme_length;
                         free(lexeme);
                         return RET_VAL_OK;
                     } else {
@@ -704,6 +724,7 @@ int get_token(T_TOKEN *token) {
                     lexeme[lexeme_length] = '\0';
                     token->type = FLOAT;
                     token->lexeme = strdup(lexeme);
+                            token->length = lexeme_length;
                     token->value.floatVal = atof(lexeme);
                     free(lexeme);
                     return RET_VAL_OK;
@@ -747,6 +768,7 @@ int get_token(T_TOKEN *token) {
                             lexeme[lexeme_length] = '\0';
                             token->type = TYPE_STRING;
                             token->lexeme = strdup(lexeme);
+                            token->length = lexeme_length;
                             free(lexeme);
                             return RET_VAL_OK;
                         } else {
@@ -784,6 +806,7 @@ int get_token(T_TOKEN *token) {
                             lexeme[lexeme_length] = '\0';
                             token->type = TYPE_STRING_NULL;
                             token->lexeme = strdup(lexeme);
+                            token->length = lexeme_length;
                             free(lexeme);
                             return RET_VAL_OK;
                         } else {
