@@ -60,6 +60,7 @@ typedef enum TOKEN_TYPE{
     WHILE,
     VOID,
     IFJ,
+    EOF_TOKEN,
 } TOKEN_TYPE;
 
 /**
