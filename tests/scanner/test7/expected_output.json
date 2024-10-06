@@ -1,0 +1,121 @@
+[
+  {
+    "type": "VAR",
+    "lexeme": "var",
+    "line": 1,
+    "length": 3,
+    "value": null
+  },
+  {
+    "type": "IDENTIFIER",
+    "lexeme": "result",
+    "line": 1,
+    "length": 6,
+    "value": null
+  },
+  {
+    "type": "COLON",
+    "lexeme": ":",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "TYPE_FLOAT",
+    "lexeme": "f64",
+    "line": 1,
+    "length": 3,
+    "value": null
+  },
+  {
+    "type": "ASSIGN",
+    "lexeme": "=",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "BRACKET_LEFT_SIMPLE",
+    "lexeme": "(",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "IDENTIFIER",
+    "lexeme": "a",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "PLUS",
+    "lexeme": "+",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "IDENTIFIER",
+    "lexeme": "b",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "BRACKET_RIGHT_SIMPLE",
+    "lexeme": ")",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "MULTIPLY",
+    "lexeme": "*",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "IDENTIFIER",
+    "lexeme": "c",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "DIVIDE",
+    "lexeme": "/",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "IDENTIFIER",
+    "lexeme": "d",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "MINUS",
+    "lexeme": "-",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "IDENTIFIER",
+    "lexeme": "e",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "SEMICOLON",
+    "lexeme": ";",
+    "line": 1,
+    "length": 1,
+    "value": null
+  }
+]
