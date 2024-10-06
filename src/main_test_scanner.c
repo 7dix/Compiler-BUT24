@@ -100,6 +100,9 @@ int main()
     int err_code = 0;
     T_TOKEN currentToken;
     int is_first_token = 1;
+
+    printf("[\n"); // Start of JSON array
+
     while (err_code == 0){
         err_code = get_token(&currentToken);
         if (err_code != 0){
