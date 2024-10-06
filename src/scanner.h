@@ -67,7 +67,6 @@ typedef enum TOKEN_TYPE{
  */
 typedef struct T_TOKEN {
     TOKEN_TYPE type;     // The type of the token
-    char type_str[25];   // String representation of the token type
     char *lexeme;        // The lexeme (string representation)
     int line;            // Line number where the token was found
     int length;          // Length of the lexeme
@@ -87,5 +86,14 @@ typedef struct T_TOKEN {
  * @return int Return value indicating success or error.
  */
 int get_token(T_TOKEN *token);
+
+/**
+ * @brief Gets the string representation of a token type.
+ *
+ * @param type The token type.
+ * @return const char* The string representation.
+ */
+const char* tt_to_str(TOKEN_TYPE type)
+
 
 #endif // H_SCANNER
