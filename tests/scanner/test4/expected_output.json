@@ -1,0 +1,135 @@
+[
+  {
+    "type": "FN",
+    "lexeme": "fn",
+    "line": 1,
+    "length": 2,
+    "value": null
+  },
+  {
+    "type": "IDENTIFIER",
+    "lexeme": "multiply",
+    "line": 1,
+    "length": 8,
+    "value": null
+  },
+  {
+    "type": "BRACKET_LEFT_SIMPLE",
+    "lexeme": "(",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "IDENTIFIER",
+    "lexeme": "a",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "COLON",
+    "lexeme": ":",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "TYPE_INT",
+    "lexeme": "i32",
+    "line": 1,
+    "length": 3,
+    "value": null
+  },
+  {
+    "type": "COMMA",
+    "lexeme": ",",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "IDENTIFIER",
+    "lexeme": "b",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "COLON",
+    "lexeme": ":",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "TYPE_INT",
+    "lexeme": "i32",
+    "line": 1,
+    "length": 3,
+    "value": null
+  },
+  {
+    "type": "BRACKET_RIGHT_SIMPLE",
+    "lexeme": ")",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "TYPE_INT",
+    "lexeme": "i32",
+    "line": 1,
+    "length": 3,
+    "value": null
+  },
+  {
+    "type": "BRACKET_LEFT_CURLY",
+    "lexeme": "{",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "RETURN",
+    "lexeme": "return",
+    "line": 2,
+    "length": 6,
+    "value": null
+  },
+  {
+    "type": "IDENTIFIER",
+    "lexeme": "a",
+    "line": 2,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "MULTIPLY",
+    "lexeme": "*",
+    "line": 2,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "IDENTIFIER",
+    "lexeme": "b",
+    "line": 2,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "SEMICOLON",
+    "lexeme": ";",
+    "line": 2,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "BRACKET_RIGHT_CURLY",
+    "lexeme": "}",
+    "line": 3,
+    "length": 1,
+    "value": null
+  }
+]
