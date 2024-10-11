@@ -107,7 +107,7 @@ def main():
             all_passed = False
 
     if all_passed:
-        print('All tests passed!')
+        print('All tests passed.')
     else:
         print('Some tests failed.')
         sys.exit(1)
