@@ -37,8 +37,10 @@ debug: bin $(SRC)
 debug_scanner: bin $(SRC_SCANNER_TEST)
 	$(CC) $(CFLAGS) $(DEBUG_FLAGS) -o $(DEBUG_SCANNER_OUTPUT) $(SRC_SCANNER_TEST)
 
-test: debug_scanner
+test_scanner: debug_scanner
 	cd tests/scanner &&  python3 test_scanner.py
+
+test: test_scanner
 
 # Clean target to remove the executables
 clean:
