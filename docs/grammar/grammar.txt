@@ -1,0 +1,32 @@
+START -> PROLOG FUNC_DEF_NEXT END
+
+PROLOG -> const ifj assign import ( string ) ;
+
+FUNC_DEF_NEXT -> FUNC_DEF epsilon
+FUNC_DEF_NEXT -> FUNC_DEF FUNC_DEF_NEXT
+
+FUNC_DEF -> pub fn identifier ( PARAMS ")" TYPE { CODE_BLOCK CODE_BLOCK_NEXT }
+FUNC_DEF -> pub fn identifier ( PARAMS ")" void { CODE_BLOCK CODE_BLOCK_NEXT }
+
+PARAM -> identifier : TYPE
+
+PARAMS -> )
+PARAMS -> PARAM )
+PARAMS -> PARAM , )
+PARAMS -> PARAM NEXT_PARAM
+
+NEXT_PARAM -> )
+NEXT_PARAM -> , PARAM NEXT_PARAM
+NEXT_PARAM -> , )
+
+TYPE -> i32
+TYPE -> f64
+TYPE -> []u8
+TYPE -> ?i32
+TYPE -> ?f64
+TYPE -> ?[]u8
+
+CODE_BLOCK_NEXT -> epsilon
+CODE_BLOCK_NEXT -> CODE_BLOCK CODE_BLOCK_NEXT
+
+CODE_BLOCK -> 
