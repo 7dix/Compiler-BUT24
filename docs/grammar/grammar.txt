@@ -1,12 +1,37 @@
+# VELKYMI PISMENY jsou znaceny NETERMINALY
+# malymi pismeny jsou znaceny terminaly (mely by byt identicke s tokeny)
+# startovnim NETERMINALEM je START
+# znakem mrizka zacinaji komentare
+# ukoncujici zavorka pro hlavicku definice funkce a volani funkce jiz je mapovana
+# v PARAMS a ARGUMENTS, zde by se tedy nemela uvadet
+# pokud není jinak uvedeno tak identifier náleží {identifier proměnné / konstanty}
+# nasledujici znaky byly pro citelnosti napsany primo narozdil od jejich token-formy
+# . DOT
+# : COLON
+# ( BRACKET_LEFT_SIMPLE
+# ) BRACKET_RIGHT_SIMPLE
+# { BRACKET_LEFT_CURLY
+# } BRACKET_RIGHT_CURLY
+# , COMMA
+# | PIPE
+# = ASSIGN
+#
+# Jak modelovat vestavene funkce? pridat sem, nebo ne?
+
+
 START -> PROLOG FUNC_DEF_NEXT END
 
-PROLOG -> const ifj assign import ( string ) ;
+END -> eof_token
+
+PROLOG -> const ifj = import ( string ) ;
 
 FUNC_DEF_NEXT -> FUNC_DEF epsilon
 FUNC_DEF_NEXT -> FUNC_DEF FUNC_DEF_NEXT
 
-FUNC_DEF -> pub fn identifier ( PARAMS ")" TYPE { CODE_BLOCK CODE_BLOCK_NEXT }
-FUNC_DEF -> pub fn identifier ( PARAMS ")" void { CODE_BLOCK CODE_BLOCK_NEXT }
+FUNC_DEF -> pub fn identifier ( PARAMS ) TYPE { CODE_BLOCK_NEXT }
+#                       |- identifier funkce
+FUNC_DEF -> pub fn identifier ( PARAMS ) void { CODE_BLOCK_NEXT }
+#                       |- identifier funkce
 
 PARAM -> identifier : TYPE
 
@@ -19,14 +44,60 @@ NEXT_PARAM -> )
 NEXT_PARAM -> , PARAM NEXT_PARAM
 NEXT_PARAM -> , )
 
-TYPE -> i32
-TYPE -> f64
-TYPE -> []u8
-TYPE -> ?i32
-TYPE -> ?f64
-TYPE -> ?[]u8
+TYPE -> type_int
+TYPE -> type_float
+TYPE -> type_string
+TYPE -> type_int_null
+TYPE -> type_float_null
+TYPE -> type_string_null
 
 CODE_BLOCK_NEXT -> epsilon
 CODE_BLOCK_NEXT -> CODE_BLOCK CODE_BLOCK_NEXT
 
-CODE_BLOCK -> 
+CODE_BLOCK -> VAR_DEF
+CODE_BLOCK -> ASSIGN
+CODE_BLOCK -> IF_STATEMENT
+CODE_BLOCK -> WHILE_STATEMENT
+CODE_BLOCK -> VOID_FUNCTION_CALL
+CODE_BLOCK -> RETURN
+
+VAR_DEF -> const identifier : TYPE = EXPRESSION ;
+VAR_DEF -> var identifier : TYPE = EXPRESSION ;
+
+ASSIGN -> identifier = EXPRESSION ;
+ASSIGN -> identifier = identifier ( ARGUMENTS ) ;
+#                            |- tento identifier náleží {funkce}
+ASSIGN -> identifier = ifj . identifier ( ARGUMENTS ) ;
+#                                |- tento identifier náleží {vestavěné funkce}
+ASSIGN -> identifier_discard = identifier ( ARGUMENTS ) ;
+#                                   |- tento identifier náleží {funkce}
+ASSIGN -> identifier_discard = ifj . identifier ( ARGUMENTS )
+#                                       |- tento identifier náleží {vestavěné funkce}
+
+ARGUMENTS -> )
+ARGUMENTS -> ARGUMENT )
+ARGUMENTS -> ARGUMENT , )
+ARGUMENTS -> ARGUMENT NEXT_ARGUMENT
+
+NEXT_ARGUMENT -> )
+NEXT_ARGUMENT -> , )
+NEXT_ARGUMENT -> , ARGUMENT NEXT_ARGUMENT
+
+ARGUMENT -> identifier
+ARGUMENT -> int
+ARGUMENT -> float
+ARGUMENT -> string
+
+IF_STATEMENT -> if ( BOOL_EXPRESSION ) { CODE_BLOCK_NEXT } else { CODE_BLOCK_NEXT }
+IF_STATEMENT -> if ( BOOL_EXPRESSION ) | identifier | { CODE_BLOCK_NEXT } else { CODE_BLOCK_NEXT }
+
+WHILE_STATEMENT -> while ( BOOL_EXPRESSION ) { CODE_BLOCK_NEXT }
+WHILE_STATEMENT -> while ( BOOL_EXPRESSION ) | identifier | { CODE_BLOCK_NEXT }
+
+VOID_FUNCTION_CALL -> identifier ( ARGUMENTS ) ;
+#                            |- tento identifier náleží {funkce}
+VOID_FUNCTION_CALL -> ifj . identifier ( ARGUMENTS ) ;
+#                                |- tento identifier náleží {vestavěné funkce}
+
+RETURN -> return ;
+RETURN -> return EXPRESSION ;
