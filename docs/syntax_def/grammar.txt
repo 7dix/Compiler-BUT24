@@ -2,19 +2,17 @@
 # malymi pismeny jsou znaceny terminaly (mely by byt identicke s tokeny)
 # startovnim NETERMINALEM je START
 # znakem mrizka zacinaji komentare
-# ukoncujici zavorka pro hlavicku definice funkce a volani funkce jiz je mapovana
-# v PARAMS a ARGUMENTS, zde by se tedy nemela uvadet
 # pokud není jinak uvedeno tak identifier náleží {identifier proměnné / konstanty}
 # nasledujici znaky byly pro citelnosti napsany primo narozdil od jejich token-formy
-# . DOT
-# : COLON
-# ( BRACKET_LEFT_SIMPLE
-# ) BRACKET_RIGHT_SIMPLE
-# { BRACKET_LEFT_CURLY
-# } BRACKET_RIGHT_CURLY
-# , COMMA
-# | PIPE
-# = ASSIGN
+# . dot
+# : colon
+# ( bracket_left_simple
+# ) bracket_rigth_simple
+# { bracket_left_curly
+# } bracket_right_curly
+# , comma
+# | pipe
+# = assign
 #
 # Jak modelovat vestavene funkce? pridat sem, nebo ne?
 
@@ -35,14 +33,14 @@ FUNC_DEF -> pub fn identifier ( PARAMS ) void { CODE_BLOCK_NEXT }
 
 PARAM -> identifier : TYPE
 
-PARAMS -> )
-PARAMS -> PARAM )
-PARAMS -> PARAM , )
-PARAMS -> PARAM NEXT_PARAM
+PARAMS -> epsilon
+PARAMS -> PARAM PARAM_NEXT
 
-NEXT_PARAM -> )
-NEXT_PARAM -> , PARAM NEXT_PARAM
-NEXT_PARAM -> , )
+PARAM_NEXT -> epsilon
+PARAM_NEXT -> PARAM_COMMA epsilon
+PARAM_NEXT -> PARAM_COMMA PARAM PARAM_NEXT
+
+PARAM_COMMA -> ,
 
 TYPE -> type_int
 TYPE -> type_float
@@ -74,14 +72,14 @@ ASSIGN -> identifier_discard = identifier ( ARGUMENTS ) ;
 ASSIGN -> identifier_discard = ifj . identifier ( ARGUMENTS )
 #                                       |- tento identifier náleží {vestavěné funkce}
 
-ARGUMENTS -> )
-ARGUMENTS -> ARGUMENT )
-ARGUMENTS -> ARGUMENT , )
-ARGUMENTS -> ARGUMENT NEXT_ARGUMENT
+ARGUMENTS -> epsilon
+ARGUMENTS -> ARGUMENT ARGUMENT_NEXT
 
-NEXT_ARGUMENT -> )
-NEXT_ARGUMENT -> , )
-NEXT_ARGUMENT -> , ARGUMENT NEXT_ARGUMENT
+ARGUMENT_NEXT -> epsilon
+ARGUMENT_NEXT -> ARGUMENT_COMMA epsilon
+ARGUMENT_NEXT -> ARGUMENT_COMMA ARGUMENT ARGUMENT_NEXT
+
+ARGUMENT_COMMA -> ,
 
 ARGUMENT -> identifier
 ARGUMENT -> int
