@@ -1,9 +1,12 @@
 # VELKYMI PISMENY jsou znaceny NETERMINALY
-# malymi pismeny jsou znaceny terminaly (mely by byt identicke s tokeny)
-# startovnim NETERMINALEM je START
-# znakem mrizka zacinaji komentare
-# tento soubor obsahuje pouze obecne definice gramatiky, pro poznamky ohledne stycnych bodu pro kooperaci
-# pristupu bottom-up a top-down a pro poznamky ohledne semantiky navstivte soubor grammar_notes.txt
+# Malymi pismeny jsou znaceny terminaly (mely by byt identicke s tokeny)
+# Startovnim NETERMINALEM je START
+# Znakem mrizka zacinaji komentare
+# Tento soubor obsahuje definici gramatiky a doplnuji poznamky ohledne stycnych bodu
+# pro kooperaci bottom-up a top-down syntakaticke analyzy a poznamky ohledne semantiky
+# Do precedencni analyzy (bottom-up) se prepina az ve chvili kdy je naprosto jiste ze se jedna o vyraz
+# v tu chvili jsou vsechny tokeny jiz prectene rekurizivnim sestupem (0 az 2) navraceny do bufferu lexeru
+# a vyraz je pristupem bottom-up zpracovan od zacatku a cely
 # nasledujici znaky byly pro citelnosti napsany primo narozdil od jejich token-formy
 # . dot
 # : colon
@@ -23,6 +26,7 @@ START -> PROLOG FUNC_DEF_NEXT END
 END -> eof_token
 
 PROLOG -> const ifj = import ( string ) ;
+# string musi konkretne obsahovat "ifj24.zig"
 
 
 FUNC_DEF_NEXT -> FUNC_DEF epsilon
@@ -31,6 +35,7 @@ FUNC_DEF_NEXT -> FUNC_DEF FUNC_DEF_NEXT
 
 FUNC_DEF -> pub fn identifier ( PARAMS ) TYPE { CODE_BLOCK_NEXT }
 FUNC_DEF -> pub fn identifier ( PARAMS ) void { CODE_BLOCK_NEXT }
+# identifier je ze semantickeho hlediska id funkce
 
 
 PARAM -> identifier : TYPE
@@ -68,20 +73,34 @@ CODE_BLOCK -> BUILT_IN_VOID_FUNCTION_CALL
 
 VAR_DEF -> const identifier : TYPE = EXPRESSION ;
 VAR_DEF -> var identifier : TYPE = EXPRESSION ;
+# ve chvili znalosti tokenu = se ihned prepina do bottom-up, navratovym stycnym bodem je ;
+# ktery bottom-up navrati lexeru
+# ze semantickeho pohledu musi byt EXPRESSION NE-pravdivostni
 
 
 IF_STATEMENT -> if ( EXPRESSION ) { CODE_BLOCK_NEXT } else { CODE_BLOCK_NEXT }
 IF_STATEMENT -> if ( EXPRESSION ) | identifier | { CODE_BLOCK_NEXT } else { CODE_BLOCK_NEXT }
+# ve chvili znalosti tokenu ( se prepina do bottom-up, navratovym stycnym bodem je )
+# ktery bottom-up navrati lexeru
+# ze semantickeho pohledu musi byt u prvni definice EXPRESSION pravdivostni
+# a druhy NE-pravdivostni s moznosti null vysledku
 
 WHILE_STATEMENT -> while ( EXPRESSION ) { CODE_BLOCK_NEXT }
 WHILE_STATEMENT -> while ( EXPRESSION ) | identifier | { CODE_BLOCK_NEXT }
-
+# ve chvili znalosti tokenu ( se prepina do bottom-up, navratovym stycnym bodem je )
+# ktery bottom-up navrati lexeru
+# ze semantickeho pohledu musi byt u prvni definice EXPRESSION pravdivostni
+# a druhy NE-pravdivostni s moznosti null vysledku
 
 RETURN -> return ;
 RETURN -> return EXPRESSION ;
+# pokud dalsim tokenem za return neni ; -> prepnout do bottom-up, navratovy stycny bod je ;
+# ktery bottom-up navraci lexeru
+# EXPRESSION musi byt NE-pravdivostni
 
 
 BUILT_IN_VOID_FUNCTION_CALL -> ifj . identifier ( ARGUMENTS ) ;
+# semantika -> identifier musi spadat do mnoziny vestavenych funkci
 
 
 ASSIGN_EXPRESSION_OR_FUNCTION_CALL -> identifier ID_START
@@ -92,10 +111,24 @@ ID_START -> VOID_FUNCTION_ARGUMENTS
 VOID_FUNCTION_ARGUMENTS -> ( ARGUMENTS ) ;
 
 ASSIGN -> { cokoli z EXPRESSION bez identifier } ;
+# timto naznacujeme, ze pokud nasleduje cokoli jineho nez ifj nebo id, tak se jedna o vyraz
+# precteny token je navracen do bufferu lexeru a je spustena precedencni analyza
+# stycnym bodem pro navrat z bottom-up je ; ktery bottom-up navraci do bufferu lexeru pro zpracovani
+# rekurzivnim sestupem
+# ziskany EXPRESSION musi byt NE-pravdivostni
+
 ASSIGN -> identifier ID_ASSIGN
+
 ASSIGN -> ifj . identifier ( ARGUMENTS ) ;
+# semantika -> identifier musi spadat do mnoziny vestavenych funkci
 
 ID_ASSIGN -> { cokoli z EXPRESSION bez ( } ;
+# timto naznacujeme, ze pokud nasleduje cokoli jineho nez (, tak se jedna o vyraz
+# prectene tokeny jsou navraceny do bufferu lexeru (id a 1 dalsi vyrazovy token) a je spustena precedencni analyza
+# stycnym bodem pro navrat z bottom-up je ; ktery bottom-up navraci do bufferu lexeru pro zpracovani
+# rekurzivnim sestupem
+# ziskany EXPRESSION musi byt NE-pravdivostni
+
 ID_ASSIGN -> FUNCTION_ARGUMENTS
 
 FUNCTION_ARGUMENTS -> ( ARGUMENTS ) ;
