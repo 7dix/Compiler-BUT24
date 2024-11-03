@@ -21,7 +21,7 @@
 
 
 
-START -> PROLOG FUNC_DEF_NEXT END
+START -> PROLOG FN_DEFS END
 
 END -> eof_token
 
@@ -29,12 +29,13 @@ PROLOG -> const ifj = import ( string ) ;
 # string musi konkretne obsahovat "ifj24.zig"
 
 
-FUNC_DEF_NEXT -> FUNC_DEF epsilon
-FUNC_DEF_NEXT -> FUNC_DEF FUNC_DEF_NEXT
+FN_DEFS -> FN_DEF FN_DEF_NEXT
+FN_DEF_NEXT -> epsilon
+FN_DEF_NEXT -> FN_DEF FUNC_DEF_NEXT
 
-
-FUNC_DEF -> pub fn identifier ( PARAMS ) TYPE { CODE_BLOCK_NEXT }
-FUNC_DEF -> pub fn identifier ( PARAMS ) void { CODE_BLOCK_NEXT }
+FN_DEF -> pub fn identifier ( PARAMS ) FN_DEF_REMAINING
+FN_DEF_REMAINING -> TYPE { CODE_BLOCK_NEXT }
+FN_DEF_REMAINING -> void { CODE_BLOCK_NEXT }
 # identifier je ze semantickeho hlediska id funkce
 
 
@@ -42,13 +43,10 @@ PARAM -> identifier : TYPE
 
 PARAMS -> epsilon
 PARAMS -> PARAM PARAM_NEXT
-
 PARAM_NEXT -> epsilon
-PARAM_NEXT -> PARAM_COMMA epsilon
-PARAM_NEXT -> PARAM_COMMA PARAM PARAM_NEXT
-
-PARAM_COMMA -> ,
-
+PARAM_NEXT -> , PARAM_AFTER_COMMA
+PARAM_AFTER_COMMA -> epsilon
+PARAM_AFTER_COMMA -> PARAM PARAM_NEXT
 
 TYPE -> type_int
 TYPE -> type_float
@@ -78,22 +76,25 @@ VAR_DEF -> var identifier : TYPE = EXPRESSION ;
 # ze semantickeho pohledu musi byt EXPRESSION NE-pravdivostni
 
 
-IF_STATEMENT -> if ( EXPRESSION ) { CODE_BLOCK_NEXT } else { CODE_BLOCK_NEXT }
-IF_STATEMENT -> if ( EXPRESSION ) | identifier | { CODE_BLOCK_NEXT } else { CODE_BLOCK_NEXT }
+IF_STATEMENT -> if ( EXPRESSION ) IF_STATEMENT_REMAINING
+IF_STATEMENT_REMAINING -> { CODE_BLOCK_NEXT } else { CODE_BLOCK_NEXT }
+IF_STATEMENT_REMAINING -> | identifier | { CODE_BLOCK_NEXT } else { CODE_BLOCK_NEXT }
 # ve chvili znalosti tokenu ( se prepina do bottom-up, navratovym stycnym bodem je )
 # ktery bottom-up navrati lexeru
-# ze semantickeho pohledu musi byt u prvni definice EXPRESSION pravdivostni
-# a druhy NE-pravdivostni s moznosti null vysledku
+# ze semantickeho pohledu musi byt u konstrukce s |identifier| EXPRESSION NE-pravdivostni
+# a bez |iden...| pravdivostni vyraz
 
-WHILE_STATEMENT -> while ( EXPRESSION ) { CODE_BLOCK_NEXT }
-WHILE_STATEMENT -> while ( EXPRESSION ) | identifier | { CODE_BLOCK_NEXT }
+WHILE_STATEMENT -> while ( EXPRESSION ) WHILE_STATEMENT_REMAINING
+WHILE_STATEMENT_REMAINING -> { CODE_BLOCK_NEXT }
+WHILE_STATEMENT_REMAINING -> | identifier | { CODE_BLOCK_NEXT }
 # ve chvili znalosti tokenu ( se prepina do bottom-up, navratovym stycnym bodem je )
 # ktery bottom-up navrati lexeru
-# ze semantickeho pohledu musi byt u prvni definice EXPRESSION pravdivostni
-# a druhy NE-pravdivostni s moznosti null vysledku
+# ze semantickeho pohledu musi byt u konstrukce s |identifier| EXPRESSION NE-pravdivostni
+# a bez |iden...| pravdivostni vyraz
 
-RETURN -> return ;
-RETURN -> return EXPRESSION ;
+RETURN -> return RETURN_REMAINING
+RETURN_REMAINING -> ;
+RETURN_REMAINING -> EXPRESSION ;
 # pokud dalsim tokenem za return neni ; -> prepnout do bottom-up, navratovy stycny bod je ;
 # ktery bottom-up navraci lexeru
 # EXPRESSION musi byt NE-pravdivostni
@@ -105,7 +106,7 @@ BUILT_IN_VOID_FUNCTION_CALL -> ifj . identifier ( ARGUMENTS ) ;
 
 ASSIGN_EXPRESSION_OR_FUNCTION_CALL -> identifier ID_START
 
-ID_START -> ASSIGN
+ID_START -> = ASSIGN
 ID_START -> VOID_FUNCTION_ARGUMENTS
 
 VOID_FUNCTION_ARGUMENTS -> ( ARGUMENTS ) ;
@@ -134,15 +135,14 @@ ID_ASSIGN -> FUNCTION_ARGUMENTS
 FUNCTION_ARGUMENTS -> ( ARGUMENTS ) ;
 
 
-
 ARGUMENTS -> epsilon
 ARGUMENTS -> ARGUMENT ARGUMENT_NEXT
 
 ARGUMENT_NEXT -> epsilon
-ARGUMENT_NEXT -> ARGUMENT_COMMA epsilon
-ARGUMENT_NEXT -> ARGUMENT_COMMA ARGUMENT ARGUMENT_NEXT
+ARGUMENT_NEXT -> , ARGUMENT_AFTER_COMMA
 
-ARGUMENT_COMMA -> ,
+ARGUMENT_AFTER_COMMA -> epsilon
+ARGUMENT_AFTER_COMMA -> ARGUMENT ARGUMENT_NEXT
 
 ARGUMENT -> identifier
 ARGUMENT -> int
