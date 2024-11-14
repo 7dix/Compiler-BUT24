@@ -4,7 +4,8 @@
 # znakem mrizka zacinaji komentare
 # tento soubor obsahuje pouze obecne definice gramatiky, pro poznamky ohledne stycnych bodu pro kooperaci
 # pristupu bottom-up a top-down a pro poznamky ohledne semantiky navstivte soubor grammar_notes.txt
-# nasledujici znaky byly pro citelnosti napsany primo narozdil od jejich token-formy
+# neterminal EXPRESSION znaci ze dojde k prepnuti do precedencni analyzy
+# nasledujici znaky byly pro citelnost napsany primo narozdil od jejich token-formy:
 # . dot
 # : colon
 # ( bracket_left_simple
@@ -64,9 +65,12 @@ CODE_BLOCK -> ASSIGN_DISCARD_EXPR_OR_FN_CALL
 CODE_BLOCK -> BUILT_IN_VOID_FN_CALL
 
 
+VAR_DEF -> const identifier VAR_DEF_AFTER_ID
+VAR_DEF -> var identifier VAR_DEF_AFTER_ID
 
-VAR_DEF -> const identifier : TYPE = EXPRESSION ;
-VAR_DEF -> var identifier : TYPE = EXPRESSION ;
+
+VAR_DEF_AFTER_ID -> : TYPE = ASSIGN
+VAR_DEF_AFTER_ID -> = ASSIGN
 
 
 IF_STATEMENT -> if ( EXPRESSION ) IF_STATEMENT_REMAINING
@@ -81,29 +85,25 @@ WHILE_STATEMENT_REMAINING -> | identifier | { CODE_BLOCK_NEXT }
 
 RETURN -> return RETURN_REMAINING
 RETURN_REMAINING -> ;
-RETURN_REMAINING -> EXPRESSION ;
+RETURN_REMAINING -> ASSIGN
 
 
 BUILT_IN_VOID_FN_CALL -> ifj . identifier ( ARGUMENTS ) ;
 
 
 ASSIGN_EXPR_OR_FN_CALL -> identifier ID_START
-ASSIGN_DISCARD_EXPR_OR_FN_CALL -> discard_identifier = ASSIGN_DISCARD
-
-ASSIGN_DISCARD -> { cokoli z EXPRESSION bez identifier }
-ASSIGN_DISCARD -> identifier ID_ASSIGN
-ASSIGN_DISCARD -> ifj . identifier ( ARGUMENTS ) ;
+ASSIGN_DISCARD_EXPR_OR_FN_CALL -> discard_identifier = ASSIGN
 
 ID_START -> = ASSIGN
 ID_START -> VOID_FUNCTION_ARGUMENTS
 
 VOID_FUNCTION_ARGUMENTS -> ( ARGUMENTS ) ;
 
-ASSIGN -> { cokoli z EXPRESSION bez identifier } ;
+ASSIGN -> EXPRESSION ;
 ASSIGN -> identifier ID_ASSIGN
 ASSIGN -> ifj . identifier ( ARGUMENTS ) ;
 
-ID_ASSIGN -> { cokoli z EXPRESSION bez ( } ;
+ID_ASSIGN -> EXPRESSION ;
 ID_ASSIGN -> FUNCTION_ARGUMENTS
 
 FUNCTION_ARGUMENTS -> ( ARGUMENTS ) ;
@@ -122,3 +122,4 @@ ARGUMENT -> identifier
 ARGUMENT -> int
 ARGUMENT -> float
 ARGUMENT -> string
+ARGUMENT -> null
