@@ -1,0 +1,124 @@
+# VELKYMI PISMENY jsou znaceny NETERMINALY
+# malymi pismeny jsou znaceny terminaly (mely by byt identicke s tokeny)
+# startovnim NETERMINALEM je START
+# znakem mrizka zacinaji komentare
+# tento soubor obsahuje pouze obecne definice gramatiky, pro poznamky ohledne stycnych bodu pro kooperaci
+# pristupu bottom-up a top-down a pro poznamky ohledne semantiky navstivte soubor grammar_notes.txt
+# neterminal EXPRESSION znaci ze dojde k prepnuti do precedencni analyzy
+# nasledujici znaky byly pro citelnost napsany primo narozdil od jejich token-formy:
+# . dot
+# : colon
+# ( bracket_left_simple
+# ) bracket_rigth_simple
+# { bracket_left_curly
+# } bracket_right_curly
+# , comma
+# | pipe
+# = assign
+#
+
+
+
+START -> PROLOG FN_DEFS END
+
+END -> eof_token
+
+PROLOG -> const ifj = import ( string ) ;
+
+FN_DEFS -> FN_DEF FN_DEF_NEXT
+FN_DEF_NEXT -> epsilon
+FN_DEF_NEXT -> FN_DEF FUNC_DEF_NEXT
+
+FN_DEF -> pub fn identifier ( PARAMS ) FN_DEF_REMAINING
+FN_DEF_REMAINING -> TYPE { CODE_BLOCK_NEXT }
+FN_DEF_REMAINING -> void { CODE_BLOCK_NEXT }
+
+
+PARAM -> identifier : TYPE
+
+PARAMS -> epsilon
+PARAMS -> PARAM PARAM_NEXT
+PARAM_NEXT -> epsilon
+PARAM_NEXT -> , PARAM_AFTER_COMMA
+PARAM_AFTER_COMMA -> epsilon
+PARAM_AFTER_COMMA -> PARAM PARAM_NEXT
+
+
+TYPE -> type_int
+TYPE -> type_float
+TYPE -> type_string
+TYPE -> type_int_null
+TYPE -> type_float_null
+TYPE -> type_string_null
+
+
+
+CODE_BLOCK_NEXT -> epsilon
+CODE_BLOCK_NEXT -> CODE_BLOCK CODE_BLOCK_NEXT
+
+CODE_BLOCK -> VAR_DEF
+CODE_BLOCK -> IF_STATEMENT
+CODE_BLOCK -> WHILE_STATEMENT
+CODE_BLOCK -> RETURN
+CODE_BLOCK -> ASSIGN_EXPR_OR_FN_CALL
+CODE_BLOCK -> ASSIGN_DISCARD_EXPR_OR_FN_CALL
+CODE_BLOCK -> BUILT_IN_VOID_FN_CALL
+
+
+VAR_DEF -> const identifier VAR_DEF_AFTER_ID
+VAR_DEF -> var identifier VAR_DEF_AFTER_ID
+
+
+VAR_DEF_AFTER_ID -> : TYPE = ASSIGN
+VAR_DEF_AFTER_ID -> = ASSIGN
+
+
+IF_STATEMENT -> if ( EXPRESSION ) IF_STATEMENT_REMAINING
+IF_STATEMENT_REMAINING -> { CODE_BLOCK_NEXT } else { CODE_BLOCK_NEXT }
+IF_STATEMENT_REMAINING -> | identifier | { CODE_BLOCK_NEXT } else { CODE_BLOCK_NEXT }
+
+
+WHILE_STATEMENT -> while ( EXPRESSION ) WHILE_STATEMENT_REMAINING
+WHILE_STATEMENT_REMAINING -> { CODE_BLOCK_NEXT }
+WHILE_STATEMENT_REMAINING -> | identifier | { CODE_BLOCK_NEXT }
+
+
+RETURN -> return RETURN_REMAINING
+RETURN_REMAINING -> ;
+RETURN_REMAINING -> ASSIGN
+
+
+BUILT_IN_VOID_FN_CALL -> ifj . identifier ( ARGUMENTS ) ;
+
+
+ASSIGN_EXPR_OR_FN_CALL -> identifier ID_START
+ASSIGN_DISCARD_EXPR_OR_FN_CALL -> discard_identifier = ASSIGN
+
+ID_START -> = ASSIGN
+ID_START -> FUNCTION_ARGUMENTS
+
+
+ASSIGN -> EXPRESSION ;
+ASSIGN -> identifier ID_ASSIGN
+ASSIGN -> ifj . identifier ( ARGUMENTS ) ;
+
+ID_ASSIGN -> EXPRESSION ;
+ID_ASSIGN -> FUNCTION_ARGUMENTS
+
+FUNCTION_ARGUMENTS -> ( ARGUMENTS ) ;
+
+
+ARGUMENTS -> epsilon
+ARGUMENTS -> ARGUMENT ARGUMENT_NEXT
+
+ARGUMENT_NEXT -> epsilon
+ARGUMENT_NEXT -> , ARGUMENT_AFTER_COMMA
+
+ARGUMENT_AFTER_COMMA -> epsilon
+ARGUMENT_AFTER_COMMA -> ARGUMENT ARGUMENT_NEXT
+
+ARGUMENT -> identifier
+ARGUMENT -> int
+ARGUMENT -> float
+ARGUMENT -> string
+ARGUMENT -> null
