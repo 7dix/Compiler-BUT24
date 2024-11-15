@@ -1,0 +1,93 @@
+[
+  {
+    "type": "VAR",
+    "lexeme": "var",
+    "line": 1,
+    "length": 3,
+    "value": null
+  },
+  {
+    "type": "IDENTIFIER",
+    "lexeme": "x",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "COLON",
+    "lexeme": ":",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "TYPE_INT",
+    "lexeme": "i32",
+    "line": 1,
+    "length": 3,
+    "value": null
+  },
+  {
+    "type": "ASSIGN",
+    "lexeme": "=",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "INT",
+    "lexeme": "10",
+    "line": 1,
+    "length": 2,
+    "value": 10
+  },
+  {
+    "type": "SEMICOLON",
+    "lexeme": ";",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "EOF",
+    "lexeme": null,
+    "line": 1,
+    "length": 0,
+    "value": null
+  },
+  {
+    "type": "EOF",
+    "lexeme": null,
+    "line": 1,
+    "length": 0,
+    "value": null
+  },
+  {
+    "type": "EOF",
+    "lexeme": null,
+    "line": 1,
+    "length": 0,
+    "value": null
+  },
+  {
+    "type": "VAR",
+    "lexeme": "var",
+    "line": 1,
+    "length": 3,
+    "value": null
+  },
+  {
+    "type": "IDENTIFIER",
+    "lexeme": "x",
+    "line": 1,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "IDENTIFIER",
+    "lexeme": "x",
+    "line": 1,
+    "length": 1,
+    "value": null
+  }
+]

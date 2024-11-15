@@ -79,6 +79,7 @@ const char* tt_to_str(TOKEN_TYPE type) {
         case WHILE: return "WHILE";
         case VOID: return "VOID";
         case IFJ: return "IFJ";
+        case EOF_TOKEN: return "EOF";
         default: return "UNKNOWN";
     }
 }
