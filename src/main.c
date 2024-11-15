@@ -49,9 +49,11 @@ int main() {
         return error_code;
     }
 
+    set_current_to_first(token_buffer);
+
     // Run second phase of the compiler
     // TODO: give symtable to parser
-    error_code = parser(token_buffer);
+    error_code = run_parser(token_buffer);
     if (error_code != RET_VAL_OK) {
         switch (error_code) {
             case RET_VAL_LEXICAL_ERR:
@@ -70,9 +72,15 @@ int main() {
         }
         free_token_buffer(&token_buffer);
         // TODO: free symtable as well
+        return error_code;
     }
-    
+
+    // TODO: remove later, just for testing
+    fprintf(stdout, "Compilation successful\n");
+
     // TODO: cleaning, ...
+
+    free_token_buffer(&token_buffer);
 
     return RET_VAL_OK;
 }

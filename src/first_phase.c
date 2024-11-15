@@ -11,7 +11,35 @@
 
 #include "first_phase.h"
 
+// Function to run the first phase of the compiler
 int first_phase(T_TOKEN_BUFFER *token_buffer) {
-    // TODO: code first phase
-    return 0;
+    // TODO: add detection of function headers and store their signatures in the symtable
+
+
+    // Fill the buffer with tokens
+    while (true) {
+
+        // Allocate memory for the token
+        T_TOKEN *currentToken = (T_TOKEN *) malloc(sizeof(T_TOKEN));
+        if (currentToken == NULL) {
+            return RET_VAL_INTERNAL_ERR;
+        }
+        
+        // Get the next token
+        int err_code = get_token(currentToken);
+        if (err_code != 0){
+            return RET_VAL_LEXICAL_ERR;
+        }
+
+        // Add the token to the buffer
+        if (!add_token_as_last(token_buffer, currentToken)) {
+            return RET_VAL_INTERNAL_ERR;
+        }
+
+        if (currentToken->type == EOF_TOKEN){
+            break;
+        }
+    }
+
+    return RET_VAL_OK;
 }

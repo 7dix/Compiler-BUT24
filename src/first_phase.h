@@ -18,7 +18,7 @@
 #include "scanner.h"
 #include "shared.h"
 
-
+// Function prototypes
 int first_phase(T_TOKEN_BUFFER *token_buffer);
 
 #endif // FIRST_PHASE_H
