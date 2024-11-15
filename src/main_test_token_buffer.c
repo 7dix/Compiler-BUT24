@@ -150,7 +150,7 @@ int main()
     printf("[\n"); // Start of JSON array
     // Print the buffer
     while (true) {
-        get_current_and_move_forward(buffer, &currentToken);
+        next_token(buffer, &currentToken);
 
         // Print the token details
         print_token_json(currentToken, is_first_token);
@@ -161,22 +161,22 @@ int main()
     }
 
     // Test moving further and back -> should stay at EOF
-    get_current_and_move_forward(buffer, &currentToken);
+    next_token(buffer, &currentToken);
     print_token_json(currentToken, 0);
     move_back(buffer);
-    get_current_and_move_forward(buffer, &currentToken);
+    next_token(buffer, &currentToken);
     print_token_json(currentToken, 0);
 
     // Test moving back from first token -> should stay at first token
     set_current_to_first(buffer);
     move_back(buffer);
-    get_current_and_move_forward(buffer, &currentToken);
+    next_token(buffer, &currentToken);
     print_token_json(currentToken, 0);
     // Test moving backwards from non-first token
-    get_current_and_move_forward(buffer, &currentToken);
+    next_token(buffer, &currentToken);
     print_token_json(currentToken, 0);
     move_back(buffer);
-    get_current_and_move_forward(buffer, &currentToken);
+    next_token(buffer, &currentToken);
     print_token_json(currentToken, 0);
 
 
