@@ -113,7 +113,7 @@ bool add_token_as_last(T_TOKEN_BUFFER *buffer, T_TOKEN *token) {
  */
 void move_back(T_TOKEN_BUFFER *buffer) {
     // Move the current pointer back, if possible
-    if (buffer->current != NULL && buffer->current->prev != NULL && buffer->current->next != NULL) {
+    if (buffer->current != NULL && buffer->current->prev != NULL) {
         buffer->current = buffer->current->prev;
     }
 }
@@ -124,7 +124,7 @@ void move_back(T_TOKEN_BUFFER *buffer) {
  * @param *buffer The token buffer.
  * @param *token The token to store the current token.
  */
-void get_current_and_move_forward(T_TOKEN_BUFFER *buffer, T_TOKEN **token) {
+void next_token(T_TOKEN_BUFFER *buffer, T_TOKEN **token) {
     // Get the current token and move the current pointer forward
     if (buffer->current != NULL) { // Check if the current pointer is not NULL
         *token = buffer->current->token;
