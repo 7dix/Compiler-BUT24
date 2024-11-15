@@ -12,11 +12,13 @@ DEBUG_FLAGS = -g -O0
 # Source files
 SRC = src/main.c src/scanner.c
 SRC_SCANNER_TEST = src/main_test_scanner.c src/scanner.c
+SRC_TOKEN_BUFFER_TEST = src/main_test_token_buffer.c src/token_buffer.c src/scanner.c
 
 # Output executables
 OUTPUT = bin/ifj24
 DEBUG_OUTPUT = bin/ifj24debug
 DEBUG_SCANNER_OUTPUT = bin/scannerdebug
+DEBUG_TOKEN_BUFFER_OUTPUT = bin/tokenbufferdebug
 
 # Default target
 all: $(OUTPUT)
@@ -37,14 +39,19 @@ debug: bin $(SRC)
 debug_scanner: bin $(SRC_SCANNER_TEST)
 	$(CC) $(CFLAGS) $(DEBUG_FLAGS) -o $(DEBUG_SCANNER_OUTPUT) $(SRC_SCANNER_TEST)
 
+debug_token_buffer: bin $(SRC_TOKEN_BUFFER_TEST)
+	$(CC) $(CFLAGS) $(DEBUG_FLAGS) -o $(DEBUG_TOKEN_BUFFER_OUTPUT) $(SRC_TOKEN_BUFFER_TEST)
+
 test_scanner: debug_scanner
 	cd tests/scanner &&  python3 test_scanner.py
-	
 
-test: test_scanner
+test_token_buffer: debug_token_buffer
+	cd tests/token_buffer &&  python3 test_token_buffer.py
+
+test: test_scanner test_token_buffer
 
 # Clean target to remove the executables
 clean:
-	rm -f $(OUTPUT) $(DEBUG_OUTPUT)
+	rm -f $(OUTPUT) $(DEBUG_OUTPUT) $(DEBUG_SCANNER_OUTPUT) $(DEBUG_TOKEN_BUFFER_OUTPUT)
 
 .PHONY: all debug clean bin test
