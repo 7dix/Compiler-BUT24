@@ -26,7 +26,17 @@ void token_buffer_move_back() {
     return;
 }
 
-
+/**
+ * @brief Entry point of the parser.
+ * 
+ * @note TODO: add semantic checks, cleaning, etc.
+ * @note TODO: change signature to work properly with future buffer
+ * @note TODO: improve comments on return values
+ * @return 
+ * - RET_VAL_OK if parsing was successful
+ * 
+ * - RET_VAL_SYNTAX_ERR if syntax error occurred
+ */
 int run_parser() {
     // TODO: add semantic checks, cleaning, etc.
     // Start of recursive parser
@@ -36,6 +46,17 @@ int run_parser() {
     return RET_VAL_OK;
 }
 
+/**
+ * @brief Checks whether given token can occur in expression.
+ * 
+ * This function uses following global variables:
+ * 
+ * - T_TOKEN `token`
+ * @return
+ * - `true` if token can occur in expression
+ * 
+ * - `false` otherwise
+ */
 bool is_token_in_expr() {
     bool is_in_expr = ( token.type == NOT_EQUAL || token.type == INT ||
                         token.type == FLOAT || token.type == LESS_THAN ||
@@ -46,7 +67,6 @@ bool is_token_in_expr() {
                         token.type == BRACKET_RIGHT_SIMPLE || token.type == IDENTIFIER );
     return is_in_expr;
 }
-
 
 /**
  * @brief Start of recursive parser. Simulates START non-terminal.
@@ -61,6 +81,7 @@ bool is_token_in_expr() {
  */
 bool syntax_start() {
     // TODO: add semantic checks, cleaning, etc.
+
     if (!syntax_prolog()) {
         return false;
     }
@@ -86,52 +107,49 @@ bool syntax_start() {
  */
 bool syntax_prolog() {
     // TODO: add semantic checks, cleaning, etc.
-    // check first terminal in prolog -> const
-    next_token();
+    
+    next_token(); // const
     if (token.type != CONST) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
-    // check second terminal in prolog -> ifj
-    next_token(); 
+
+    next_token(); // ifj
     if (token.type != IFJ) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
-    // check third terminal in prolog -> =
-    next_token();
+    next_token(); // =
     if (token.type != ASSIGN) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
     
-    // check fourth terminal in prolog -> @import
-    next_token();
+    next_token(); // @import
     if (token.type != IMPORT) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
     
-    // check fifth terminal in prolog -> (
-    next_token();
+    next_token(); // (
     if (token.type != BRACKET_LEFT_SIMPLE) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
-    // check sixth terminal in prolog -> string
-    next_token();
+    next_token(); // string
     if (token.type != STRING) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
+
     // check that string is equal to "ifj24.zig"
     if (strcmp(token.lexeme, "ifj24.zig") != 0) {
         // TODO: process error
@@ -140,16 +158,14 @@ bool syntax_prolog() {
         return false;
     }
 
-    // check seventh terminal in prolog -> )
-    next_token();
+    next_token(); // )
     if (token.type != BRACKET_RIGHT_SIMPLE) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
-    // check eighth and last terminal in prolog -> ;
-    next_token();
+    next_token(); // ;
     if (token.type != SEMICOLON) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
@@ -171,6 +187,7 @@ bool syntax_prolog() {
  */
 bool syntax_fn_defs() {
     // TODO: add semantic checks, cleaning, etc.
+
     if (!syntax_fn_def()) {
         return false;
     }
@@ -194,7 +211,7 @@ bool syntax_fn_defs() {
 bool syntax_fn_def() {
     // TODO: add semantic checks, cleaning, etc.
 
-    // check first terminal in fn_def -> pub
+    // pub
     next_token();
     if (token.type != PUB) {
         // TODO: process error
@@ -202,7 +219,7 @@ bool syntax_fn_def() {
         return false;
     }
 
-    // check second terminal in fn_def -> fn
+    // fn
     next_token();
     if (token.type != FN) {
         // TODO: process error
@@ -210,7 +227,7 @@ bool syntax_fn_def() {
         return false;
     }
 
-    // check third terminal in fn_def -> identifier
+    // identifier
     next_token();
     if (token.type != IDENTIFIER) {
         // TODO: process error
@@ -218,20 +235,21 @@ bool syntax_fn_def() {
         return false;
     }
 
-    // check fourth terminal in fn_def -> (
+    // (
     next_token();
     if (token.type != BRACKET_LEFT_SIMPLE) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
-    // follows non-terminal PARAMS, no need to choose a branch,
+
+    // follows non-terminal PARAMS
     // not checking token here
     if (!syntax_params()) {
         return false;
     }
 
-    // check following terminal in fn_def -> )
+    // )
     next_token();
     if (token.type != BRACKET_RIGHT_SIMPLE) {
         // TODO: process error
@@ -239,7 +257,7 @@ bool syntax_fn_def() {
         return false;
     }
 
-    // follows non-terminal FN_DEF_REMAINING, no need to choose a branch,
+    // follows non-terminal FN_DEF_REMAINING
     // not checking token here
     if (!syntax_fn_def_remaining()) {
         return false;
@@ -266,13 +284,13 @@ bool syntax_fn_def_next() {
     
     // we have two possible branches, need to choose here
     next_token();
-    token_buffer_move_back();
-    // first branch -> ε, we need to return the token
+    token_buffer_move_back(); // token needed in both branches
+    // first branch -> ε
     if (token.type == EOF_TOKEN) {
         return true;
     }
 
-    // second branch -> FN_DEF FN_DEF_NEXT, return token
+    // second branch -> FN_DEF FN_DEF_NEXT
     if (token.type == PUB) { // pub is first terminal in FN_DEF
         if (!syntax_fn_def()) {
             return false;
@@ -280,9 +298,13 @@ bool syntax_fn_def_next() {
         if (!syntax_fn_def_next()) {
             return false;
         }
+
+        return true;
     }
 
-    return true;
+    // TODO: process error
+    error_flag = RET_VAL_SYNTAX_ERR;
+    return false;
 }
 
 /**
@@ -299,11 +321,12 @@ bool syntax_fn_def_next() {
  */
 bool syntax_fn_def_remaining() {
     // TODO: add semantic checks, cleaning, etc.
-    // TODO: possible simplification by checking only void letting type
+    // TODO: possible simplification by checking only void type
+
     // to be checked in syntax_type function
     // we have two possible branches, need to choose here
     next_token();
-    // first branch -> TYPE { CODE_BLOCK_NEXT }, we need to return the token
+    // first branch -> TYPE { CODE_BLOCK_NEXT }, return token
     if (token.type == TYPE_INT || token.type == TYPE_FLOAT ||
         token.type == TYPE_STRING || token.type == TYPE_INT_NULL ||
         token.type == TYPE_FLOAT_NULL || token.type == TYPE_STRING_NULL) {
@@ -313,7 +336,7 @@ bool syntax_fn_def_remaining() {
             return false;
         }
 
-        // check following terminal in fn_def_remaining -> {
+        // {
         next_token();
         if (token.type != BRACKET_LEFT_CURLY) {
             // TODO: process error
@@ -321,13 +344,13 @@ bool syntax_fn_def_remaining() {
             return false;
         }
 
-        // follows non-terminal CODE_BLOCK_NEXT, no need to choose a branch,
+        // follows non-terminal CODE_BLOCK_NEXT
         // not checking token here
         if (!syntax_code_block_next()) {
             return false;
         }
 
-        // check following terminal in fn_def_remaining -> }
+        // }
         next_token();
         if (token.type != BRACKET_RIGHT_CURLY) {
             // TODO: process error
@@ -340,7 +363,7 @@ bool syntax_fn_def_remaining() {
 
     // second branch -> void { CODE_BLOCK_NEXT }
     if (token.type == VOID) {
-        // check following terminal in fn_def_remaining -> {
+        // {
         next_token();
         if (token.type != BRACKET_LEFT_CURLY) {
             // TODO: process error
@@ -348,13 +371,13 @@ bool syntax_fn_def_remaining() {
             return false;
         }
 
-        // follows non-terminal CODE_BLOCK_NEXT, no need to choose a branch,
+        // follows non-terminal CODE_BLOCK_NEXT
         // not checking token here
         if (!syntax_code_block_next()) {
             return false;
         }
 
-        // check last terminal in fn_def_remaining -> }
+        // }
         next_token();
         if (token.type != BRACKET_RIGHT_CURLY) {
             // TODO: process error
@@ -384,14 +407,15 @@ bool syntax_fn_def_remaining() {
  */
 bool syntax_params() {
     // TODO: add semantic checks, cleaning, etc.
+
     // we have two possible branches, need to choose here
     next_token();
-    token_buffer_move_back();
-    // first branch -> ε, we need to return the token
+    token_buffer_move_back(); // token needed in both branches
+    // first branch -> ε
     if (token.type == BRACKET_RIGHT_SIMPLE) {
         return true;
     }
-    // second branch -> PARAM PARAM_NEXT, return token
+    // second branch -> PARAM PARAM_NEXT
     if (token.type == IDENTIFIER) { // identifier is first terminal in PARAM
         if (!syntax_param()) {
             return false;
@@ -399,8 +423,13 @@ bool syntax_params() {
         if (!syntax_param_next()) {
             return false;
         }
+
+        return true;
     }
-    return true;
+    
+    // TODO: process error
+    error_flag = RET_VAL_SYNTAX_ERR;
+    return false;
 }
 
 /**
@@ -416,7 +445,8 @@ bool syntax_params() {
  */
 bool syntax_param() {
     // TODO: add semantic checks, cleaning, etc.
-    // check first terminal in param -> identifier
+
+    // identifier
     next_token();
     if (token.type != IDENTIFIER) {
         // TODO: process error
@@ -424,7 +454,7 @@ bool syntax_param() {
         return false;
     }
 
-    // check second terminal in param -> :
+    // :
     next_token();
     if (token.type != COLON) {
         // TODO: process error
@@ -432,7 +462,8 @@ bool syntax_param() {
         return false;
     }
 
-    // follows non-terminal TYPE, no need to choose a branch -> not checking token here
+    // follows non-terminal TYPE
+    // not checking token here
     if (!syntax_type()) {
         return false;
     }
@@ -458,6 +489,7 @@ bool syntax_param() {
  */
 bool syntax_type() {
     // TODO: add semantic checks, cleaning, etc.
+
     // check whether token is one of the types
     next_token();
     if (token.type != TYPE_INT && token.type != TYPE_FLOAT &&
@@ -495,13 +527,17 @@ bool syntax_param_next() {
     }
 
     // second branch -> , PARAM_AFTER_COMMA, consuming token
-    if (token.type == COMMA) {
+    if (token.type == COMMA) { // ,
         if (!syntax_param_after_comma()) {
             return false;
         }
+
+        return true;
     }
 
-    return true;
+    // TODO: process error
+    error_flag = RET_VAL_SYNTAX_ERR;
+    return false;
 }
 
 /**
@@ -521,13 +557,13 @@ bool syntax_param_after_comma() {
 
     // we have two possible branches, need to choose here
     next_token();
-    token_buffer_move_back();
-    // first branch -> ε, we need to return the token
+    token_buffer_move_back(); // token needed in both branches
+    // first branch -> ε
     if (token.type == BRACKET_RIGHT_SIMPLE) {
         return true;
     }
 
-    // second branch -> PARAM PARAM_NEXT, return token
+    // second branch -> PARAM PARAM_NEXT
     if (token.type == IDENTIFIER) { // identifier is first terminal in PARAM
         if (!syntax_param()) {
             return false;
@@ -535,9 +571,13 @@ bool syntax_param_after_comma() {
         if (!syntax_param_next()) {
             return false;
         }
+
+        return true;
     }
 
-    return true;
+    // TODO: process error
+    error_flag = RET_VAL_SYNTAX_ERR;
+    return false;
 }
 
 /**
@@ -579,13 +619,13 @@ bool syntax_code_block_next() {
 
     // we have two possible branches, need to choose here
     next_token();
-    token_buffer_move_back();
-    // first branch -> ε, we need to return the token
+    token_buffer_move_back(); // token needed in both branches
+    // first branch -> ε
     if (token.type == BRACKET_RIGHT_CURLY) {
         return true;
     }
 
-    // second branch -> CODE_BLOCK CODE_BLOCK_NEXT, return token
+    // second branch -> CODE_BLOCK CODE_BLOCK_NEXT
     if (token.type == CONST || token.type == VAR || token.type == IF ||
         token.type == WHILE || token.type == RETURN || token.type == IFJ ||
         token.type == IDENTIFIER || token.type == IDENTIFIER_DISCARD) {
@@ -605,20 +645,30 @@ bool syntax_code_block_next() {
 }
 
 /**
- * @brief Checks syntax of code block. Simulates CODE_BLOCK non-terminal.
+ * @brief Simulates CODE_BLOCK non-terminal.
  * 
  * CODE_BLOCK is defined as:
- * CODE_BLOCK -> VAR_DEF
- * CODE_BLOCK -> IF_STATEMENT
- * CODE_BLOCK -> WHILE_STATEMENT
- * CODE_BLOCK -> RETURN
- * CODE_BLOCK -> ASSIGN_EXPR_OR_FN_CALL
- * CODE_BLOCK -> ASSIGN_DISCARD_EXPR_OR_FN_CALL
- * CODE_BLOCK -> BUILT_IN_VOID_FN_CALL
+ * 
+ * - `CODE_BLOCK -> VAR_DEF` 
+ * 
+ * - CODE_BLOCK -> IF_STATEMENT 
+ * 
+ * - CODE_BLOCK -> WHILE_STATEMENT 
+ * 
+ * - CODE_BLOCK -> RETURN 
+ * 
+ * - CODE_BLOCK -> ASSIGN_EXPR_OR_FN_CALL 
+ * 
+ * - CODE_BLOCK -> ASSIGN_DISCARD_EXPR_OR_FN_CALL 
+ * 
+ * - CODE_BLOCK -> BUILT_IN_VOID_FN_CALL 
  * 
  * This function uses following global variables:
+ * 
  * - T_TOKEN token
+ * 
  * - int error_flag
+ * 
  * @return true if syntax is correct, false otherwise
  */
 bool syntax_code_block() {
@@ -629,7 +679,7 @@ bool syntax_code_block() {
     token_buffer_move_back();
     switch (token.type) {
         case CONST:
-        case VAR:
+        case VAR: 
             if (!syntax_var_def()) {
                 return false;
             }
@@ -692,7 +742,7 @@ bool syntax_var_def() {
     next_token();
     // first branch -> const identifier VAR_DEF_AFTER_ID
     if (token.type == CONST) {
-        // check second terminal in var_def -> identifier
+        // identifier
         next_token();
         if (token.type != IDENTIFIER) {
             // TODO: process error
@@ -710,7 +760,7 @@ bool syntax_var_def() {
 
     // second branch -> var identifier VAR_DEF_AFTER_ID
     if (token.type == VAR) {
-        // check second terminal in var_def -> identifier
+        // identifier
         next_token();
         if (token.type != IDENTIFIER) {
             // TODO: process error
@@ -753,7 +803,7 @@ bool syntax_var_def_after_id() {
             return false;
         }
 
-        // check following terminal in var_def_after_id -> =
+        // =
         next_token();
         if (token.type != ASSIGN) {
             // TODO: process error
@@ -797,7 +847,7 @@ bool syntax_var_def_after_id() {
 bool syntax_if_statement() {
     // TODO: add semantic checks, cleaning, etc.
 
-    // check first terminal in if_statement -> if
+    // if
     next_token();
     if (token.type != IF) {
         // TODO: process error
@@ -805,7 +855,7 @@ bool syntax_if_statement() {
         return false;
     }
 
-    // check second terminal in if_statement -> (
+    // (
     next_token();
     if (token.type != BRACKET_LEFT_SIMPLE) {
         // TODO: process error
@@ -819,7 +869,7 @@ bool syntax_if_statement() {
         return false;
     }
 
-    // check another terminal in if_statement -> )
+    // )
     next_token();
     if (token.type != BRACKET_RIGHT_SIMPLE) {
         // TODO: process error
@@ -827,7 +877,7 @@ bool syntax_if_statement() {
         return false;
     }
 
-    // follows non-terminal IF_STATEMENT_REMAINING, no need to choose a branch,
+    // follows non-terminal IF_STATEMENT_REMAINING
     // not checking token here
     if (!syntax_if_statement_remaining()) {
         return false;
@@ -854,14 +904,14 @@ bool syntax_if_statement_remaining() {
     // we have two possible branches, need to choose here
     next_token();
     // first branch -> { CODE_BLOCK_NEXT } else { CODE_BLOCK_NEXT }
-    if (token.type == BRACKET_LEFT_CURLY) {
+    if (token.type == BRACKET_LEFT_CURLY) { // {
         // follows non-terminal CODE_BLOCK_NEXT, no need to choose a branch,
         // not checking token here
         if (!syntax_code_block_next()) {
             return false;
         }
 
-        // check following terminal in if_statement_remaining -> }
+        // }
         next_token();
         if (token.type != BRACKET_RIGHT_CURLY) {
             // TODO: process error
@@ -869,7 +919,7 @@ bool syntax_if_statement_remaining() {
             return false;
         }
 
-        // check another terminal in if_statement_remaining -> else
+        // else
         next_token();
         if (token.type != ELSE) {
             // TODO: process error
@@ -877,7 +927,7 @@ bool syntax_if_statement_remaining() {
             return false;
         }
 
-        // check another terminal in if_statement_remaining -> {
+        // {
         next_token();
         if (token.type != BRACKET_LEFT_CURLY) {
             // TODO: process error
@@ -885,13 +935,13 @@ bool syntax_if_statement_remaining() {
             return false;
         }
 
-        // follows non-terminal CODE_BLOCK_NEXT, no need to choose a branch,
+        // follows non-terminal CODE_BLOCK_NEXT
         // not checking token here
         if (!syntax_code_block_next()) {
             return false;
         }
 
-        // check last terminal in if_statement_remaining -> }
+        // }
         next_token();
         if (token.type != BRACKET_RIGHT_CURLY) {
             // TODO: process error
@@ -903,8 +953,8 @@ bool syntax_if_statement_remaining() {
     }
 
     // second branch -> | identifier | { CODE_BLOCK_NEXT } else { CODE_BLOCK_NEXT }
-    if (token.type == PIPE) {
-        // check second terminal in if_statement_remaining -> identifier
+    if (token.type == PIPE) { // |
+        // identifier
         next_token();
         if (token.type != IDENTIFIER) {
             // TODO: process error
@@ -912,7 +962,7 @@ bool syntax_if_statement_remaining() {
             return false;
         }
 
-        // check third terminal in if_statement_remaining -> |
+        // |
         next_token();
         if (token.type != PIPE) {
             // TODO: process error
@@ -920,7 +970,7 @@ bool syntax_if_statement_remaining() {
             return false;
         }
 
-        // check fourth terminal in if_statement_remaining -> {
+        // {
         next_token();
         if (token.type != BRACKET_LEFT_CURLY) {
             // TODO: process error
@@ -933,7 +983,7 @@ bool syntax_if_statement_remaining() {
             return false;
         }
 
-        // check following terminal in if_statement_remaining -> }
+        // }
         next_token();
         if (token.type != BRACKET_RIGHT_CURLY) {
             // TODO: process error
@@ -941,7 +991,7 @@ bool syntax_if_statement_remaining() {
             return false;
         }
 
-        // check another terminal in if_statement_remaining -> else
+        // else
         next_token();
         if (token.type != ELSE) {
             // TODO: process error
@@ -949,7 +999,7 @@ bool syntax_if_statement_remaining() {
             return false;
         }
 
-        // check another terminal in if_statement_remaining -> {
+        // {
         next_token();
         if (token.type != BRACKET_LEFT_CURLY) {
             // TODO: process error
@@ -962,7 +1012,7 @@ bool syntax_if_statement_remaining() {
             return false;
         }
 
-        // check last terminal in if_statement_remaining -> }
+        // }
         next_token();
         if (token.type != BRACKET_RIGHT_CURLY) {
             // TODO: process error
@@ -992,7 +1042,7 @@ bool syntax_if_statement_remaining() {
 bool syntax_while_statement() {
     // TODO: add semantic checks, cleaning, etc.
 
-    // check first terminal in while_statement -> while
+    // while
     next_token();
     if (token.type != WHILE) {
         // TODO: process error
@@ -1000,7 +1050,7 @@ bool syntax_while_statement() {
         return false;
     }
 
-    // check second terminal in while_statement -> (
+    // (
     next_token();
     if (token.type != BRACKET_LEFT_SIMPLE) {
         // TODO: process error
@@ -1014,7 +1064,7 @@ bool syntax_while_statement() {
         return false;
     }
 
-    // check another terminal in while_statement -> )
+    // )
     next_token();
     if (token.type != BRACKET_RIGHT_SIMPLE) {
         // TODO: process error
@@ -1048,14 +1098,14 @@ bool syntax_while_statement_remaining() {
     // we have two possible branches, need to choose here
     next_token();
     // first branch -> { CODE_BLOCK_NEXT }
-    if (token.type == BRACKET_LEFT_CURLY) {
+    if (token.type == BRACKET_LEFT_CURLY) { // {
         // follows non-terminal CODE_BLOCK_NEXT
         // not checking token here
         if (!syntax_code_block_next()) {
             return false;
         }
 
-        // check following terminal in while_statement_remaining -> }
+        // }
         next_token();
         if (token.type != BRACKET_RIGHT_CURLY) {
             // TODO: process error
@@ -1067,8 +1117,8 @@ bool syntax_while_statement_remaining() {
     }
 
     // second branch -> | identifier | { CODE_BLOCK_NEXT }
-    if (token.type == PIPE) {
-        // check second terminal in while_statement_remaining -> identifier
+    if (token.type == PIPE) { // |
+        // identifier
         next_token();
         if (token.type != IDENTIFIER) {
             // TODO: process error
@@ -1076,7 +1126,7 @@ bool syntax_while_statement_remaining() {
             return false;
         }
 
-        // check third terminal in while_statement_remaining -> |
+        // |
         next_token();
         if (token.type != PIPE) {
             // TODO: process error
@@ -1084,7 +1134,7 @@ bool syntax_while_statement_remaining() {
             return false;
         }
 
-        // check fourth terminal in while_statement_remaining -> {
+        // {
         next_token();
         if (token.type != BRACKET_LEFT_CURLY) {
             // TODO: process error
@@ -1098,7 +1148,7 @@ bool syntax_while_statement_remaining() {
             return false;
         }
 
-        // check last terminal in while_statement_remaining -> }
+        // }
         next_token();
         if (token.type != BRACKET_RIGHT_CURLY) {
             // TODO: process error
@@ -1128,7 +1178,7 @@ bool syntax_while_statement_remaining() {
 bool syntax_return() {
     // TODO: add semantic checks, cleaning, etc.
 
-    // check first terminal in return -> return
+    // return
     next_token();
     if (token.type != RETURN) {
         // TODO: process error
@@ -1162,7 +1212,7 @@ bool syntax_return_remaining() {
     // we have two possible branches, need to choose here
     next_token();
     // first branch -> ;
-    if (token.type == SEMICOLON) {
+    if (token.type == SEMICOLON) { // ;
         return true;
     }
 
@@ -1197,7 +1247,7 @@ bool syntax_return_remaining() {
 bool syntax_built_in_void_fn_call() {
     // TODO: add semantic checks, cleaning, etc.
 
-    // check first terminal in built_in_void_fn_call -> ifj
+    // ifj
     next_token();
     if (token.type != IFJ) {
         // TODO: process error
@@ -1205,7 +1255,7 @@ bool syntax_built_in_void_fn_call() {
         return false;
     }
 
-    // check second terminal in built_in_void_fn_call -> .
+    // .
     next_token();
     if (token.type != DOT) {
         // TODO: process error
@@ -1213,7 +1263,7 @@ bool syntax_built_in_void_fn_call() {
         return false;
     }
 
-    // check third terminal in built_in_void_fn_call -> identifier
+    // identifier
     next_token();
     if (token.type != IDENTIFIER) {
         // TODO: process error
@@ -1221,7 +1271,7 @@ bool syntax_built_in_void_fn_call() {
         return false;
     }
 
-    // check fourth terminal in built_in_void_fn_call -> (
+    // (
     next_token();
     if (token.type != BRACKET_LEFT_SIMPLE) {
         // TODO: process error
@@ -1234,7 +1284,7 @@ bool syntax_built_in_void_fn_call() {
         return false;
     }
 
-    // check following terminal in built_in_void_fn_call -> )
+    // )
     next_token();
     if (token.type != BRACKET_RIGHT_SIMPLE) {
         // TODO: process error
@@ -1242,7 +1292,7 @@ bool syntax_built_in_void_fn_call() {
         return false;
     }
 
-    // check last terminal in built_in_void_fn_call -> ;
+    // ;
     next_token();
     if (token.type != SEMICOLON) {
         // TODO: process error
@@ -1267,7 +1317,7 @@ bool syntax_built_in_void_fn_call() {
 bool syntax_assign_expr_or_fn_call() {
     // TODO: add semantic checks, cleaning, etc.
     
-    // check first terminal in assign_expr_or_fn_call -> identifier
+    // identifier
     next_token();
     if (token.type != IDENTIFIER) {
         // TODO: process error
@@ -1297,7 +1347,7 @@ bool syntax_assign_expr_or_fn_call() {
 bool syntax_assign_discard_expr_or_fn_call() {
     // TODO: add semantic checks, cleaning, etc.
 
-    // check first terminal in assign_discard_expr_or_fn_call -> discard_identifier
+    // discard_identifier
     next_token();
     if (token.type != IDENTIFIER_DISCARD) {
         // TODO: process error
@@ -1305,7 +1355,7 @@ bool syntax_assign_discard_expr_or_fn_call() {
         return false;
     }
 
-    // check second terminal in assign_discard_expr_or_fn_call -> =
+    // =
     next_token();
     if (token.type != ASSIGN) {
         // TODO: process error
@@ -1339,7 +1389,7 @@ bool syntax_id_start() {
     // we have two possible branches, need to choose here
     next_token();
     // first branch -> = ASSIGN
-    if (token.type == ASSIGN) {
+    if (token.type == ASSIGN) { // =
         // follows non-terminal ASSIGN
         if (!syntax_assign()) {
             return false;
@@ -1349,7 +1399,7 @@ bool syntax_id_start() {
     }
 
     // second branch -> FUNCTION_ARGUMENTS, return token
-    if (token.type == BRACKET_LEFT_SIMPLE) {
+    if (token.type == BRACKET_LEFT_SIMPLE) { // (
         // follows non-terminal FUNCTION_ARGUMENTS
         token_buffer_move_back();
         if (!syntax_function_arguments()) {
@@ -1378,7 +1428,7 @@ bool syntax_id_start() {
 bool syntax_function_arguments() {
     // TODO: add semantic checks, cleaning, etc.
 
-    // check first terminal in function_arguments -> (
+    // (
     next_token();
     if (token.type != BRACKET_LEFT_SIMPLE) {
         // TODO: process error
@@ -1391,7 +1441,7 @@ bool syntax_function_arguments() {
         return false;
     }
 
-    // check following terminal in function_arguments -> )
+    // )
     next_token();
     if (token.type != BRACKET_RIGHT_SIMPLE) {
         // TODO: process error
@@ -1399,7 +1449,7 @@ bool syntax_function_arguments() {
         return false;
     }
 
-    // check last terminal in function_arguments -> ;
+    // ;
     next_token();
     if (token.type != SEMICOLON) {
         // TODO: process error
@@ -1430,7 +1480,7 @@ bool syntax_assign() {
     next_token();
     // first branch -> ifj . identifier ( ARGUMENTS ) ;
     if (token.type == IFJ) {
-        // check second terminal in assign -> .
+        // .
         next_token();
         if (token.type != DOT) {
             // TODO: process error
@@ -1438,7 +1488,7 @@ bool syntax_assign() {
             return false;
         }
 
-        // check third terminal in assign -> identifier
+        // identifier
         next_token();
         if (token.type != IDENTIFIER) {
             // TODO: process error
@@ -1446,7 +1496,7 @@ bool syntax_assign() {
             return false;
         }
 
-        // check fourth terminal in assign -> (
+        // (
         next_token();
         if (token.type != BRACKET_LEFT_SIMPLE) {
             // TODO: process error
@@ -1459,7 +1509,7 @@ bool syntax_assign() {
             return false;
         }
 
-        // check following terminal in assign -> )
+        // )
         next_token();
         if (token.type != BRACKET_RIGHT_SIMPLE) {
             // TODO: process error
@@ -1467,7 +1517,7 @@ bool syntax_assign() {
             return false;
         }
 
-        // check last terminal in assign -> ;
+        // ;
         next_token();
         if (token.type != SEMICOLON) {
             // TODO: process error
@@ -1479,7 +1529,7 @@ bool syntax_assign() {
     }
 
     // second branch -> identifier ID_ASSIGN
-    if (token.type == IDENTIFIER) {
+    if (token.type == IDENTIFIER) { // identifier
         // follows non-terminal ID_ASSIGN
         if (!syntax_id_assign()) {
             return false;
@@ -1496,7 +1546,7 @@ bool syntax_assign() {
             return false;
         }
 
-        // check last terminal in assign -> ;
+        // ;
         next_token();
         if (token.type != SEMICOLON) {
             // TODO: process error
@@ -1530,7 +1580,7 @@ bool syntax_id_assign() {
     // we have two possible branches, need to choose here
     next_token();
     // first branch -> FUNCTION_ARGUMENTS
-    if (token.type == BRACKET_LEFT_SIMPLE) {
+    if (token.type == BRACKET_LEFT_SIMPLE) { // (
         // follows non-terminal FUNCTION_ARGUMENTS
         token_buffer_move_back();
         if (!syntax_function_arguments()) {
@@ -1551,7 +1601,7 @@ bool syntax_id_assign() {
             return false;
         }
 
-        // check last terminal in id_assign -> ;
+        // ;
         next_token();
         if (token.type != SEMICOLON) {
             // TODO: process error
@@ -1586,7 +1636,7 @@ bool syntax_arguments() {
     next_token();
     token_buffer_move_back();
     // first branch -> ε
-    if (token.type == BRACKET_RIGHT_SIMPLE) {
+    if (token.type == BRACKET_RIGHT_SIMPLE) { // )
         return true;
     }
 
@@ -1626,13 +1676,13 @@ bool syntax_argument_next() {
     // we have two possible branches, need to choose here
     next_token();
     // first branch -> ε
-    if (token.type == BRACKET_RIGHT_SIMPLE) {
+    if (token.type == BRACKET_RIGHT_SIMPLE) { // )
         token_buffer_move_back();
         return true;
     }
 
     // second branch -> , ARGUMENT_AFTER_COMMA
-    if (token.type == COMMA) {
+    if (token.type == COMMA) { // ,
         if (!syntax_argument_after_comma()) {
             return false;
         }
@@ -1664,7 +1714,7 @@ bool syntax_argument_after_comma() {
     next_token();
     token_buffer_move_back();
     // first branch -> ε
-    if (token.type == BRACKET_RIGHT_SIMPLE) {
+    if (token.type == BRACKET_RIGHT_SIMPLE) { // )
         return true;
     }
 
