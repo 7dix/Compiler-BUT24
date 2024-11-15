@@ -13,44 +13,44 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "scanner.h"
 #include "shared.h"
+#include "token_buffer.h"
 
 // Function prototypes
-int run_parser();
-bool is_token_in_expr();
-bool syntax_start();
-bool syntax_prolog();
-bool syntax_fn_defs();
-bool syntax_fn_def();
-bool syntax_fn_def_next();
-bool syntax_fn_def_remaining();
-bool syntax_params();
-bool syntax_param();
-bool syntax_type();
-bool syntax_param_next();
-bool syntax_param_after_comma();
-bool syntax_end();
-bool syntax_code_block_next();
-bool syntax_code_block();
-bool syntax_var_def();
-bool syntax_var_def_after_id();
-bool syntax_if_statement();
-bool syntax_if_statement_remaining();
-bool syntax_while_statement();
-bool syntax_while_statement_remaining();
-bool syntax_return();
-bool syntax_return_remaining();
-bool syntax_built_in_void_fn_call();
-bool syntax_assign_expr_or_fn_call();
-bool syntax_assign_discard_expr_or_fn_call();
-bool syntax_id_start();
-bool syntax_function_arguments();
-bool syntax_assign();
-bool syntax_id_assign();
-bool syntax_arguments();
-bool syntax_argument_next();
-bool syntax_argument_after_comma();
-bool syntax_argument();
+int run_parser(T_TOKEN_BUFFER *token_buffer);
+bool is_token_in_expr(T_TOKEN *token);
+bool syntax_start(T_TOKEN_BUFFER *token_buffer);
+bool syntax_prolog(T_TOKEN_BUFFER *buffer);
+bool syntax_fn_defs(T_TOKEN_BUFFER *buffer);
+bool syntax_fn_def(T_TOKEN_BUFFER *buffer);
+bool syntax_fn_def_next(T_TOKEN_BUFFER *buffer);
+bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer);
+bool syntax_params(T_TOKEN_BUFFER *buffer);
+bool syntax_param(T_TOKEN_BUFFER *buffer);
+bool syntax_type(T_TOKEN_BUFFER *buffer);
+bool syntax_param_next(T_TOKEN_BUFFER *buffer);
+bool syntax_param_after_comma(T_TOKEN_BUFFER *buffer);
+bool syntax_end(T_TOKEN_BUFFER *buffer);
+bool syntax_code_block_next(T_TOKEN_BUFFER *buffer);
+bool syntax_code_block(T_TOKEN_BUFFER *buffer);
+bool syntax_var_def(T_TOKEN_BUFFER *buffer);
+bool syntax_var_def_after_id(T_TOKEN_BUFFER *buffer);
+bool syntax_if_statement(T_TOKEN_BUFFER *buffer);
+bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer);
+bool syntax_while_statement(T_TOKEN_BUFFER *buffer);
+bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer);
+bool syntax_return(T_TOKEN_BUFFER *buffer);
+bool syntax_return_remaining(T_TOKEN_BUFFER *buffer);
+bool syntax_built_in_void_fn_call(T_TOKEN_BUFFER *buffer);
+bool syntax_assign_expr_or_fn_call(T_TOKEN_BUFFER *buffer);
+bool syntax_assign_discard_expr_or_fn_call(T_TOKEN_BUFFER *buffer);
+bool syntax_id_start(T_TOKEN_BUFFER *buffer);
+bool syntax_function_arguments(T_TOKEN_BUFFER *buffer);
+bool syntax_assign(T_TOKEN_BUFFER *buffer);
+bool syntax_id_assign(T_TOKEN_BUFFER *buffer);
+bool syntax_arguments(T_TOKEN_BUFFER *buffer);
+bool syntax_argument_next(T_TOKEN_BUFFER *buffer);
+bool syntax_argument_after_comma(T_TOKEN_BUFFER *buffer);
+bool syntax_argument(T_TOKEN_BUFFER *buffer);
 
 #endif // H_PARSER

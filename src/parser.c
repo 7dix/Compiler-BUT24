@@ -7,40 +7,33 @@
 // YEAR: 2024
 // NOTES: Parser for the IFJ24 language
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include "scanner.h"
-#include "shared.h"
+#include "parser.h"
 
-T_TOKEN token;
+
 int error_flag = RET_VAL_OK;
 
-// those are just dummy functions, later on we will probably use buffer
-// (doubly linked list) to store tokens
-void next_token() {
-    get_token(&token);
+// dummy function for precedence parser
+bool syntax_expression() {
+    return true;
 }
 
-void token_buffer_move_back() {
-    return;
-}
 
 /**
  * @brief Entry point of the parser.
  * 
  * @note TODO: add semantic checks, cleaning, etc.
  * @note TODO: change signature to work properly with future buffer
+ * @note TODO: change signature to work properly with future symtable
  * @note TODO: improve comments on return values
  * @return 
  * - RET_VAL_OK if parsing was successful
  * 
  * - RET_VAL_SYNTAX_ERR if syntax error occurred
  */
-int run_parser() {
+int run_parser(T_TOKEN_BUFFER *token_buffer) {
     // TODO: add semantic checks, cleaning, etc.
     // Start of recursive parser
-    if (!syntax_start()) {
+    if (!syntax_start(token_buffer)) {
         return error_flag;
     }
     return RET_VAL_OK;
@@ -57,14 +50,14 @@ int run_parser() {
  * 
  * - `false` otherwise
  */
-bool is_token_in_expr() {
-    bool is_in_expr = ( token.type == NOT_EQUAL || token.type == INT ||
-                        token.type == FLOAT || token.type == LESS_THAN ||
-                        token.type == GREATER_THAN || token.type == EQUAL ||
-                        token.type == LESS_THAN_EQUAL || token.type == GREATER_THAN_EQUAL ||
-                        token.type == PLUS || token.type == MINUS || token.type == MULTIPLY ||
-                        token.type == DIVIDE || token.type == BRACKET_LEFT_SIMPLE ||
-                        token.type == BRACKET_RIGHT_SIMPLE || token.type == IDENTIFIER );
+bool is_token_in_expr(T_TOKEN *token) {
+    bool is_in_expr = ( token->type == NOT_EQUAL || token->type == INT ||
+                        token->type == FLOAT || token->type == LESS_THAN ||
+                        token->type == GREATER_THAN || token->type == EQUAL ||
+                        token->type == LESS_THAN_EQUAL || token->type == GREATER_THAN_EQUAL ||
+                        token->type == PLUS || token->type == MINUS || token->type == MULTIPLY ||
+                        token->type == DIVIDE || token->type == BRACKET_LEFT_SIMPLE ||
+                        token->type == BRACKET_RIGHT_SIMPLE || token->type == IDENTIFIER );
     return is_in_expr;
 }
 
@@ -79,16 +72,16 @@ bool is_token_in_expr() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_start() {
+bool syntax_start(T_TOKEN_BUFFER *token_buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
-    if (!syntax_prolog()) {
+    if (!syntax_prolog(token_buffer)) {
         return false;
     }
-    if (!syntax_fn_defs()) {
+    if (!syntax_fn_defs(token_buffer)) {
         return false;
     }
-    if (!syntax_end()) {
+    if (!syntax_end(token_buffer)) {
         return false;
     }
     return true;
@@ -105,68 +98,69 @@ bool syntax_start() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_prolog() {
+bool syntax_prolog(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
-    
-    next_token(); // const
-    if (token.type != CONST) {
+    T_TOKEN *token;
+
+    next_token(buffer, &token); // const
+    if (token->type != CONST) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
-    next_token(); // ifj
-    if (token.type != IFJ) {
+    next_token(buffer, &token); // ifj
+    if (token->type != IFJ) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
-    next_token(); // =
-    if (token.type != ASSIGN) {
+    next_token(buffer, &token); // =
+    if (token->type != ASSIGN) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
     
-    next_token(); // @import
-    if (token.type != IMPORT) {
+    next_token(buffer, &token); // @import
+    if (token->type != IMPORT) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
     
-    next_token(); // (
-    if (token.type != BRACKET_LEFT_SIMPLE) {
+    next_token(buffer, &token); // (
+    if (token->type != BRACKET_LEFT_SIMPLE) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
-    next_token(); // string
-    if (token.type != STRING) {
+    next_token(buffer, &token); // string
+    if (token->type != STRING) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     // check that string is equal to "ifj24.zig"
-    if (strcmp(token.lexeme, "ifj24.zig") != 0) {
+    if (strcmp(token->lexeme, "ifj24.zig") != 0) {
         // TODO: process error
         // TODO: is this syntax or semantic error?
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
-    next_token(); // )
-    if (token.type != BRACKET_RIGHT_SIMPLE) {
+    next_token(buffer, &token); // )
+    if (token->type != BRACKET_RIGHT_SIMPLE) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
-    next_token(); // ;
-    if (token.type != SEMICOLON) {
+    next_token(buffer, &token); // ;
+    if (token->type != SEMICOLON) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
@@ -185,13 +179,13 @@ bool syntax_prolog() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_fn_defs() {
+bool syntax_fn_defs(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
-    if (!syntax_fn_def()) {
+    if (!syntax_fn_def(buffer)) {
         return false;
     }
-    if (!syntax_fn_def_next()) {
+    if (!syntax_fn_def_next(buffer)) {
         return false;
     }
     return true;
@@ -208,36 +202,37 @@ bool syntax_fn_defs() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_fn_def() {
+bool syntax_fn_def(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // pub
-    next_token();
-    if (token.type != PUB) {
+    next_token(buffer, &token);
+    if (token->type != PUB) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     // fn
-    next_token();
-    if (token.type != FN) {
+    next_token(buffer, &token);
+    if (token->type != FN) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     // identifier
-    next_token();
-    if (token.type != IDENTIFIER) {
+    next_token(buffer, &token);
+    if (token->type != IDENTIFIER) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     // (
-    next_token();
-    if (token.type != BRACKET_LEFT_SIMPLE) {
+    next_token(buffer, &token);
+    if (token->type != BRACKET_LEFT_SIMPLE) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
@@ -245,13 +240,13 @@ bool syntax_fn_def() {
 
     // follows non-terminal PARAMS
     // not checking token here
-    if (!syntax_params()) {
+    if (!syntax_params(buffer)) {
         return false;
     }
 
     // )
-    next_token();
-    if (token.type != BRACKET_RIGHT_SIMPLE) {
+    next_token(buffer, &token);
+    if (token->type != BRACKET_RIGHT_SIMPLE) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
@@ -259,7 +254,7 @@ bool syntax_fn_def() {
 
     // follows non-terminal FN_DEF_REMAINING
     // not checking token here
-    if (!syntax_fn_def_remaining()) {
+    if (!syntax_fn_def_remaining(buffer)) {
         return false;
     }
 
@@ -279,23 +274,24 @@ bool syntax_fn_def() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_fn_def_next() {
+bool syntax_fn_def_next(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
     
+    T_TOKEN *token;
     // we have two possible branches, need to choose here
-    next_token();
-    token_buffer_move_back(); // token needed in both branches
+    next_token(buffer, &token);
+    
     // first branch -> ε
-    if (token.type == EOF_TOKEN) {
+    if (token->type == EOF_TOKEN) {
         return true;
     }
-
+    move_back(buffer);
     // second branch -> FN_DEF FN_DEF_NEXT
-    if (token.type == PUB) { // pub is first terminal in FN_DEF
-        if (!syntax_fn_def()) {
+    if (token->type == PUB) { // pub is first terminal in FN_DEF
+        if (!syntax_fn_def(buffer)) {
             return false;
         }
-        if (!syntax_fn_def_next()) {
+        if (!syntax_fn_def_next(buffer)) {
             return false;
         }
 
@@ -319,26 +315,27 @@ bool syntax_fn_def_next() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_fn_def_remaining() {
+bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
     // TODO: possible simplification by checking only void type
 
+    T_TOKEN *token;
     // to be checked in syntax_type function
     // we have two possible branches, need to choose here
-    next_token();
+    next_token(buffer, &token);
     // first branch -> TYPE { CODE_BLOCK_NEXT }, return token
-    if (token.type == TYPE_INT || token.type == TYPE_FLOAT ||
-        token.type == TYPE_STRING || token.type == TYPE_INT_NULL ||
-        token.type == TYPE_FLOAT_NULL || token.type == TYPE_STRING_NULL) {
+    if (token->type == TYPE_INT || token->type == TYPE_FLOAT ||
+        token->type == TYPE_STRING || token->type == TYPE_INT_NULL ||
+        token->type == TYPE_FLOAT_NULL || token->type == TYPE_STRING_NULL) {
         // follows non-terminal TYPE
-        token_buffer_move_back();
-        if (!syntax_type()) {
+        move_back(buffer);
+        if (!syntax_type(buffer)) {
             return false;
         }
 
         // {
-        next_token();
-        if (token.type != BRACKET_LEFT_CURLY) {
+        next_token(buffer, &token);
+        if (token->type != BRACKET_LEFT_CURLY) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
@@ -346,13 +343,13 @@ bool syntax_fn_def_remaining() {
 
         // follows non-terminal CODE_BLOCK_NEXT
         // not checking token here
-        if (!syntax_code_block_next()) {
+        if (!syntax_code_block_next(buffer)) {
             return false;
         }
 
         // }
-        next_token();
-        if (token.type != BRACKET_RIGHT_CURLY) {
+        next_token(buffer, &token);
+        if (token->type != BRACKET_RIGHT_CURLY) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
@@ -362,10 +359,10 @@ bool syntax_fn_def_remaining() {
     }
 
     // second branch -> void { CODE_BLOCK_NEXT }
-    if (token.type == VOID) {
+    if (token->type == VOID) {
         // {
-        next_token();
-        if (token.type != BRACKET_LEFT_CURLY) {
+        next_token(buffer, &token);
+        if (token->type != BRACKET_LEFT_CURLY) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
@@ -373,13 +370,13 @@ bool syntax_fn_def_remaining() {
 
         // follows non-terminal CODE_BLOCK_NEXT
         // not checking token here
-        if (!syntax_code_block_next()) {
+        if (!syntax_code_block_next(buffer)) {
             return false;
         }
 
         // }
-        next_token();
-        if (token.type != BRACKET_RIGHT_CURLY) {
+        next_token(buffer, &token);
+        if (token->type != BRACKET_RIGHT_CURLY) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
@@ -405,22 +402,23 @@ bool syntax_fn_def_remaining() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_params() {
+bool syntax_params(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // we have two possible branches, need to choose here
-    next_token();
-    token_buffer_move_back(); // token needed in both branches
+    next_token(buffer, &token);
+    move_back(buffer); // token needed in both branches
     // first branch -> ε
-    if (token.type == BRACKET_RIGHT_SIMPLE) {
+    if (token->type == BRACKET_RIGHT_SIMPLE) {
         return true;
     }
     // second branch -> PARAM PARAM_NEXT
-    if (token.type == IDENTIFIER) { // identifier is first terminal in PARAM
-        if (!syntax_param()) {
+    if (token->type == IDENTIFIER) { // identifier is first terminal in PARAM
+        if (!syntax_param(buffer)) {
             return false;
         }
-        if (!syntax_param_next()) {
+        if (!syntax_param_next(buffer)) {
             return false;
         }
 
@@ -443,20 +441,21 @@ bool syntax_params() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_param() {
+bool syntax_param(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // identifier
-    next_token();
-    if (token.type != IDENTIFIER) {
+    next_token(buffer, &token);
+    if (token->type != IDENTIFIER) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     // :
-    next_token();
-    if (token.type != COLON) {
+    next_token(buffer, &token);
+    if (token->type != COLON) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
@@ -464,7 +463,7 @@ bool syntax_param() {
 
     // follows non-terminal TYPE
     // not checking token here
-    if (!syntax_type()) {
+    if (!syntax_type(buffer)) {
         return false;
     }
 
@@ -487,14 +486,15 @@ bool syntax_param() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_type() {
+bool syntax_type(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // check whether token is one of the types
-    next_token();
-    if (token.type != TYPE_INT && token.type != TYPE_FLOAT &&
-        token.type != TYPE_STRING && token.type != TYPE_INT_NULL && 
-        token.type != TYPE_FLOAT_NULL && token.type != TYPE_STRING_NULL) {
+    next_token(buffer, &token);
+    if (token->type != TYPE_INT && token->type != TYPE_FLOAT &&
+        token->type != TYPE_STRING && token->type != TYPE_INT_NULL && 
+        token->type != TYPE_FLOAT_NULL && token->type != TYPE_STRING_NULL) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
@@ -515,20 +515,21 @@ bool syntax_type() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_param_next() {
+bool syntax_param_next(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // we have two possible branches, need to choose here
-    next_token();
+    next_token(buffer, &token);
     // first branch -> ε, we need to return the token
-    if (token.type == BRACKET_RIGHT_SIMPLE) {
-        token_buffer_move_back();
+    if (token->type == BRACKET_RIGHT_SIMPLE) {
+        move_back(buffer);
         return true;
     }
 
     // second branch -> , PARAM_AFTER_COMMA, consuming token
-    if (token.type == COMMA) { // ,
-        if (!syntax_param_after_comma()) {
+    if (token->type == COMMA) { // ,
+        if (!syntax_param_after_comma(buffer)) {
             return false;
         }
 
@@ -552,23 +553,24 @@ bool syntax_param_next() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_param_after_comma() {
+bool syntax_param_after_comma(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // we have two possible branches, need to choose here
-    next_token();
-    token_buffer_move_back(); // token needed in both branches
+    next_token(buffer, &token);
+    move_back(buffer); // token needed in both branches
     // first branch -> ε
-    if (token.type == BRACKET_RIGHT_SIMPLE) {
+    if (token->type == BRACKET_RIGHT_SIMPLE) {
         return true;
     }
 
     // second branch -> PARAM PARAM_NEXT
-    if (token.type == IDENTIFIER) { // identifier is first terminal in PARAM
-        if (!syntax_param()) {
+    if (token->type == IDENTIFIER) { // identifier is first terminal in PARAM
+        if (!syntax_param(buffer)) {
             return false;
         }
-        if (!syntax_param_next()) {
+        if (!syntax_param_next(buffer)) {
             return false;
         }
 
@@ -591,10 +593,11 @@ bool syntax_param_after_comma() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_end() {
+bool syntax_end(T_TOKEN_BUFFER *buffer) {
+    T_TOKEN *token;
     // check last terminal in the program -> EOF
-    next_token();
-    if (token.type != EOF_TOKEN) {
+    next_token(buffer, &token);
+    if (token->type != EOF_TOKEN) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
@@ -614,25 +617,26 @@ bool syntax_end() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_code_block_next() {
+bool syntax_code_block_next(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // we have two possible branches, need to choose here
-    next_token();
-    token_buffer_move_back(); // token needed in both branches
+    next_token(buffer, &token);
+    move_back(buffer); // token needed in both branches
     // first branch -> ε
-    if (token.type == BRACKET_RIGHT_CURLY) {
+    if (token->type == BRACKET_RIGHT_CURLY) {
         return true;
     }
 
     // second branch -> CODE_BLOCK CODE_BLOCK_NEXT
-    if (token.type == CONST || token.type == VAR || token.type == IF ||
-        token.type == WHILE || token.type == RETURN || token.type == IFJ ||
-        token.type == IDENTIFIER || token.type == IDENTIFIER_DISCARD) {
-        if (!syntax_code_block()) {
+    if (token->type == CONST || token->type == VAR || token->type == IF ||
+        token->type == WHILE || token->type == RETURN || token->type == IFJ ||
+        token->type == IDENTIFIER || token->type == IDENTIFIER_DISCARD) {
+        if (!syntax_code_block(buffer)) {
             return false;
         }
-        if (!syntax_code_block_next()) {
+        if (!syntax_code_block_next(buffer)) {
             return false;
         }
 
@@ -671,46 +675,47 @@ bool syntax_code_block_next() {
  * 
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_code_block() {
+bool syntax_code_block(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // we have several branches, need to choose here
-    next_token();
-    token_buffer_move_back();
-    switch (token.type) {
+    next_token(buffer, &token);
+    move_back(buffer);
+    switch (token->type) {
         case CONST:
         case VAR: 
-            if (!syntax_var_def()) {
+            if (!syntax_var_def(buffer)) {
                 return false;
             }
             break;
         case IF:
-            if (!syntax_if_statement()) {
+            if (!syntax_if_statement(buffer)) {
                 return false;
             }
             break;
         case WHILE:
-            if (!syntax_while_statement()) {
+            if (!syntax_while_statement(buffer)) {
                 return false;
             }
             break;
         case RETURN:
-            if (!syntax_return()) {
+            if (!syntax_return(buffer)) {
                 return false;
             }
             break;
         case IDENTIFIER:
-            if (!syntax_assign_expr_or_fn_call()) {
+            if (!syntax_assign_expr_or_fn_call(buffer)) {
                 return false;
             }
             break;
         case IDENTIFIER_DISCARD:
-            if (!syntax_assign_discard_expr_or_fn_call()) {
+            if (!syntax_assign_discard_expr_or_fn_call(buffer)) {
                 return false;
             }
             break;
         case IFJ:
-            if (!syntax_built_in_void_fn_call()) {
+            if (!syntax_built_in_void_fn_call(buffer)) {
                 return false;
             }
             break;
@@ -735,23 +740,24 @@ bool syntax_code_block() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_var_def() {
+bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // we have two possible branches, need to choose here
-    next_token();
+    next_token(buffer, &token);
     // first branch -> const identifier VAR_DEF_AFTER_ID
-    if (token.type == CONST) {
+    if (token->type == CONST) {
         // identifier
-        next_token();
-        if (token.type != IDENTIFIER) {
+        next_token(buffer, &token);
+        if (token->type != IDENTIFIER) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
 
         // follows non-terminal VAR_DEF_AFTER_ID
-        if (!syntax_var_def_after_id()) {
+        if (!syntax_var_def_after_id(buffer)) {
             return false;
         }
 
@@ -759,24 +765,27 @@ bool syntax_var_def() {
     }
 
     // second branch -> var identifier VAR_DEF_AFTER_ID
-    if (token.type == VAR) {
+    if (token->type == VAR) {
         // identifier
-        next_token();
-        if (token.type != IDENTIFIER) {
+        next_token(buffer, &token);
+        if (token->type != IDENTIFIER) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
 
         // follows non-terminal VAR_DEF_AFTER_ID
-        if (!syntax_var_def_after_id()) {
+        if (!syntax_var_def_after_id(buffer)) {
             return false;
         }
 
         return true;
     }
 
-    // we should not reach this point
+    // we should not reach this point, anyway ...
+    // TODO: process error
+    error_flag = RET_VAL_SYNTAX_ERR;
+    return false;
 }
 
 /**
@@ -791,28 +800,29 @@ bool syntax_var_def() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_var_def_after_id() {
+bool syntax_var_def_after_id(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // we have two possible branches
-    next_token();
+    next_token(buffer, &token);
     // first branch -> : TYPE = ASSIGN
-    if (token.type == COLON) {
+    if (token->type == COLON) {
         // follows non-terminal TYPE
-        if (!syntax_type()) {
+        if (!syntax_type(buffer)) {
             return false;
         }
 
         // =
-        next_token();
-        if (token.type != ASSIGN) {
+        next_token(buffer, &token);
+        if (token->type != ASSIGN) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
 
         // follows non-terminal ASSIGN
-        if (!syntax_assign()) {
+        if (!syntax_assign(buffer)) {
             return false;
         }
     
@@ -820,9 +830,9 @@ bool syntax_var_def_after_id() {
     }
 
     // second branch -> = ASSIGN
-    if (token.type == ASSIGN) {
+    if (token->type == ASSIGN) {
         // follows non-terminal ASSIGN
-        if (!syntax_assign()) {
+        if (!syntax_assign(buffer)) {
             return false;
         }
 
@@ -844,20 +854,21 @@ bool syntax_var_def_after_id() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_if_statement() {
+bool syntax_if_statement(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // if
-    next_token();
-    if (token.type != IF) {
+    next_token(buffer, &token);
+    if (token->type != IF) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     // (
-    next_token();
-    if (token.type != BRACKET_LEFT_SIMPLE) {
+    next_token(buffer, &token);
+    if (token->type != BRACKET_LEFT_SIMPLE) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
@@ -870,8 +881,8 @@ bool syntax_if_statement() {
     }
 
     // )
-    next_token();
-    if (token.type != BRACKET_RIGHT_SIMPLE) {
+    next_token(buffer, &token);
+    if (token->type != BRACKET_RIGHT_SIMPLE) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
@@ -879,7 +890,7 @@ bool syntax_if_statement() {
 
     // follows non-terminal IF_STATEMENT_REMAINING
     // not checking token here
-    if (!syntax_if_statement_remaining()) {
+    if (!syntax_if_statement_remaining(buffer)) {
         return false;
     }
 
@@ -898,38 +909,39 @@ bool syntax_if_statement() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_if_statement_remaining() {
+bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // we have two possible branches, need to choose here
-    next_token();
+    next_token(buffer, &token);
     // first branch -> { CODE_BLOCK_NEXT } else { CODE_BLOCK_NEXT }
-    if (token.type == BRACKET_LEFT_CURLY) { // {
+    if (token->type == BRACKET_LEFT_CURLY) { // {
         // follows non-terminal CODE_BLOCK_NEXT, no need to choose a branch,
         // not checking token here
-        if (!syntax_code_block_next()) {
+        if (!syntax_code_block_next(buffer)) {
             return false;
         }
 
         // }
-        next_token();
-        if (token.type != BRACKET_RIGHT_CURLY) {
+        next_token(buffer, &token);
+        if (token->type != BRACKET_RIGHT_CURLY) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
 
         // else
-        next_token();
-        if (token.type != ELSE) {
+        next_token(buffer, &token);
+        if (token->type != ELSE) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
 
         // {
-        next_token();
-        if (token.type != BRACKET_LEFT_CURLY) {
+        next_token(buffer, &token);
+        if (token->type != BRACKET_LEFT_CURLY) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
@@ -937,13 +949,13 @@ bool syntax_if_statement_remaining() {
 
         // follows non-terminal CODE_BLOCK_NEXT
         // not checking token here
-        if (!syntax_code_block_next()) {
+        if (!syntax_code_block_next(buffer)) {
             return false;
         }
 
         // }
-        next_token();
-        if (token.type != BRACKET_RIGHT_CURLY) {
+        next_token(buffer, &token);
+        if (token->type != BRACKET_RIGHT_CURLY) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
@@ -953,68 +965,68 @@ bool syntax_if_statement_remaining() {
     }
 
     // second branch -> | identifier | { CODE_BLOCK_NEXT } else { CODE_BLOCK_NEXT }
-    if (token.type == PIPE) { // |
+    if (token->type == PIPE) { // |
         // identifier
-        next_token();
-        if (token.type != IDENTIFIER) {
+        next_token(buffer, &token);
+        if (token->type != IDENTIFIER) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
 
         // |
-        next_token();
-        if (token.type != PIPE) {
+        next_token(buffer, &token);
+        if (token->type != PIPE) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
 
         // {
-        next_token();
-        if (token.type != BRACKET_LEFT_CURLY) {
+        next_token(buffer, &token);
+        if (token->type != BRACKET_LEFT_CURLY) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
 
         // follows non-terminal CODE_BLOCK_NEXT
-        if (!syntax_code_block_next()) {
+        if (!syntax_code_block_next(buffer)) {
             return false;
         }
 
         // }
-        next_token();
-        if (token.type != BRACKET_RIGHT_CURLY) {
+        next_token(buffer, &token);
+        if (token->type != BRACKET_RIGHT_CURLY) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
 
         // else
-        next_token();
-        if (token.type != ELSE) {
+        next_token(buffer, &token);
+        if (token->type != ELSE) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
 
         // {
-        next_token();
-        if (token.type != BRACKET_LEFT_CURLY) {
+        next_token(buffer, &token);
+        if (token->type != BRACKET_LEFT_CURLY) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
 
         // follows non-terminal CODE_BLOCK_NEXT
-        if (!syntax_code_block_next()) {
+        if (!syntax_code_block_next(buffer)) {
             return false;
         }
 
         // }
-        next_token();
-        if (token.type != BRACKET_RIGHT_CURLY) {
+        next_token(buffer, &token);
+        if (token->type != BRACKET_RIGHT_CURLY) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
@@ -1039,20 +1051,21 @@ bool syntax_if_statement_remaining() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_while_statement() {
+bool syntax_while_statement(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // while
-    next_token();
-    if (token.type != WHILE) {
+    next_token(buffer, &token);
+    if (token->type != WHILE) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     // (
-    next_token();
-    if (token.type != BRACKET_LEFT_SIMPLE) {
+    next_token(buffer, &token);
+    if (token->type != BRACKET_LEFT_SIMPLE) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
@@ -1065,15 +1078,15 @@ bool syntax_while_statement() {
     }
 
     // )
-    next_token();
-    if (token.type != BRACKET_RIGHT_SIMPLE) {
+    next_token(buffer, &token);
+    if (token->type != BRACKET_RIGHT_SIMPLE) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     // follows non-terminal WHILE_STATEMENT_REMAINING
-    if (!syntax_while_statement_remaining()) {
+    if (!syntax_while_statement_remaining(buffer)) {
         return false;
     }
 
@@ -1092,22 +1105,23 @@ bool syntax_while_statement() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_while_statement_remaining() {
+bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // we have two possible branches, need to choose here
-    next_token();
+    next_token(buffer, &token);
     // first branch -> { CODE_BLOCK_NEXT }
-    if (token.type == BRACKET_LEFT_CURLY) { // {
+    if (token->type == BRACKET_LEFT_CURLY) { // {
         // follows non-terminal CODE_BLOCK_NEXT
         // not checking token here
-        if (!syntax_code_block_next()) {
+        if (!syntax_code_block_next(buffer)) {
             return false;
         }
 
         // }
-        next_token();
-        if (token.type != BRACKET_RIGHT_CURLY) {
+        next_token(buffer, &token);
+        if (token->type != BRACKET_RIGHT_CURLY) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
@@ -1117,26 +1131,26 @@ bool syntax_while_statement_remaining() {
     }
 
     // second branch -> | identifier | { CODE_BLOCK_NEXT }
-    if (token.type == PIPE) { // |
+    if (token->type == PIPE) { // |
         // identifier
-        next_token();
-        if (token.type != IDENTIFIER) {
+        next_token(buffer, &token);
+        if (token->type != IDENTIFIER) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
 
         // |
-        next_token();
-        if (token.type != PIPE) {
+        next_token(buffer, &token);
+        if (token->type != PIPE) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
 
         // {
-        next_token();
-        if (token.type != BRACKET_LEFT_CURLY) {
+        next_token(buffer, &token);
+        if (token->type != BRACKET_LEFT_CURLY) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
@@ -1144,13 +1158,13 @@ bool syntax_while_statement_remaining() {
 
         // follows non-terminal CODE_BLOCK_NEXT
         // not checking token here
-        if (!syntax_code_block_next()) {
+        if (!syntax_code_block_next(buffer)) {
             return false;
         }
 
         // }
-        next_token();
-        if (token.type != BRACKET_RIGHT_CURLY) {
+        next_token(buffer, &token);
+        if (token->type != BRACKET_RIGHT_CURLY) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
@@ -1175,19 +1189,20 @@ bool syntax_while_statement_remaining() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_return() {
+bool syntax_return(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // return
-    next_token();
-    if (token.type != RETURN) {
+    next_token(buffer, &token);
+    if (token->type != RETURN) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     // follows non-terminal RETURN_REMAINING
-    if (!syntax_return_remaining()) {
+    if (!syntax_return_remaining(buffer)) {
         return false;
     }
 
@@ -1206,22 +1221,23 @@ bool syntax_return() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_return_remaining() {
+bool syntax_return_remaining(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // we have two possible branches, need to choose here
-    next_token();
+    next_token(buffer, &token);
     // first branch -> ;
-    if (token.type == SEMICOLON) { // ;
+    if (token->type == SEMICOLON) { // ;
         return true;
     }
 
     // second branch -> ASSIGN
     // TODO: is this correct? Need to verify
-    if (token.type == IDENTIFIER || token.type == IFJ || is_token_in_expr()) {
+    if (token->type == IDENTIFIER || token->type == IFJ || is_token_in_expr(token)) {
         // follows non-terminal ASSIGN
-        token_buffer_move_back();
-        if (!syntax_assign()) {
+        move_back(buffer);
+        if (!syntax_assign(buffer)) {
             return false;
         }
 
@@ -1244,57 +1260,58 @@ bool syntax_return_remaining() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_built_in_void_fn_call() {
+bool syntax_built_in_void_fn_call(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // ifj
-    next_token();
-    if (token.type != IFJ) {
+    next_token(buffer, &token);
+    if (token->type != IFJ) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     // .
-    next_token();
-    if (token.type != DOT) {
+    next_token(buffer, &token);
+    if (token->type != DOT) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     // identifier
-    next_token();
-    if (token.type != IDENTIFIER) {
+    next_token(buffer, &token);
+    if (token->type != IDENTIFIER) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     // (
-    next_token();
-    if (token.type != BRACKET_LEFT_SIMPLE) {
+    next_token(buffer, &token);
+    if (token->type != BRACKET_LEFT_SIMPLE) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     // follows non-terminal ARGUMENTS
-    if (!syntax_arguments()) {
+    if (!syntax_arguments(buffer)) {
         return false;
     }
 
     // )
-    next_token();
-    if (token.type != BRACKET_RIGHT_SIMPLE) {
+    next_token(buffer, &token);
+    if (token->type != BRACKET_RIGHT_SIMPLE) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     // ;
-    next_token();
-    if (token.type != SEMICOLON) {
+    next_token(buffer, &token);
+    if (token->type != SEMICOLON) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
@@ -1314,19 +1331,20 @@ bool syntax_built_in_void_fn_call() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_assign_expr_or_fn_call() {
+bool syntax_assign_expr_or_fn_call(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
     
+    T_TOKEN *token;
     // identifier
-    next_token();
-    if (token.type != IDENTIFIER) {
+    next_token(buffer, &token);
+    if (token->type != IDENTIFIER) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     // follows non-terminal ID_START
-    if (!syntax_id_start()) {
+    if (!syntax_id_start(buffer)) {
         return false;
     }
 
@@ -1344,27 +1362,28 @@ bool syntax_assign_expr_or_fn_call() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_assign_discard_expr_or_fn_call() {
+bool syntax_assign_discard_expr_or_fn_call(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // discard_identifier
-    next_token();
-    if (token.type != IDENTIFIER_DISCARD) {
+    next_token(buffer, &token);
+    if (token->type != IDENTIFIER_DISCARD) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     // =
-    next_token();
-    if (token.type != ASSIGN) {
+    next_token(buffer, &token);
+    if (token->type != ASSIGN) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     // follows non-terminal ASSIGN
-    if (!syntax_assign()) {
+    if (!syntax_assign(buffer)) {
         return false;
     }
 
@@ -1383,15 +1402,16 @@ bool syntax_assign_discard_expr_or_fn_call() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_id_start() {
+bool syntax_id_start(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // we have two possible branches, need to choose here
-    next_token();
+    next_token(buffer, &token);
     // first branch -> = ASSIGN
-    if (token.type == ASSIGN) { // =
+    if (token->type == ASSIGN) { // =
         // follows non-terminal ASSIGN
-        if (!syntax_assign()) {
+        if (!syntax_assign(buffer)) {
             return false;
         }
 
@@ -1399,10 +1419,10 @@ bool syntax_id_start() {
     }
 
     // second branch -> FUNCTION_ARGUMENTS, return token
-    if (token.type == BRACKET_LEFT_SIMPLE) { // (
+    if (token->type == BRACKET_LEFT_SIMPLE) { // (
         // follows non-terminal FUNCTION_ARGUMENTS
-        token_buffer_move_back();
-        if (!syntax_function_arguments()) {
+        move_back(buffer);
+        if (!syntax_function_arguments(buffer)) {
             return false;
         }
 
@@ -1425,33 +1445,34 @@ bool syntax_id_start() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_function_arguments() {
+bool syntax_function_arguments(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // (
-    next_token();
-    if (token.type != BRACKET_LEFT_SIMPLE) {
+    next_token(buffer, &token);
+    if (token->type != BRACKET_LEFT_SIMPLE) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     // follows non-terminal ARGUMENTS
-    if (!syntax_arguments()) {
+    if (!syntax_arguments(buffer)) {
         return false;
     }
 
     // )
-    next_token();
-    if (token.type != BRACKET_RIGHT_SIMPLE) {
+    next_token(buffer, &token);
+    if (token->type != BRACKET_RIGHT_SIMPLE) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     // ;
-    next_token();
-    if (token.type != SEMICOLON) {
+    next_token(buffer, &token);
+    if (token->type != SEMICOLON) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
@@ -1473,53 +1494,54 @@ bool syntax_function_arguments() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_assign() {
+bool syntax_assign(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // we have several branches, need to choose here
-    next_token();
+    next_token(buffer, &token);
     // first branch -> ifj . identifier ( ARGUMENTS ) ;
-    if (token.type == IFJ) {
+    if (token->type == IFJ) {
         // .
-        next_token();
-        if (token.type != DOT) {
+        next_token(buffer, &token);
+        if (token->type != DOT) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
 
         // identifier
-        next_token();
-        if (token.type != IDENTIFIER) {
+        next_token(buffer, &token);
+        if (token->type != IDENTIFIER) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
 
         // (
-        next_token();
-        if (token.type != BRACKET_LEFT_SIMPLE) {
+        next_token(buffer, &token);
+        if (token->type != BRACKET_LEFT_SIMPLE) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
 
         // follows non-terminal ARGUMENTS
-        if (!syntax_arguments()) {
+        if (!syntax_arguments(buffer)) {
             return false;
         }
 
         // )
-        next_token();
-        if (token.type != BRACKET_RIGHT_SIMPLE) {
+        next_token(buffer, &token);
+        if (token->type != BRACKET_RIGHT_SIMPLE) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
 
         // ;
-        next_token();
-        if (token.type != SEMICOLON) {
+        next_token(buffer, &token);
+        if (token->type != SEMICOLON) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
@@ -1529,9 +1551,9 @@ bool syntax_assign() {
     }
 
     // second branch -> identifier ID_ASSIGN
-    if (token.type == IDENTIFIER) { // identifier
+    if (token->type == IDENTIFIER) { // identifier
         // follows non-terminal ID_ASSIGN
-        if (!syntax_id_assign()) {
+        if (!syntax_id_assign(buffer)) {
             return false;
         }
 
@@ -1539,21 +1561,21 @@ bool syntax_assign() {
     }
 
     // third branch -> EXPRESSION ;
-    if (is_token_in_expr()) {
-        // follows non-terminal EXPRESSION
-        token_buffer_move_back();
+    if (is_token_in_expr(token)) {
+        move_back(buffer);
+        // TODO: change based on api of bottom-up parser
         if (!syntax_expression()) {
             return false;
         }
 
         // ;
-        next_token();
-        if (token.type != SEMICOLON) {
+        next_token(buffer, &token);
+        if (token->type != SEMICOLON) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
-
+        
         return true;
     }
 
@@ -1574,16 +1596,17 @@ bool syntax_assign() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_id_assign() {
+bool syntax_id_assign(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // we have two possible branches, need to choose here
-    next_token();
+    next_token(buffer, &token);
     // first branch -> FUNCTION_ARGUMENTS
-    if (token.type == BRACKET_LEFT_SIMPLE) { // (
+    if (token->type == BRACKET_LEFT_SIMPLE) { // (
         // follows non-terminal FUNCTION_ARGUMENTS
-        token_buffer_move_back();
-        if (!syntax_function_arguments()) {
+        move_back(buffer);
+        if (!syntax_function_arguments(buffer)) {
             return false;
         }
 
@@ -1591,19 +1614,19 @@ bool syntax_id_assign() {
     }
 
     // second branch -> EXPRESSION ;
-    if (is_token_in_expr()) {
-        // follows non-terminal EXPRESSION
+    if (is_token_in_expr(token)) {
         // we have to move back twice to get to the beginning of the expression
         // we ate the first token of the expression as identifier in ASSIGN non-terminal
-        token_buffer_move_back();
-        token_buffer_move_back();
+        move_back(buffer);
+        move_back(buffer);
+        // TODO: change based on api of bottom-up parser
         if (!syntax_expression()) {
             return false;
         }
 
         // ;
-        next_token();
-        if (token.type != SEMICOLON) {
+        next_token(buffer, &token);
+        if (token->type != SEMICOLON) {
             // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
@@ -1629,24 +1652,25 @@ bool syntax_id_assign() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_arguments() {
+bool syntax_arguments(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // we have two possible branches, need to choose here
-    next_token();
-    token_buffer_move_back();
+    next_token(buffer, &token);
+    move_back(buffer);
     // first branch -> ε
-    if (token.type == BRACKET_RIGHT_SIMPLE) { // )
+    if (token->type == BRACKET_RIGHT_SIMPLE) { // )
         return true;
     }
 
     // second branch -> ARGUMENT ARGUMENT_NEXT
-    if (token.type == IDENTIFIER || token.type == INT ||
-        token.type == FLOAT || token.type == STRING || token.type == NULL) {
-        if (!syntax_argument()) {
+    if (token->type == IDENTIFIER || token->type == INT ||
+        token->type == FLOAT || token->type == STRING || token->type == NULL_TOKEN) {
+        if (!syntax_argument(buffer)) {
             return false;
         }
-        if (!syntax_argument_next()) {
+        if (!syntax_argument_next(buffer)) {
             return false;
         }
 
@@ -1670,20 +1694,21 @@ bool syntax_arguments() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_argument_next() {
+bool syntax_argument_next(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // we have two possible branches, need to choose here
-    next_token();
+    next_token(buffer, &token);
     // first branch -> ε
-    if (token.type == BRACKET_RIGHT_SIMPLE) { // )
-        token_buffer_move_back();
+    if (token->type == BRACKET_RIGHT_SIMPLE) { // )
+        move_back(buffer);
         return true;
     }
 
     // second branch -> , ARGUMENT_AFTER_COMMA
-    if (token.type == COMMA) { // ,
-        if (!syntax_argument_after_comma()) {
+    if (token->type == COMMA) { // ,
+        if (!syntax_argument_after_comma(buffer)) {
             return false;
         }
 
@@ -1707,24 +1732,25 @@ bool syntax_argument_next() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_argument_after_comma() {
+bool syntax_argument_after_comma(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // we have two possible branches, need to choose here
-    next_token();
-    token_buffer_move_back();
+    next_token(buffer, &token);
+    move_back(buffer);
     // first branch -> ε
-    if (token.type == BRACKET_RIGHT_SIMPLE) { // )
+    if (token->type == BRACKET_RIGHT_SIMPLE) { // )
         return true;
     }
 
     // second branch -> ARGUMENT ARGUMENT_NEXT
-    if (token.type == IDENTIFIER || token.type == INT ||
-        token.type == FLOAT || token.type == STRING || token.type == NULL) {
-        if (!syntax_argument()) {
+    if (token->type == IDENTIFIER || token->type == INT ||
+        token->type == FLOAT || token->type == STRING || token->type == NULL_TOKEN) {
+        if (!syntax_argument(buffer)) {
             return false;
         }
-        if (!syntax_argument_next()) {
+        if (!syntax_argument_next(buffer)) {
             return false;
         }
 
@@ -1751,13 +1777,14 @@ bool syntax_argument_after_comma() {
  * - int error_flag
  * @return true if syntax is correct, false otherwise
  */
-bool syntax_argument() {
+bool syntax_argument(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
 
+    T_TOKEN *token;
     // check first terminal in argument -> identifier, int, float, string, null
-    next_token();
-    if (token.type != IDENTIFIER && token.type != INT &&
-        token.type != FLOAT && token.type != STRING && token.type != NULL) {
+    next_token(buffer, &token);
+    if (token->type != IDENTIFIER && token->type != INT &&
+        token->type != FLOAT && token->type != STRING && token->type != NULL_TOKEN) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
