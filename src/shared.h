@@ -1,6 +1,6 @@
 //FILE: shared.h
 //PROJEKT: IFJ24 - Compiler for the IFJ24 lang @ FIT BUT 2BIT
-//TEAM: Martin Zůbek (253226)
+//TEAM: Martin Zůbek (253206)
 //AUTHORS:
 // Otakar Kočí (xkocio00, 247555)
 //
