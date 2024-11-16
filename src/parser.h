@@ -17,6 +17,7 @@
 #include "token_buffer.h"
 
 // Function prototypes
+
 int run_parser(T_TOKEN_BUFFER *token_buffer);
 bool is_token_in_expr(T_TOKEN *token);
 bool syntax_start(T_TOKEN_BUFFER *token_buffer);

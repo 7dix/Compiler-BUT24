@@ -5,7 +5,11 @@
 //  <Otakar Kočí> (xkocio00)
 //
 // YEAR: 2024
-// NOTES: Main function of the IFJ24 compiler
+// NOTES:   Entry point of the IFJ24 compiler
+//          Compiler is divided into two phases:
+//          1.  Gather function signatures to Symtable, check that main exists
+//              store all read tokens into a buffer
+//          2. Use the buffer to run full syntax-based compilation
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,9 +17,10 @@
 #include "first_phase.h"
 #include "parser.h"
 #include "token_buffer.h"
+// TODO: include symtable when ready
 
 int main() {
-    // TODO: stuff before
+    // TODO: stuff before ??
 
     // Initialize token buffer
     T_TOKEN_BUFFER *token_buffer = init_token_buffer();
@@ -81,6 +86,7 @@ int main() {
     // TODO: cleaning, ...
 
     free_token_buffer(&token_buffer);
+    // TODO: free symtable as well
 
     return RET_VAL_OK;
 }

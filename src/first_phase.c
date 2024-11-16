@@ -11,7 +11,19 @@
 
 #include "first_phase.h"
 
-// Function to run the first phase of the compiler
+/**
+ * @brief Runs first phase of the compiler
+ * 
+ * Scans the input file to extract function signatures. Saves them into the symtable.
+ * All tokens are stored into the token buffer.
+ * 
+ * @param *token_buffer pointer to the token buffer
+ * @return int
+ * @retval RET_VAL_OK - success
+ * @retval RET_VAL_LEXICAL_ERR - lexical error
+ * @retval RET_VAL_SYNTAX_ERR - syntax error
+ * @retval RET_VAL_INTERNAL_ERR - internal error
+ */
 int first_phase(T_TOKEN_BUFFER *token_buffer) {
     // TODO: add detection of function headers and store their signatures in the symtable
 
