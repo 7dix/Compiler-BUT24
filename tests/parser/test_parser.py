@@ -13,13 +13,25 @@ ERROR_CODES = {
 # The path to the parser executable
 PARSER_EXEC = os.path.join(os.path.dirname(__file__), '../../bin/ifj24debug')
 
+# ANSI escape codes for color formatting
+COLOR_SUCCESS = '\033[92m'  # Green
+COLOR_FAILED = '\033[91m'   # Red
+COLOR_SKIPPED = '\033[93m'  # Yellow
+COLOR_HEADER = '\033[94m'   # Blue
+COLOR_RESET = '\033[0m'     # Reset to default
+
+def print_colored(text, color):
+    """Print text with a specified color."""
+    print(f"{color}{text}{COLOR_RESET}")
+
+# Enhanced run_test function with color output
 def run_test(test_folder, test_number):
     # Construct the paths for input and expected output files
     input_file = os.path.join(test_folder, f'test{test_number}', 'input.ifj')
     expected_output_file = os.path.join(test_folder, f'test{test_number}', 'output.txt')
 
     if not os.path.exists(input_file) or not os.path.exists(expected_output_file):
-        print(f"Skipping test {test_number}: Missing input or expected output file.")
+        print_colored(f"Skipping test {test_number}: Missing input or expected output file.", COLOR_SKIPPED)
         return test_number, "SKIPPED"
 
     # Run the parser with the input file
@@ -39,17 +51,18 @@ def run_test(test_folder, test_number):
 
     # Compare expected and actual outputs
     if actual_output == expected_output:
-        print(f"TEST {test_number} SUCCESSFUL")
+        print_colored(f"TEST {test_number} SUCCESSFUL", COLOR_SUCCESS)
         return test_number, "SUCCESSFUL"
     else:
         # Translate the return code to text
         actual_text = ERROR_CODES.get(int(actual_output), "UNKNOWN ERROR")
         expected_text = ERROR_CODES.get(int(expected_output), "UNKNOWN ERROR")
-        print(f"TEST {test_number} FAILED")
+        print_colored(f"TEST {test_number} FAILED", COLOR_FAILED)
         print(f"  Expected: {expected_text} (Code: {expected_output})")
         print(f"  Got: {actual_text} (Code: {actual_output})")
         return test_number, "FAILED"
 
+# Enhanced run_tests function with color output
 def run_tests(test_type):
     # Define base path for the tests based on the argument
     base_path = ''
@@ -70,17 +83,24 @@ def run_tests(test_type):
             result = run_test(base_path, test_number)
             test_results.append(result)
 
-    # Summary table
-    print("\nTest Summary:")
+    # Print Summary
+    print_colored("\nTest Summary:", COLOR_HEADER)
     print(f"{'Test No.':<10}{'Result':<12}")
     print("-" * 24)
     for test_number, result in test_results:
-        print(f"{test_number:<10}{result:<12}")
+        result_color = COLOR_SKIPPED if result == "SKIPPED" else COLOR_SUCCESS if result == "SUCCESSFUL" else COLOR_FAILED
+        print_colored(f"{test_number:<10}{result:<12}", result_color)
     print("-" * 24)
+
+    # Quick overview: Count successful, failed, and skipped tests
     success_count = sum(1 for _, result in test_results if result == "SUCCESSFUL")
-    failed_count = len(test_results) - success_count
-    print(f"SUCCESSFUL: {success_count}")
-    print(f"FAILED: {failed_count}")
+    failed_count = sum(1 for _, result in test_results if result == "FAILED")
+    skipped_count = sum(1 for _, result in test_results if result == "SKIPPED")
+
+    # Print color-coded quick overview with color-coded labels
+    print(f"{COLOR_SUCCESS}SUCCESSFUL:{COLOR_RESET} {COLOR_SUCCESS}{success_count}{COLOR_RESET}")
+    print(f"{COLOR_FAILED}FAILED:{COLOR_RESET} {COLOR_FAILED}{failed_count}{COLOR_RESET}")
+    print(f"{COLOR_SKIPPED}SKIPPED:{COLOR_RESET} {COLOR_SKIPPED}{skipped_count}{COLOR_RESET}")
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
