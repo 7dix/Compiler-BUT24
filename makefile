@@ -48,6 +48,12 @@ test_scanner: debug_scanner
 test_token_buffer: debug_token_buffer
 	cd tests/token_buffer &&  python3 test_token_buffer.py
 
+test_parser_noexpr: debug
+	cd tests/parser &&  python3 test_parser.py -noexpr
+
+test_parser_normal: debug
+	cd tests/parser &&  python3 test_parser.py -normal
+
 test: test_scanner test_token_buffer
 
 # Clean target to remove the executables
