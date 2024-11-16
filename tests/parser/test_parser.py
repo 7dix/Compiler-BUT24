@@ -16,7 +16,7 @@ PARSER_EXEC = os.path.join(os.path.dirname(__file__), '../../bin/ifj24debug')
 def run_test(test_folder, test_number):
     # Construct the paths for input and expected output files
     input_file = os.path.join(test_folder, f'test{test_number}', 'input.ifj')
-    expected_output_file = os.path.join(test_folder, f'test{test_number}', 'output.out')
+    expected_output_file = os.path.join(test_folder, f'test{test_number}', 'output.txt')
 
     if not os.path.exists(input_file) or not os.path.exists(expected_output_file):
         print(f"Skipping test {test_number}: Missing input or expected output file.")
