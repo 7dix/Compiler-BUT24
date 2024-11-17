@@ -75,21 +75,27 @@ def run_tests(test_type):
         return
 
     test_results = []
-    # Loop through the folders (test1, test2, ..., testn)
-    for test_folder in os.listdir(base_path):
-        test_folder_path = os.path.join(base_path, test_folder)
-        if os.path.isdir(test_folder_path):
-            test_number = test_folder.replace('test', '')  # Extract the number part (e.g., "test1" -> "1")
-            result = run_test(base_path, test_number)
-            test_results.append(result)
+    # Loop through the folders (test1, test2, ..., testn) sorted numerically
+    test_folders = [folder for folder in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, folder))]
+    test_folders.sort(key=lambda x: int(x.replace('test', '')))  # Sort by the numeric part of the folder name
+
+    for test_folder in test_folders:
+        test_number = test_folder.replace('test', '')  # Extract the number part (e.g., "test1" -> "1")
+        result = run_test(base_path, test_number)
+        test_results.append(result)
 
     # Print Summary
     print_colored("\nTest Summary:", COLOR_HEADER)
     print(f"{'Test No.':<10}{'Result':<12}")
     print("-" * 24)
+
+    # Sort test results numerically before printing
+    test_results.sort(key=lambda x: int(x[0]))  # Sort results by the test number
+
     for test_number, result in test_results:
         result_color = COLOR_SKIPPED if result == "SKIPPED" else COLOR_SUCCESS if result == "SUCCESSFUL" else COLOR_FAILED
         print_colored(f"{test_number:<10}{result:<12}", result_color)
+    
     print("-" * 24)
 
     # Quick overview: Count successful, failed, and skipped tests
