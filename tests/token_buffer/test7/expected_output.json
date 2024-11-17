@@ -133,10 +133,10 @@
     "value": null
   },
   {
-    "type": "EOF",
-    "lexeme": null,
+    "type": "SEMICOLON",
+    "lexeme": ";",
     "line": 1,
-    "length": 0,
+    "length": 1,
     "value": null
   },
   {

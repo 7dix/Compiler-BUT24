@@ -56,8 +56,10 @@ test_parser_noexpr: debug
 
 test_parser_normal: debug
 	cd tests/parser &&  python3 test_parser.py -normal
+
 test_precedence: debug_precedence 
-	cd src
+	cd tests/precedence && python3 test_precedence.py
+
 test: test_scanner test_token_buffer
 
 # Clean target to remove the executables

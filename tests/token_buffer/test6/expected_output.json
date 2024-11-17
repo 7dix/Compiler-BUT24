@@ -161,10 +161,10 @@
     "value": null
   },
   {
-    "type": "EOF",
-    "lexeme": null,
-    "line": 4,
-    "length": 0,
+    "type": "BRACKET_RIGHT_CURLY",
+    "lexeme": "}",
+    "line": 3,
+    "length": 1,
     "value": null
   },
   {
