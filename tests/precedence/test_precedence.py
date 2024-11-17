@@ -101,26 +101,28 @@ def run_tests():
     # Print basic info
     print("[bold cyan]Running tests for expressions...[/bold cyan]\n")
     
+    # Get all the test directories and sort them numerically
+    test_dirs = [d for d in os.listdir(TESTS_DIR) if test_dir_pattern.match(d)]
+    test_dirs.sort(key=lambda x: int(test_dir_pattern.match(x).group(1)))  # Sort numerically
+
     # Iterate through the test directories (test1, test2, ...) and only consider valid ones
-    for test_dir in sorted(os.listdir(TESTS_DIR)):
-        match = test_dir_pattern.match(test_dir)
-        if match:
-            test_path = os.path.join(TESTS_DIR, test_dir)
-            input_file_path = os.path.join(test_path, 'input.expr')  # input file is input.expr
-            output_file_path = os.path.join(test_path, 'output.txt')  # expected output file is output.txt
+    for test_dir in test_dirs:
+        test_path = os.path.join(TESTS_DIR, test_dir)
+        input_file_path = os.path.join(test_path, 'input.expr')  # input file is input.expr
+        output_file_path = os.path.join(test_path, 'output.txt')  # expected output file is output.txt
 
-            if os.path.isdir(test_path):
-                print(f"[bold cyan]Running Test {test_dir}...[/bold cyan]")  # Indicate running test
-                status, actual_output, expected_output = run_test(test_dir, input_file_path, output_file_path)
-                test_results.append([test_dir, colorize_status(status)])
+        if os.path.isdir(test_path):
+            print(f"[bold cyan]Running Test {test_dir}...[/bold cyan]")  # Indicate running test
+            status, actual_output, expected_output = run_test(test_dir, input_file_path, output_file_path)
+            test_results.append([test_dir, colorize_status(status)])
 
-                # Update counts based on the test result
-                if status == "SUCCESSFUL":
-                    successful_tests += 1
-                elif status == "FAILED":
-                    failed_tests += 1
-                else:
-                    skipped_tests += 1
+            # Update counts based on the test result
+            if status == "SUCCESSFUL":
+                successful_tests += 1
+            elif status == "FAILED":
+                failed_tests += 1
+            else:
+                skipped_tests += 1
 
     # Print summary table of test results with rich styling and bold borders
     table = Table(title="Test Results Summary", box=ROUNDED, border_style="bold blue")
