@@ -38,6 +38,7 @@ bool add_token_as_last(T_TOKEN_BUFFER *buffer, T_TOKEN *token);
 void move_back(T_TOKEN_BUFFER *buffer);
 void next_token(T_TOKEN_BUFFER *buffer, T_TOKEN **token);
 void set_current_to_first(T_TOKEN_BUFFER *buffer);
+void get_last_token(T_TOKEN_BUFFER *buffer, T_TOKEN **token);
 
 
 #endif //H_TOKEN_BUFFER

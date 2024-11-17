@@ -147,3 +147,17 @@ void set_current_to_first(T_TOKEN_BUFFER *buffer) {
     buffer->current = buffer->head;
 }
 
+/**
+ * @brief Gets the last token in the buffer.
+ * 
+ * @param *buffer The token buffer.
+ * @param **token The token to store the last token.
+ */
+void get_last_token(T_TOKEN_BUFFER *buffer, T_TOKEN **token) {
+    if (buffer->tail == NULL) {
+        *token = buffer->dummy_eof_token;
+        return;
+    }
+
+    *token = buffer->tail->token;
+}
