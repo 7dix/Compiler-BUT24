@@ -97,7 +97,7 @@ ASSIGN_DISCARD_EXPR_OR_FN_CALL -> discard_identifier = ASSIGN
 ID_START -> = ASSIGN
 ID_START -> FUNCTION_ARGUMENTS
 
-
+ASSIGN -> null ;
 ASSIGN -> EXPRESSION ;
 ASSIGN -> identifier ID_ASSIGN
 ASSIGN -> ifj . identifier ( ARGUMENTS ) ;

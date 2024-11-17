@@ -1544,6 +1544,8 @@ bool syntax_function_arguments(T_TOKEN_BUFFER *buffer) {
  * 
  * `ASSIGN` is defined as:
  * 
+ * `ASSIGN -> null ;`
+ * 
  * `ASSIGN -> EXPRESSION ;`
  * 
  * `ASSIGN -> identifier ID_ASSIGN`
@@ -1564,7 +1566,20 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer) {
     T_TOKEN *token;
     // we have several branches, choose here
     next_token(buffer, &token);
-    // first branch -> ifj . identifier ( ARGUMENTS ) ;
+    // first branch -> null ;
+    if (token->type == NULL_TOKEN) { // null
+
+        next_token(buffer, &token); // ;
+        if (token->type != SEMICOLON) {
+            // TODO: process error
+            error_flag = RET_VAL_SYNTAX_ERR;
+            return false;
+        }
+
+        return true;
+    }
+    
+    // second branch -> ifj . identifier ( ARGUMENTS ) ;
     if (token->type == IFJ) { // ifj
 
         next_token(buffer, &token); // .
@@ -1609,7 +1624,7 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer) {
         return true;
     }
 
-    // second branch -> identifier ID_ASSIGN
+    // third branch -> identifier ID_ASSIGN
     if (token->type == IDENTIFIER) { // identifier
 
         if (!syntax_id_assign(buffer)) { // ID_ASSIGN
@@ -1619,7 +1634,7 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer) {
         return true;
     }
 
-    // third branch -> EXPRESSION ;
+    // fourth branch -> EXPRESSION ;
     if (is_token_in_expr(token)) {
         move_back(buffer);
         // TODO: change based on api of bottom-up parser
