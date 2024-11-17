@@ -6,6 +6,7 @@
 //
 // YEAR: 2024
 // NOTES: Syntax-driven compilation for the IFJ24 language.
+// TODO: maybe remove matching of prolog and other such stuff, as this is already checked in the first phase
 
 #include "parser.h"
 

@@ -20,5 +20,20 @@
 
 // Function prototypes
 int first_phase(T_TOKEN_BUFFER *token_buffer);
+bool get_save_token(T_TOKEN_BUFFER *token_buffer, T_TOKEN **token);
+bool syntax_fp_start(T_TOKEN_BUFFER *buffer);
+bool syntax_fp_prolog(T_TOKEN_BUFFER *buffer);
+bool syntax_fp_fn_defs(T_TOKEN_BUFFER *buffer);
+bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer);
+bool syntax_fp_fn_def_next(T_TOKEN_BUFFER *buffer);
+bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer);
+bool syntax_fp_type(T_TOKEN_BUFFER *buffer);
+bool syntax_fp_params(T_TOKEN_BUFFER *buffer);
+bool syntax_fp_param(T_TOKEN_BUFFER *buffer);
+bool syntax_fp_param_next(T_TOKEN_BUFFER *buffer);
+bool syntax_fp_param_after_comma(T_TOKEN_BUFFER *buffer);
+bool syntax_fp_end(T_TOKEN_BUFFER *buffer);
+bool simulate_fn_body(T_TOKEN_BUFFER *buffer);
+
 
 #endif // FIRST_PHASE_H
