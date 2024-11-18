@@ -50,17 +50,19 @@ int main(void)
 
     set_current_to_first(buffer);
     
-    printf("Precedence syntax analysis\n");
+    //printf("Precedence syntax analysis\n");
     RetVal ret = precedenceSyntaxMain(buffer, &tree, ASS_END);
+    
     if(ret == 0){
         printf("OK\n");
         Postorder(tree);
+        tree_dispose(&tree);
     }else{
-        printf("NOK!");
+        printf("NOK\n");
     }
 
 
-    tree_dispose(&tree);
+    
     free_token_buffer(&buffer);
 
     return 0;

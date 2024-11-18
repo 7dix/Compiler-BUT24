@@ -70,8 +70,8 @@ OPERATOR_INDEX precedenceIndex(TOKEN_TYPE type){
 
     switch (type){
         case IDENTIFIER:return ID;
-        case TYPE_INT:return ID;
-        case TYPE_FLOAT:return ID;
+        case INT:return ID;
+        case FLOAT:return ID;
         case PLUS:return PL;
         case MINUS:return MIN;
         case MULTIPLY:return MUL;
@@ -111,154 +111,179 @@ void destroy_all(T_STACK_PTR stack, T_TREE_NODE_PTR *tree){
     return;
 }
 
+/**
+ * @brief Function for set count of reduce items in stack
+ * @param stack Pointer on stack
+ * @return Count of variables in stack
+*/
 int reduceVaribles(T_STACK_PTR stack){
+    // Count of reduce items
     int countOfVarRed = 0;
-    for ( T_STACK_ITEM_PTR top = stack_top(stack); top != NULL || top->type != SHIFT; top = top->prev){
+    if (stack->countItems == 1) return 1;
+    if (stack->countItems == 0) return 0;
+        
+    // Get top of stack
+    T_STACK_ITEM_PTR startingItem = stack_top(stack);
+
+    // Counting until the we find SHIFT or stack doesn't terminals and shifts
+    while (startingItem != NULL && startingItem->type != SHIFT){
         countOfVarRed++;
+        startingItem = startingItem->prev;
+
     }
     return countOfVarRed;
     
 }
 
 
+/**
+ * @brief Function for search reduce rule
+ * @param stack Pointer on stack
+ * @return Number of type reduce rule, if rule doesn't exist return 0
+*/
 int canReduce(T_STACK_PTR stack){
 
+    // Count of reduce items
     int countOfVarRed = reduceVaribles(stack);
+
     // Rule doesn't exist
-    if(countOfVarRed != 1 || countOfVarRed != 3) return 0;
+    if(countOfVarRed != 1 && countOfVarRed != 3) return 0;
 
     // E -> id | int_value | float_value
     if (countOfVarRed == 1 && stack->top->type == TERMINAL) return 1;
     // E -> R | T
     if (countOfVarRed == 1 && (stack->top->type == NON_TERMINAL_R || stack->top->type == NON_TERMINAL_E )) return 2;
     
-    T_STACK_ITEM_PTR top = stack_top(stack);
-    T_STACK_ITEM_PTR secondTop = top->prev;
-    T_STACK_ITEM_PTR thirdTop = secondTop->prev;
-    // E -> E + E | E - E | E * E | E / E
-    if(countOfVarRed == 3 && (top->type == NON_TERMINAL_E || thirdTop->type == NON_TERMINAL_E)){
-        switch (secondTop->token->type){
-            case PLUS: return 3;
-            case MINUS: return 4;
-            case MULTIPLY: return 5;
-            case DIVIDE: return 6;
-            default: return 0;
-        }
-    }
+    T_STACK_ITEM_PTR left = stack_top(stack);
+    T_STACK_ITEM_PTR operator = left->prev;
+    T_STACK_ITEM_PTR right = operator->prev;
 
-    // T -> E < E | E > E | E <= E | E >= E | E == E | E != E
-    if (countOfVarRed == 3 && (top->type == NON_TERMINAL_E || thirdTop->type == NON_TERMINAL_E)){
-        switch (secondTop->token->type){
-            case LESS_THAN: return 7;
-            case GREATER_THAN: return 8;
-            case LESS_THAN_EQUAL: return 9;
-            case GREATER_THAN_EQUAL: return 10;
-            case EQUAL: return 11;
-            case NOT_EQUAL: return 12;
-            default: return 0;
-        }
-    }    
-
-    // E -> (E)
-    if (countOfVarRed == 3 && top->type == L_B && (secondTop->type == NON_TERMINAL_E || secondTop->type == NON_TERMINAL_R) && thirdTop->type == R_B) return 13;
+    // E -> E + E | E - E | E * E | E / E  IT IS EQUAL TO 3
+    if(countOfVarRed == 3 && (left->type == NON_TERMINAL_E || right->type == NON_TERMINAL_E) && (operator->token->type == PLUS || operator->token->type == MINUS || operator->token->type == MULTIPLY || operator->token->type == DIVIDE)) return 3;
+    // T -> E < E | E > E | E <= E | E >= E | E == E | E != E IT IS EQUAL TO 4
+    if (countOfVarRed == 3 && (left->type == NON_TERMINAL_E || right->type == NON_TERMINAL_E) && (operator->token->type == LESS_THAN || operator->token->type == GREATER_THAN || operator->token->type == LESS_THAN_EQUAL || operator->token->type == GREATER_THAN_EQUAL || operator->token->type == EQUAL || operator->token->type == NOT_EQUAL)) return 4;
+    // E -> (E) IT IS EQUAL TO 5
+    if (countOfVarRed == 3 && left->type == L_B && (operator->type == NON_TERMINAL_E || operator->type == NON_TERMINAL_R) && right->type == R_B) return 5;
 
     return 0;
 
 
 }
 
+/**
+ * @brief Function for reduce
+ * @param stack Pointer on stack
+ * @param tree Pointer on tree
+ * @param rule Number of reduce rule
+ */
 bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule){
+
+    // Init variables
+    T_STACK_ITEM_PTR operator = NULL;
+    T_STACK_ITEM_PTR right = NULL;
     T_STACK_ITEM_PTR top = stack_top(stack);
+    T_STACK_ITEM_PTR left = NULL;
+    T_TREE_NODE_PTR root = NULL;
+
     switch (rule){
     case 1:
+        // Get node of tree of reduce item
+        T_TREE_NODE_PTR node = (stack_top(stack))->node;
+
+        // Pop reduce item
         stack_pop(stack);
-        stack_pop(stack);
+        // Pop shift item
         stack_pop(stack);
 
-        if(stack_push(stack, NULL, NON_TERMINAL_E)){
-            return false;
-        }
-        break;
+        // Push non terminal E
+        if(stack_push(stack, NULL, NON_TERMINAL_E)) return false;
+        
+
+        // Set node of non terminal E, this if is for expression with one terminal
+        stack->top->node = node;
+        return true;
+
     case 2:
 
-        stack_pop(stack);
+        // The last item in stack <=> non terminal R
+        // Completed tree
+        *tree = top->node;
+        // Pop non terminal R
+        stack_pop(stack); 
+        return true;
+
+    case 3:
+        // Get items from stack
+        right = top;
+        operator = right->prev;
+        left = operator->prev;
         
-        break;
-    default: break;
-    }
-
-    if (rule == 3 || rule == 4 || rule == 5 || rule == 6){
-        T_STACK_ITEM_PTR secondTop = top->prev;
-        T_STACK_ITEM_PTR thirdTop = secondTop->prev;
-
-        T_TREE_NODE_PTR root = createSubTree(tree, secondTop->node, top->node, thirdTop->node);
-
+        // Create new node of tree
+        root = createSubTree(tree, operator->node, right->node, left->node);
+        // Pop right
         stack_pop(stack);
+        // Pop operator
         stack_pop(stack);
+        // Pop left
         stack_pop(stack);
-        stack_pop(stack);
+        // Pop shift
         stack_pop(stack);
 
-        if(stack_push(stack, NULL, NON_TERMINAL_E)){
-            return false;
-        }
-
+        // Push non terminal E
+        if(stack_push(stack, NULL, NON_TERMINAL_E)) return false;
+        // Set root of subtree to non terminal E
         stack->top->node = root;
+
+        return true;
+
+
+    case 4:
+
+        // Get items from stack
+        right = top;
+        operator = right->prev;
+        left = operator->prev;
         
-    }
-    
-    if (rule == 7 || rule == 8 || rule == 9 || rule == 10 || rule == 11 || rule == 12){
-        T_STACK_ITEM_PTR secondTop = top->prev;
-        T_STACK_ITEM_PTR thirdTop = secondTop->prev;
+        // Create new node of tree
+        root = createSubTree(tree, operator->node, right->node, left->node);
 
-        T_TREE_NODE_PTR root = createSubTree(tree, secondTop->node,top->node, thirdTop->node);
-
+        // Pop right
         stack_pop(stack);
+        // Pop operator
         stack_pop(stack);
+        // Pop left
         stack_pop(stack);
-        stack_pop(stack);
+        // Pop shift
         stack_pop(stack);
 
-        if(stack_push(stack, NULL, NON_TERMINAL_R)){
-            return false;
-        }
-
+        // Push non terminal R
+        if(stack_push(stack, NULL, NON_TERMINAL_R)) return false;
+        // Set root of subtree to non terminal R
         stack->top->node = root;
-    }
 
-
-    if(rule == 13){
-        
+        return true;
     
-        T_STACK_ITEM_PTR oneNeterminal = stack_top(stack)->prev;
-        STACK_ITEM_TYPE type = stack_top(stack)->type;
+    case 5:
+        // Get items from stack
+        T_STACK_ITEM_PTR neterminal = (stack_top(stack))->prev;
         
+        // Pop LB
         stack_pop(stack);
+        // Pop Neterminal
         stack_pop(stack);
+        // Pop RB
         stack_pop(stack);
-        stack_pop(stack);
+        // Pop shift
         stack_pop(stack);
 
-        if(type == NON_TERMINAL_E){
-            if(stack_push(stack, NULL, NON_TERMINAL_E)){
-                return false;
-            }
-        }
+        // Push non terminal E
+        if(stack_push(stack, NULL, neterminal->type)) return false;
 
-        if (type == NON_TERMINAL_R){
-            if(stack_push(stack, NULL, NON_TERMINAL_R)){
-                return false;
-            }
-        }
+        // Set root of subtree to non terminal
+        stack->top->node = root;
 
-        stack->top->node = oneNeterminal->node;
-
+        return true;
     }
-
-
-
-
-
 
     return true;
 }
@@ -284,7 +309,7 @@ RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_
     bool beginDollar = true;
     // Flag for end of expression
     bool notEndDollar = false;
-
+    // Flag for continue reduction
     bool continueReduction = false;    
 
     // Token for analysis
@@ -295,16 +320,13 @@ RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_
 
     
     // Precednce analysis
-    while(is_empty(&stack) && beginDollar){
+    while(!is_empty(&stack) || beginDollar){
 
         // Get token from buffer, until end of expression
         if(!continueReduction && (notEndDollar || beginDollar)) next_token(buffer, &token);
 
         // Get the toppest terminal on stack
         T_STACK_ITEM_PTR topTerminal = stack_top_terminal(&stack);
-
-
-
 
         // Search for end of expression
         if(!continueReduction && (notEndDollar || beginDollar) && ((token->type == BRACKET_RIGHT_SIMPLE && countBrac == 0 && countRelOperatoes <= 1 && typeEnd == IF_WHILE_END) || (token->type == SEMICOLON && countBrac == 0 && countRelOperatoes <= 1 && typeEnd == ASS_END))) notEndDollar = false;
@@ -319,8 +341,8 @@ RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_
         }
         
         // Counting of breackets in an expression
-        if (!continueReduction && (notEndDollar || beginDollar) && token->type == BRACKET_RIGHT_SIMPLE) countBrac++;
-        if ((notEndDollar || beginDollar) && token->type == BRACKET_LEFT_SIMPLE) countBrac--;
+        if (!continueReduction && (notEndDollar || beginDollar) && token->type == BRACKET_LEFT_SIMPLE) countBrac++;
+        if ((notEndDollar || beginDollar) && token->type == BRACKET_RIGHT_SIMPLE) countBrac--;
 
         // If there are more right brackets than left brackets, then is it error
         if (!continueReduction && (notEndDollar || beginDollar) && countBrac < 0){
@@ -334,12 +356,26 @@ RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_
             beginDollar = false;
             notEndDollar= true;
         }
-        else if(topTerminal == NULL && !beginDollar) precedence = getPrecedence(DOLLAR, precedenceIndex(token->type));
+        else if (topTerminal == NULL && !beginDollar && notEndDollar) precedence = getPrecedence(DOLLAR, precedenceIndex(token->type));
         else if (notEndDollar) precedence = getPrecedence(precedenceIndex(topTerminal->token->type), precedenceIndex(token->type));
+        else if (!notEndDollar && topTerminal == NULL && !beginDollar && stack.countItems == 1 && precedence == GR_COMP) precedence = GR_COMP;
         else precedence = getPrecedence(precedenceIndex(topTerminal->token->type), DOLLAR);
         
-        if (precedence == LSS_COMP){
+        if (precedence == LSS_COMP && continueReduction){
             continueReduction = false;
+
+            if (!notEndDollar) continue;
+            
+            if (stack_insert_less(&stack, topTerminal)){
+                destroy_all(&stack,tree);
+                return RET_VAL_INTERNAL_ERR;
+            }
+            
+            if(stack_push(&stack, token, TERMINAL)){
+                destroy_all(&stack,tree);
+                return RET_VAL_INTERNAL_ERR;
+            }
+
             continue;
         }
     
@@ -362,6 +398,10 @@ RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_
                     destroy_all(&stack,tree);
                     return RET_VAL_INTERNAL_ERR;
                 }
+                if(stack_push(&stack, token, TERMINAL)){
+                    destroy_all(&stack,tree);
+                    return RET_VAL_INTERNAL_ERR;
+                }
                 break;
             
             // The closest terminal to top of stack has higher precedence than the input symbol(>) <=> reduce
@@ -380,12 +420,6 @@ RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_
                     return RET_VAL_INTERNAL_ERR;
                 }
                 
-
-                if (stack_push(&stack, NULL, REDUCE)){
-                    destroy_all(&stack,tree);
-                    return RET_VAL_INTERNAL_ERR;
-                }
-
                 continueReduction = true;
                 
                 break;

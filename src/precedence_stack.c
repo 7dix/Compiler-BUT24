@@ -25,7 +25,7 @@ void stack_init(T_STACK_PTR stack) {
  * @return True if stack is empty, false otherwise
 */
 bool is_empty(T_STACK_PTR stack){
-    return stack->countItems == 0;
+    return stack->countItems == 0 && sizeof(stack->top) == sizeof(NULL);
 }
 
 /**
@@ -48,6 +48,7 @@ RetVal stack_push(T_STACK_PTR stack, T_TOKEN *token, STACK_ITEM_TYPE type){
         itemPush->node = NULL;
         itemPush->token = token;
         itemPush->type = type;
+        itemPush->prev = NULL;
 
     }else{
     
@@ -120,11 +121,21 @@ T_STACK_ITEM_PTR stack_top(T_STACK_PTR stack){
  * @param stack Pointer on stack 
  * @return Pointer on terminal item from top of stack, if stack has not terminal item then return NULL
 */
-T_STACK_ITEM_PTR stack_top_terminal(T_STACK_PTR stack){
+T_STACK_ITEM_PTR stack_top_terminal(T_STACK_PTR stack) {
     // Search for terminal item in stack
-    for(T_STACK_ITEM_PTR top = stack->top; top != NULL; top = top->prev){
-        if (top->type == TERMINAL || top->type == L_B || top->type == R_B) return top;
+    T_STACK_ITEM_PTR searchTerminal = stack_top(stack);
+    
+    // Check if searchTerminal is not NULL
+    if (searchTerminal == NULL) return NULL;
+    
+    while (searchTerminal != NULL) {
+        if (searchTerminal->type == TERMINAL || searchTerminal->type == L_B || searchTerminal->type == R_B) {
+            return searchTerminal;
+        } else {
+            searchTerminal = searchTerminal->prev;
+        }
     }
+    
     return NULL;
 }
 
@@ -136,45 +147,56 @@ T_STACK_ITEM_PTR stack_top_terminal(T_STACK_PTR stack){
  */
 RetVal stack_insert_less(T_STACK_PTR stack, T_STACK_ITEM_PTR terminal){
 
+
     // Create new item of stack
     T_STACK_ITEM_PTR itemPush = (T_STACK_ITEM_PTR)malloc(sizeof(T_STACK_ITEM));
 
     // Check if malloc was successful
     if(itemPush == NULL) return RET_VAL_INTERNAL_ERR;
-    
+
     // Initialize item of stack
     itemPush->node = NULL;
     itemPush->type = SHIFT;
     itemPush->token = NULL;
+    itemPush->prev = NULL;
 
-    if(terminal == NULL){
-        // If stack is empty, then will be inserted less before simulating dollar
-        if (is_empty(stack)){
-            stack->top = itemPush;
-        // If stack has only one item, then will be inserted less before terminal(On stack is onyly neterminal and simulated dollar)
-        } else if(stack->countItems == 1){
-            itemPush->prev = stack->top;
-            stack->top = itemPush;
+    // If terminal is on top of stack, then will be inserted less on top of stack
+    if(terminal == stack_top(stack) && !is_empty(stack)){
+        itemPush->prev = terminal;
+        stack->top = itemPush;
+        stack->countItems++;
+        return RET_VAL_OK;
+    // If terminal is on top of stack and stack is empty, then will be inserted less on top of stack
+    }else if(terminal == NULL && is_empty(stack)){
+        stack->top = itemPush;
+        stack->countItems++;
+        return RET_VAL_OK;
+    
+    }else if(terminal == NULL && !is_empty(stack)){
+        T_STACK_ITEM_PTR begin = stack_top(stack);
+        while (begin->prev != NULL) {
+            begin = begin->prev;
         }
 
+        begin->prev = itemPush;
+        stack->countItems++;
+        return RET_VAL_OK;
+        
+    }else{
+        // Pointer on item before terminal, position where will be inserted less
+        T_STACK_ITEM_PTR beforeTerminal = stack_top(stack);
+        // Search for position before terminal
+        while (beforeTerminal->prev != terminal) {
+            beforeTerminal = beforeTerminal->prev;
+            
+        }
+
+        itemPush->prev = terminal;
+        beforeTerminal->prev = itemPush;
+        stack->countItems++;
+
+        return RET_VAL_OK;
     }
-
-    // Pointer on item before terminal, position where will be inserted less
-    T_STACK_ITEM_PTR beforeTerminal = itemPush;
-    // Search for position before terminal
-    while (beforeTerminal->prev != terminal) {
-        beforeTerminal = beforeTerminal->prev;
-    }
-    
-
-    // Insert less before terminal
-    itemPush->prev = terminal;
-    beforeTerminal->prev = itemPush;
-
-    // Increment count of items in stack
-    stack->countItems++;
-
-    return RET_VAL_OK;
 }
  
 
@@ -183,13 +205,17 @@ RetVal stack_insert_less(T_STACK_PTR stack, T_STACK_ITEM_PTR terminal){
  * @brief Function for delete all items in stack and free memory, will be used in case of errors
  * @param stack Pointer on stack where all items will be deleted
 */
-void stack_dispose(T_STACK_PTR stack){
-
-    while (!is_empty(stack)){
-        // Tree node can be freed before stack item => tree_dispose or type of item has not tree node
-        if((stack_top(stack)->node != NULL)) free(stack->top->node);
-        //Delete item from stack
-        stack_pop(stack);
-        stack->countItems--;
+void stack_dispose(T_STACK_PTR stack) {
+    while (!is_empty(stack)) {
+        T_STACK_ITEM_PTR topItem = stack_top(stack);
+        if (sizeof(topItem->node) != sizeof(NULL)) {
+            free(topItem->node);  // Uvolnění paměti uzlu
+            printf("Node freed\n");
+        }
+        // Odstranění položky ze zásobníku
+        stack_pop(stack);  // Předpokládáme, že stack_pop také snižuje countItems
     }
+    // Volitelný reset metadat zásobníku
+    stack->countItems = 0;
+    stack->top = NULL;  // Vyčištění ukazatele na vrchol zásobníku
 }

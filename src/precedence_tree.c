@@ -71,16 +71,20 @@ T_TREE_NODE_PTR createSubTree(T_TREE_NODE_PTR *tree, T_TREE_NODE_PTR operator, T
  * @brief Function to delete all nodes in tree and free memory
  * @param tree Pointer to the tree
  */
-void tree_dispose(T_TREE_NODE_PTR *tree){
-    if (*tree == NULL) return;
-    tree_dispose(&(*tree)->left);
-    tree_dispose(&(*tree)->right);
-    free(*tree);
-    *tree = NULL;
-    return;
+void tree_dispose(T_TREE_NODE_PTR *root) {
+    if (*root == NULL) {
+        return; // Strom je prázdný
+    }
+
+    // Nejprve smažeme levý a pravý podstrom
+    tree_dispose(&(*root)->left);
+    tree_dispose(&(*root)->right);
+
+    // Uvolníme aktuální uzel
+    
+    free(*root);
+    *root = NULL; // Zabráníme přístupu na již uvolněnou paměť
 }
-
-
 
 //SMAZAT
 void Postorder (T_TREE_NODE_PTR root){
