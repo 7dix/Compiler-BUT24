@@ -64,13 +64,19 @@ void print_token_json(T_TOKEN *token, int is_first) {
     char *lexeme_str = json_escape_string(token->lexeme);
     char value_str[256] = "null";
 
-    // Prepare the value based on the token type
     switch (token->type) {
         case INT:
             snprintf(value_str, sizeof(value_str), "%d", token->value.intVal);
             break;
         case FLOAT:
             snprintf(value_str, sizeof(value_str), "%f", token->value.floatVal);
+            break;
+        case STRING:
+            {
+                char *escaped_str = json_escape_string(token->value.stringVal);
+                snprintf(value_str, sizeof(value_str), "%s", escaped_str);
+                free(escaped_str);
+            }
             break;
         default:
             strcpy(value_str, "null");
