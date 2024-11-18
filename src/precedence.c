@@ -342,7 +342,7 @@ RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_
         
         // Counting of breackets in an expression
         if (!continueReduction && (notEndDollar || beginDollar) && token->type == BRACKET_LEFT_SIMPLE) countBrac++;
-        if ((notEndDollar || beginDollar) && token->type == BRACKET_RIGHT_SIMPLE) countBrac--;
+        if (!continueReduction &&(notEndDollar || beginDollar) && token->type == BRACKET_RIGHT_SIMPLE) countBrac--;
 
         // If there are more right brackets than left brackets, then is it error
         if (!continueReduction && (notEndDollar || beginDollar) && countBrac < 0){
@@ -390,6 +390,8 @@ RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_
                     destroy_all(&stack,tree);
                     return RET_VAL_INTERNAL_ERR;
                 }
+                continueReduction = false;
+
                 break;
 
             // The closest terminal to top of stack has lower precedence than the input symbol(<) <=> shift
