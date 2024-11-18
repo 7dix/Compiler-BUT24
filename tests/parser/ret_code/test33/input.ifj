@@ -4,7 +4,7 @@ const ifj = @import("ifj24.zig");
 pub fn main() void {
     ifj.write("Zadejte cislo pro vypocet faktorialu\n");
     const a = ifj.readi32();
-    if () |val| {
+    if (a+3) |val {
         if () {
             ifj.write("Faktorial ");
             ifj.write(val);
@@ -22,7 +22,7 @@ pub fn main() void {
             ifj.write(vysl_i32);
             ifj.write("\n");
         }
-    } else  // a == null
+    } else { // a == null
         ifj.write("Faktorial pro null nelze spocitat\n");
     }
 }

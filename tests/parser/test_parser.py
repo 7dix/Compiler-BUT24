@@ -78,12 +78,9 @@ def run_test(test_folder, test_number):
 def run_tests(test_type):
     # Define base path for the tests based on the argument
     base_path = ''
-    if test_type == '-noexpr':
-        base_path = os.path.join(os.path.dirname(__file__), 'no_expr')
-        print("[bold cyan]Using configuration: No Expression Tests (noexpr)[/bold cyan]")
-    elif test_type == '-normal':
-        base_path = os.path.join(os.path.dirname(__file__), 'normal')
-        print("[bold cyan]Using configuration: Normal Tests (normal)[/bold cyan]")
+    if test_type == '-retcode':
+        base_path = os.path.join(os.path.dirname(__file__), 'ret_code')
+        print("[bold cyan]Using configuration: No Expression Tests (retcode)[/bold cyan]")
     else:
         print("Invalid argument. Use -noexpr or -normal.")
         return
@@ -141,7 +138,7 @@ def run_tests(test_type):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python script.py [-noexpr | -normal]")
+        print("Usage: python script.py [-retcode]")
         sys.exit(1)
 
     test_type = sys.argv[1]
