@@ -13,6 +13,10 @@
 #include <stdbool.h>
 #include "shared.h"
 #include "scanner.h"
+#include <stdlib.h>
+#include <string.h>
+
+
 
 // Variable types
 typedef enum {
@@ -58,6 +62,7 @@ typedef struct Symbol {
     SymbolData data;
     bool used;
     struct Symbol *next; // For handling collisions in the hashtable
+    bool occupied; // Marks if this slot is occupied or has been deleted
 } Symbol;
 
 //-----------------------------------HASH TABLE-----------------------------------//
@@ -66,7 +71,7 @@ typedef struct Symbol {
 
 // Hashtable structure
 typedef struct {
-    Symbol *table[HASHTABLE_SIZE]; // Array of entry pointers
+    Symbol table[HASHTABLE_SIZE]; // Array of entry pointers
     int count; // Tracks number of entries
 } Hashtable;
 
