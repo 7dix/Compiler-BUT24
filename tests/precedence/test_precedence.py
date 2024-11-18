@@ -60,6 +60,10 @@ def run_test(test_id, input_path, output_path):
         print_skipped(f"Test {test_id} SKIPPED: Output file not found at {output_path}")
         return "SKIPPED", None, None
 
+    # Read the input file content (this will be printed in blue in case of failure)
+    with open(input_path, 'r') as input_file:
+        input_data = input_file.read()
+
     # Run the executable with input file as stdin
     with open(input_path, 'r') as input_file:
         try:
@@ -77,12 +81,16 @@ def run_test(test_id, input_path, output_path):
     # If the executable failed (non-zero exit code), treat as failed
     if return_code != 0:
         print_failure(f"Test {test_id} FAILED: Executable returned a non-zero exit code.")
+        # Print the input data in blue when the test fails
+        print(f"[blue]Test Input for {test_id}:[/blue]\n{input_data}")
         return "FAILED", actual_output, expected_output
 
     # Compare the outputs
     diff = compare_outputs(actual_output, expected_output)
     if diff:
         print_failure(f"Test {test_id} FAILED: Output differs from expected.\n" + diff)
+        # Print the input data in blue when the test fails
+        print(f"[blue]Test Input for {test_id}:[/blue]\n{input_data}")
         return "FAILED", actual_output, expected_output
     else:
         print_success(f"Test {test_id} SUCCESSFUL")
