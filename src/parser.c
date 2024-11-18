@@ -15,11 +15,6 @@
 // Stores error defined in  `shared.h`
 int error_flag = RET_VAL_OK;
 
-// dummy function for precedence parser
-bool syntax_expression() {
-    return true;
-}
-
 
 /**
  * @brief Entry point of the parser.
@@ -934,11 +929,14 @@ bool syntax_if_statement(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
-    // TODO: change based on api of bottom-up parser
     // follows an EXPRESSION, switching to bottom-up parsing
-    if (!syntax_expression()) {
+    T_TREE_NODE_PTR tree;
+    tree_init(&tree);
+    error_flag = precedenceSyntaxMain(buffer, &tree, IF_WHILE_END);
+    if (error_flag != RET_VAL_OK) {
         return false;
     }
+    tree_dispose(&tree);
 
     next_token(buffer, &token); // )
     if (token->type != BRACKET_RIGHT_SIMPLE) {
@@ -1123,9 +1121,13 @@ bool syntax_while_statement(T_TOKEN_BUFFER *buffer) {
 
     // TODO: change based on api of bottom-up parser
     // follows an EXPRESSION, switching to bottom-up parsing
-    if (!syntax_expression()) {
+    T_TREE_NODE_PTR tree;
+    tree_init(&tree);
+    error_flag = precedenceSyntaxMain(buffer, &tree, IF_WHILE_END);
+    if (error_flag != RET_VAL_OK) {
         return false;
     }
+    tree_dispose(&tree);
 
     next_token(buffer, &token); // )
     if (token->type != BRACKET_RIGHT_SIMPLE) {
@@ -1639,9 +1641,13 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer) {
     if (is_token_in_expr(token)) {
         move_back(buffer);
         // TODO: change based on api of bottom-up parser
-        if (!syntax_expression()) {
+        T_TREE_NODE_PTR tree;
+        tree_init(&tree);
+        error_flag = precedenceSyntaxMain(buffer, &tree, ASS_END);
+        if (error_flag != RET_VAL_OK) {
             return false;
         }
+        tree_dispose(&tree);
 
         next_token(buffer, &token); // ;
         if (token->type != SEMICOLON) {
@@ -1698,10 +1704,13 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer) {
         // we ate the first token of the expression as identifier in ASSIGN non-terminal
         move_back(buffer);
         move_back(buffer);
-        // TODO: change based on api of bottom-up parser
-        if (!syntax_expression()) {
+        T_TREE_NODE_PTR tree;
+        tree_init(&tree);
+        error_flag = precedenceSyntaxMain(buffer, &tree, IF_WHILE_END);
+        if (error_flag != RET_VAL_OK) {
             return false;
         }
+        tree_dispose(&tree);
 
         next_token(buffer, &token); // ;
         if (token->type != SEMICOLON) {

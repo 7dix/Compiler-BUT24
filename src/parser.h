@@ -15,6 +15,8 @@
 #include <stdbool.h>
 #include "shared.h"
 #include "token_buffer.h"
+#include "precedence.h"
+#include "precedence_tree.h"
 
 // Function prototypes
 
