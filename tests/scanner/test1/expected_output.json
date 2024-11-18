@@ -39,7 +39,7 @@
       "lexeme": "ifj24.zig",
       "line": 1,
       "length": 9,
-      "value": null
+      "value": "ifj24.zig"
     },
     {
       "type": "BRACKET_RIGHT_SIMPLE",
@@ -58,7 +58,7 @@
     {
       "type": "PUB",
       "lexeme": "pub",
-      "line": 1,
+      "line": 3,
       "length": 3,
       "value": null
     },
@@ -156,7 +156,7 @@
     {
       "type": "CONST",
       "lexeme": "const",
-      "line": 3,
+      "line": 4,
       "length": 5,
       "value": null
     },
@@ -240,7 +240,7 @@
     {
       "type": "RETURN",
       "lexeme": "return",
-      "line": 4,
+      "line": 5,
       "length": 6,
       "value": null
     },
@@ -261,14 +261,14 @@
     {
       "type": "BRACKET_RIGHT_CURLY",
       "lexeme": "}",
-      "line": 5,
+      "line": 6,
       "length": 1,
       "value": null
     },
     {
       "type": "PUB",
       "lexeme": "pub",
-      "line": 6,
+      "line": 7,
       "length": 3,
       "value": null
     },
@@ -317,7 +317,7 @@
     {
       "type": "CONST",
       "lexeme": "const",
-      "line": 7,
+      "line": 8,
       "length": 5,
       "value": null
     },
@@ -368,7 +368,7 @@
       "lexeme": "ahoj ",
       "line": 8,
       "length": 5,
-      "value": null
+      "value": "ahoj "
     },
     {
       "type": "BRACKET_RIGHT_SIMPLE",
@@ -387,7 +387,7 @@
     {
       "type": "CONST",
       "lexeme": "const",
-      "line": 8,
+      "line": 9,
       "length": 5,
       "value": null
     },
@@ -436,7 +436,7 @@
     {
       "type": "VAR",
       "lexeme": "var",
-      "line": 9,
+      "line": 10,
       "length": 3,
       "value": null
     },
@@ -501,7 +501,7 @@
       "lexeme": "svete",
       "line": 10,
       "length": 5,
-      "value": null
+      "value": "svete"
     },
     {
       "type": "BRACKET_RIGHT_SIMPLE",
@@ -520,7 +520,7 @@
     {
       "type": "IDENTIFIER",
       "lexeme": "ct",
-      "line": 10,
+      "line": 11,
       "length": 2,
       "value": null
     },
@@ -583,7 +583,7 @@
     {
       "type": "IFJ",
       "lexeme": "ifj",
-      "line": 11,
+      "line": 12,
       "length": 3,
       "value": null
     },
@@ -632,8 +632,8 @@
     {
       "type": "BRACKET_RIGHT_CURLY",
       "lexeme": "}",
-      "line": 12,
+      "line": 13,
       "length": 1,
       "value": null
     }
-  ]
+]

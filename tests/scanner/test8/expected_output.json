@@ -25,7 +25,7 @@
     "lexeme": "Hello, ",
     "line": 1,
     "length": 7,
-    "value": null
+    "value": "Hello, "
   },
   {
     "type": "PLUS",
@@ -53,7 +53,7 @@
     "lexeme": "!",
     "line": 1,
     "length": 1,
-    "value": null
+    "value": "!"
   },
   {
     "type": "SEMICOLON",

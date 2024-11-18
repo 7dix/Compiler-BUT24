@@ -37,42 +37,42 @@
   {
     "type": "IDENTIFIER",
     "lexeme": "x",
-    "line": 6,
+    "line": 3,
     "length": 1,
     "value": null
   },
   {
     "type": "ASSIGN",
     "lexeme": "=",
-    "line": 6,
+    "line": 3,
     "length": 1,
     "value": null
   },
   {
     "type": "IDENTIFIER",
     "lexeme": "x",
-    "line": 6,
+    "line": 3,
     "length": 1,
     "value": null
   },
   {
     "type": "PLUS",
     "lexeme": "+",
-    "line": 6,
+    "line": 3,
     "length": 1,
     "value": null
   },
   {
     "type": "INT",
     "lexeme": "1",
-    "line": 6,
+    "line": 3,
     "length": 1,
     "value": 1
   },
   {
     "type": "SEMICOLON",
     "lexeme": ";",
-    "line": 6,
+    "line": 3,
     "length": 1,
     "value": null
   }
