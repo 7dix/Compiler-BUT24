@@ -124,6 +124,7 @@ ASSIGN -> ifj . identifier ( ARGUMENTS ) ;
 # semantika -> identifier musi spadat do mnoziny vestavenych funkci
 
 ID_ASSIGN -> EXPRESSION ;
+ID_ASSIGN -> ; # vrat zpet a EXPRESSION
 ID_ASSIGN -> FUNCTION_ARGUMENTS
 # cokoli z EXPRESSION krome "(",
 # v tuto chvili do EXPRESSION spada i ";", pro osetreni jednoprvkovych vyrazu

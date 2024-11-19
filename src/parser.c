@@ -60,6 +60,12 @@ bool is_token_in_expr(T_TOKEN *token) {
                 token->type == BRACKET_RIGHT_SIMPLE || token->type == IDENTIFIER );
 }
 
+bool is_token_relation_operator(T_TOKEN *token) {
+    return (    token->type == NOT_EQUAL || token->type == LESS_THAN ||
+                token->type == GREATER_THAN || token->type == EQUAL ||
+                token->type == LESS_THAN_EQUAL || token->type == GREATER_THAN_EQUAL );
+}
+
 /**
  * @brief Start of recursive parser. Simulates `START` non-terminal.
  * 
@@ -936,7 +942,6 @@ bool syntax_if_statement(T_TOKEN_BUFFER *buffer) {
     if (error_flag != RET_VAL_OK) {
         return false;
     }
-    tree_dispose(&tree);
 
     next_token(buffer, &token); // )
     if (token->type != BRACKET_RIGHT_SIMPLE) {
@@ -945,7 +950,7 @@ bool syntax_if_statement(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
-    if (!syntax_if_statement_remaining(buffer)) { // IF_STATEMENT_REMAINING
+    if (!syntax_if_statement_remaining(buffer, &tree)) { // IF_STATEMENT_REMAINING
         return false;
     }
 
@@ -969,7 +974,7 @@ bool syntax_if_statement(T_TOKEN_BUFFER *buffer) {
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer) {
+bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree) {
     // TODO: add semantic checks, cleaning, etc.
 
     T_TOKEN *token;
@@ -977,6 +982,13 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer) {
     next_token(buffer, &token);
     // first branch -> { CODE_BLOCK_NEXT } else { CODE_BLOCK_NEXT }
     if (token->type == BRACKET_LEFT_CURLY) { // {
+        
+        if (!is_token_relation_operator((*tree)->token)) {
+            // TODO: process error
+            error_flag = RET_VAL_SYNTAX_ERR;
+            return false;
+        }
+        tree_dispose(tree);
         
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;
@@ -1019,6 +1031,13 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer) {
 
     // second branch -> | identifier | { CODE_BLOCK_NEXT } else { CODE_BLOCK_NEXT }
     if (token->type == PIPE) { // |
+        
+        if (is_token_relation_operator((*tree)->token)) {
+            // TODO: process error
+            error_flag = RET_VAL_SYNTAX_ERR;
+            return false;
+        }
+        tree_dispose(tree);
 
         next_token(buffer, &token); // identifier
         if (token->type != IDENTIFIER) {
@@ -1127,7 +1146,6 @@ bool syntax_while_statement(T_TOKEN_BUFFER *buffer) {
     if (error_flag != RET_VAL_OK) {
         return false;
     }
-    tree_dispose(&tree);
 
     next_token(buffer, &token); // )
     if (token->type != BRACKET_RIGHT_SIMPLE) {
@@ -1136,7 +1154,7 @@ bool syntax_while_statement(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
-    if (!syntax_while_statement_remaining(buffer)) { // WHILE_STATEMENT_REMAINING
+    if (!syntax_while_statement_remaining(buffer, &tree)) { // WHILE_STATEMENT_REMAINING
         return false;
     }
 
@@ -1158,7 +1176,7 @@ bool syntax_while_statement(T_TOKEN_BUFFER *buffer) {
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer) {
+bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree) {
     // TODO: add semantic checks, cleaning, etc.
 
     T_TOKEN *token;
@@ -1166,6 +1184,13 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer) {
     next_token(buffer, &token);
     // first branch -> { CODE_BLOCK_NEXT }
     if (token->type == BRACKET_LEFT_CURLY) { // {
+
+         if (!is_token_relation_operator((*tree)->token)) {
+            // TODO: process error
+            error_flag = RET_VAL_SYNTAX_ERR;
+            return false;
+        }
+        tree_dispose(tree);
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;
@@ -1183,6 +1208,13 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer) {
 
     // second branch -> | identifier | { CODE_BLOCK_NEXT }
     if (token->type == PIPE) { // |
+
+         if (is_token_relation_operator((*tree)->token)) {
+            // TODO: process error
+            error_flag = RET_VAL_SYNTAX_ERR;
+            return false;
+        }
+        tree_dispose(tree);
 
         next_token(buffer, &token); // identifier
         if (token->type != IDENTIFIER) {
@@ -1698,6 +1730,26 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer) {
         return true;
     }
 
+    // second branch -> ;
+    if (token->type == SEMICOLON) { // ;
+        move_back(buffer);
+        move_back(buffer);
+        T_TREE_NODE_PTR tree;
+        tree_init(&tree);
+        error_flag = precedenceSyntaxMain(buffer, &tree, ASS_END);
+        if (error_flag != RET_VAL_OK) {
+            return false;
+        }
+        tree_dispose(&tree);
+
+        next_token(buffer, &token);
+        if (token->type == SEMICOLON) {
+            return true;
+        }
+
+        return true;
+    }
+
     // second branch -> EXPRESSION ;
     if (is_token_in_expr(token)) { // is token in expression ?
         // we have to move back twice to get to the beginning of the expression
@@ -1706,7 +1758,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer) {
         move_back(buffer);
         T_TREE_NODE_PTR tree;
         tree_init(&tree);
-        error_flag = precedenceSyntaxMain(buffer, &tree, IF_WHILE_END);
+        error_flag = precedenceSyntaxMain(buffer, &tree, ASS_END);
         if (error_flag != RET_VAL_OK) {
             return false;
         }
