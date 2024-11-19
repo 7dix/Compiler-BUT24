@@ -101,15 +101,6 @@ PRECEDENCE getPrecedence(OPERATOR_INDEX row, OPERATOR_INDEX coll){
 
 
 /**
- * @brief Function for freed memory of stack and tree
- * @param stack Pointer on stack for freed memory
-*/
-void destroy_all(T_STACK_PTR stack){
-    stack_dispose(stack);
-    return;
-}
-
-/**
  * @brief Function for set count of reduce items in stack
  * @param stack Pointer on stack
  * @return Count of variables in stack
@@ -174,6 +165,7 @@ int canReduce(T_STACK_PTR stack){
  * @param tree Pointer on tree
  * @param rule Number of reduce rule
  * @param makeTree Flag for create tree
+ * @return True if reduce was successful, false if error
  */
 bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool makeTree){
 
@@ -367,7 +359,7 @@ RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_
 
         // If the number of relational operators is more than one, then is it error
         if(!continueReduction && (notEndDollar || beginDollar) && (countRelOperatoes > 1)){
-            destroy_all(&stack);
+            stack_dispose(&stack);
             return RET_VAL_SYNTAX_ERR;
         }
         
@@ -377,7 +369,7 @@ RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_
 
         // If there are more right brackets than left brackets, then is it error
         if (!continueReduction && (notEndDollar || beginDollar) && countBrac < 0){
-            destroy_all(&stack);
+            stack_dispose(&stack);
             return RET_VAL_SYNTAX_ERR;
         }
 
@@ -402,13 +394,13 @@ RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_
             
             // Shift
             if (stack_insert_less(&stack, topTerminal)){
-                destroy_all(&stack);
+                stack_dispose(&stack);
                 return RET_VAL_INTERNAL_ERR;
             }
             
             // Push new terminal on stack
             if(stack_push(&stack, token, TERMINAL)){
-                destroy_all(&stack);
+                stack_dispose(&stack);
                 return RET_VAL_INTERNAL_ERR;
             }
 
@@ -424,7 +416,7 @@ RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_
             case EQ_COMP:
 
                 if(stack_push(&stack, token, TERMINAL)){
-                    destroy_all(&stack);
+                    stack_dispose(&stack);
                     return RET_VAL_INTERNAL_ERR;
                 }
                 continueReduction = false;
@@ -434,11 +426,11 @@ RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_
             // The closest terminal to top of stack has lower precedence than the input symbol(<) <=> shift
             case LSS_COMP:
                 if(stack_insert_less(&stack, topTerminal)){
-                    destroy_all(&stack);
+                    stack_dispose(&stack);
                     return RET_VAL_INTERNAL_ERR;
                 }
                 if(stack_push(&stack, token, TERMINAL)){
-                    destroy_all(&stack);
+                    stack_dispose(&stack);
                     return RET_VAL_INTERNAL_ERR;
                 }
                 break;
@@ -448,14 +440,14 @@ RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_
 
                 // Number of reduce rul
                 if (!canReduce(&stack)){
-                    destroy_all(&stack);
+                    stack_dispose(&stack);
                     return RET_VAL_SYNTAX_ERR;
                 }
                 
 
                 
                 if(!reduce(&stack, tree , canReduce(&stack), !notEndDollar)){
-                    destroy_all(&stack);
+                    stack_dispose(&stack);
                     return RET_VAL_INTERNAL_ERR;
                 }
                 
@@ -465,7 +457,7 @@ RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_
             
             // Error
             case ERR:
-                destroy_all(&stack);
+                stack_dispose(&stack);
                 return RET_VAL_SYNTAX_ERR;
                 break;
 

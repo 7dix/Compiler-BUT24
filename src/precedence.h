@@ -59,8 +59,6 @@ PRECEDENCE getPrecedence(OPERATOR_INDEX row, OPERATOR_INDEX coll);
 // Function declarations for main function of precedence syntax analysis
 RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_END typeEnd);
 
-// Function declarations for destroy stack and tree
-void destroy_all(T_STACK_PTR stack);
 
 // Function declaration for search reuce rule
 int canReduce(T_STACK_PTR stack);

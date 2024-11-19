@@ -57,7 +57,7 @@ int main(void)
     
     if(ret == 0){
         printf("OK\n");
-        postorder(tree); // Předání správného typu do postorder
+        postorderTest(tree); // Předání správného typu do postorder
         tree_dispose(&tree);
     }else{
         printf("NOK\n");

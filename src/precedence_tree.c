@@ -72,14 +72,14 @@ void tree_dispose(T_TREE_NODE_PTR *tree){
 }
 
 /**
- * @brief Function for postorder tree traversal
+ * @brief Function for postorder tree traversal, for TESTING
  * @param root Pointer to the root of tree
  */
-void postorder (T_TREE_NODE_PTR root){
+void postorderTest (T_TREE_NODE_PTR root){
 
     if (root == NULL)return;
-    postorder(root->left);
-    postorder(root->right);
+    postorderTest(root->left);
+    postorderTest(root->right);
     printf("%s ", root->token->lexeme);
     
 }

@@ -40,7 +40,7 @@ T_TREE_NODE_PTR createSubTree(T_TREE_NODE_PTR operator, T_TREE_NODE_PTR left, T_
 // Function declaration for delete all nodes in tree and free memory
 void tree_dispose(T_TREE_NODE_PTR *tree);
 
-// Function declaration for postorder tree traversal
-void postorder (T_TREE_NODE_PTR root);
+// Function declaration for postorder tree traversal for TESTING
+void postorderTest (T_TREE_NODE_PTR root);
 
 #endif // H_TREE
