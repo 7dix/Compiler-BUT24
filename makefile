@@ -57,7 +57,7 @@ test_scanner: debug_scanner
 	cd tests/scanner &&  python3 test_scanner.py
 
 test_token_buffer: debug_token_buffer
-	cd tests/token_buffer &&  python3 test_token_buffer.py
+	cd tests/scanner &&  python3 test_token_buffer.py
 
 test_parser_retcode: debug
 	cd tests/parser &&  python3 test_parser.py -retcode

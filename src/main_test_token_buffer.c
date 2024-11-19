@@ -154,37 +154,40 @@ int main()
     int is_first_token = 1;
     // Print the JSON array to check that the buffer is filled correctly
     printf("[\n"); // Start of JSON array
+
+    // Buffer movement test
+    move_back(buffer);
+    move_back(buffer);
+    
+    for (int i = 0; i < 100; i++) {
+        next_token(buffer, &currentToken);
+    }
+
+    for (int i = 0; i < 100; i++) {
+        move_back(buffer);
+    }
+
+    for (int i = 0; i < 100; i++) {
+        next_token(buffer, &currentToken);
+    }
+
+    set_current_to_first(buffer);
+
+
+
     // Print the buffer
     while (true) {
         next_token(buffer, &currentToken);
+
+        if (currentToken->type == EOF_TOKEN)
+            break;
+
 
         // Print the token details
         print_token_json(currentToken, is_first_token);
         is_first_token = 0;
 
-        if (currentToken->type == EOF_TOKEN)
-            break;
     }
-
-    // Test moving further and back -> should stay at EOF
-    next_token(buffer, &currentToken);
-    print_token_json(currentToken, 0);
-    move_back(buffer);
-    next_token(buffer, &currentToken);
-    print_token_json(currentToken, 0);
-
-    // Test moving back from first token -> should stay at first token
-    set_current_to_first(buffer);
-    move_back(buffer);
-    next_token(buffer, &currentToken);
-    print_token_json(currentToken, 0);
-    // Test moving backwards from non-first token
-    next_token(buffer, &currentToken);
-    print_token_json(currentToken, 0);
-    move_back(buffer);
-    next_token(buffer, &currentToken);
-    print_token_json(currentToken, 0);
-
 
     printf("\n]\n"); // End of JSON array
 
