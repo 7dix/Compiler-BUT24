@@ -8,15 +8,43 @@
 // NOTES: Implementation of trees for precedence syntax analysis of expressions
 
 
+
 #include "precedence_tree.h"
 
 /**
  * @brief Function to initialize tree
  * @param tree Pointer to the tree
  */
-void tree_init(T_TREE_NODE_PTR *tree){
-    *tree = NULL;
+void tree_init(T_TREE_PTR tree){
+    tree->countItems = 0;
+    tree->first = NULL;
+    tree->tree = NULL;
     return;
+}
+
+/**
+ * @brief Function to insert first element to list of nodes of tree
+ * @param tree Pointer to the tree
+ * @param node Pointer to the node which will be inserted
+ * @return 0 = RET_VAL_OK if everything is ok, 99 = RET_VAL_INTERNAL_ERR if malloc fails
+ */
+RetVal tree_insert_first(T_TREE_PTR tree, T_TREE_NODE_PTR node){
+
+    // Create new element of tree list
+    T_TREE_LIST_ELEMENT_PTR newElement = (T_TREE_LIST_ELEMENT_PTR)malloc(sizeof(T_TREE_LIST_ELEMENT));
+    // Check if malloc was successful
+    if (newElement == NULL) return RET_VAL_INTERNAL_ERR;
+
+    // Initialize new element
+    newElement->node = node;
+    newElement->next = tree->first;
+
+    // Set new element as root of tree
+    tree->first = newElement;
+    // Increment count of items in tree
+    tree->countItems++;
+
+    return RET_VAL_OK;
 }
 
 
@@ -43,27 +71,25 @@ T_TREE_NODE_PTR createNode(T_TOKEN *token){
 }
 
 /**
- * @brief Function to create a new subtree
+ * @brief Function to get tree from tree structure
  * @param tree Pointer to the tree
- * @param operator Pointer to the operator node
- * @param left Pointer to the left node
- * @param right Pointer to the right node
- * @return Root of tree
+ * @return Pointer to the root of tree
  */
+T_TREE_NODE_PTR getTree(T_TREE_PTR tree){
+    if (tree == NULL) return NULL;
+    return tree->tree;
+}
 
-T_TREE_NODE_PTR createSubTree(T_TREE_NODE_PTR *tree, T_TREE_NODE_PTR operator, T_TREE_NODE_PTR right, T_TREE_NODE_PTR left){
-
-    if(*tree == NULL){
-        operator->left = left;
-        operator->right = right;
-        *tree = operator;
-        return operator;
-    }
-
-    T_TREE_NODE_PTR oldRoot = *tree;
-    operator->right = oldRoot;
+/**
+ * @brief Function to create a subtree
+ * @param operator Pointer to parent of subtree
+ * @param right Pointer to right child of subtree
+ * @param left Pointer to left child of subtree
+ * @return Pointer to the root of subtree
+ */
+T_TREE_NODE_PTR createSubTree(T_TREE_NODE_PTR operator, T_TREE_NODE_PTR right, T_TREE_NODE_PTR left){
     operator->left = left;
-    
+    operator->right = right;
     return operator;
 }
 
@@ -71,27 +97,35 @@ T_TREE_NODE_PTR createSubTree(T_TREE_NODE_PTR *tree, T_TREE_NODE_PTR operator, T
  * @brief Function to delete all nodes in tree and free memory
  * @param tree Pointer to the tree
  */
-void tree_dispose(T_TREE_NODE_PTR *root) {
-    if (*root == NULL) {
-        return; // Strom je prázdný
+void tree_dispose(T_TREE_PTR tree){
+    if(tree == NULL) return;
+
+    T_TREE_LIST_ELEMENT_PTR current = tree->first;
+    while (current != NULL) {
+        T_TREE_LIST_ELEMENT_PTR next = current->next; 
+        free(current->node);                         
+        free(current);                               
+        current = next;                              
+        tree->countItems--;                          
     }
 
-    // Nejprve smažeme levý a pravý podstrom
-    tree_dispose(&(*root)->left);
-    tree_dispose(&(*root)->right);
+    // Reset the tree structure
+    tree->first = NULL;
+    tree->tree = NULL;
+    tree->countItems = 0;
 
-    // Uvolníme aktuální uzel
-    
-    free(*root);
-    *root = NULL; // Zabráníme přístupu na již uvolněnou paměť
+    return;
 }
 
-//SMAZAT
-void Postorder (T_TREE_NODE_PTR root){
-    if (root != NULL){
-    
-    Postorder(root->left);
-    Postorder(root->right);
+/**
+ * @brief Function for postorder tree traversal
+ * @param root Pointer to the root of tree
+ */
+void postorder (T_TREE_NODE_PTR root){
+
+    if (root == NULL)return;
+    postorder(root->left);
+    postorder(root->right);
     printf("%s ", root->token->lexeme);
-    }
+    
 }

@@ -25,7 +25,7 @@ void stack_init(T_STACK_PTR stack) {
  * @return True if stack is empty, false otherwise
 */
 bool is_empty(T_STACK_PTR stack){
-    return stack->countItems == 0 && sizeof(stack->top) == sizeof(NULL);
+    return stack->countItems == 0 && stack->top == NULL;
 }
 
 /**
@@ -33,9 +33,10 @@ bool is_empty(T_STACK_PTR stack){
  * @param stack Pontier on stack where item will be pushed
  * @param token Token for pushing item
  * @param type Type of item on stack
+ * @param treeStruct Pointer on tree structure
  * @return 99 = RET_VAL_INTERNAL_ERR if everything is ok, 0 = RET_VAL_OK if everything is ok
  */
-RetVal stack_push(T_STACK_PTR stack, T_TOKEN *token, STACK_ITEM_TYPE type){
+RetVal stack_push(T_STACK_PTR stack, T_TOKEN *token, STACK_ITEM_TYPE type, T_TREE_PTR treeStruct){
 
     // Create new item of stack
     T_STACK_ITEM_PTR itemPush = (T_STACK_ITEM_PTR)malloc(sizeof(T_STACK_ITEM));
@@ -55,6 +56,10 @@ RetVal stack_push(T_STACK_PTR stack, T_TOKEN *token, STACK_ITEM_TYPE type){
         // Create new node of tree
         T_TREE_NODE_PTR node = createNode(token);
 
+        // Insert new node to tree structure
+        if (tree_insert_first(treeStruct, node)) return RET_VAL_INTERNAL_ERR;
+        
+        
         // Check if node was created
         if(node == NULL) return RET_VAL_INTERNAL_ERR;
             
@@ -207,15 +212,11 @@ RetVal stack_insert_less(T_STACK_PTR stack, T_STACK_ITEM_PTR terminal){
 */
 void stack_dispose(T_STACK_PTR stack) {
     while (!is_empty(stack)) {
-        T_STACK_ITEM_PTR topItem = stack_top(stack);
-        if (sizeof(topItem->node) != sizeof(NULL)) {
-            free(topItem->node);  // Uvolnění paměti uzlu
-            printf("Node freed\n");
-        }
-        // Odstranění položky ze zásobníku
-        stack_pop(stack);  // Předpokládáme, že stack_pop také snižuje countItems
+        stack_pop(stack);
     }
-    // Volitelný reset metadat zásobníku
+    
     stack->countItems = 0;
-    stack->top = NULL;  // Vyčištění ukazatele na vrchol zásobníku
+    stack->top = NULL;
+
+    return;  
 }

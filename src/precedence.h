@@ -57,16 +57,16 @@ OPERATOR_INDEX priorityIndexTable(TOKEN_TYPE type);
 PRECEDENCE getPrecedence(OPERATOR_INDEX row, OPERATOR_INDEX coll);
 
 // Function declarations for main function of precedence syntax analysis
-RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_END typeEnd);
+RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_PTR treeStruct, TYPE_END typeEnd);
 
 // Function declarations for destroy stack and tree
-void destroy_all(T_STACK_PTR stack, T_TREE_NODE_PTR *tree);
+void destroy_all(T_STACK_PTR stack, T_TREE_PTR tree);
 
 // Function declaration for search reuce rule
 int canReduce(T_STACK_PTR stack);
 
 // Function declaritions or reduce
-bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule);
+bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool makeTree);
 
 
 #endif // H_PRECEDENCE
