@@ -25,7 +25,7 @@ void stack_init(T_STACK_PTR stack) {
  * @return True if stack is empty, false otherwise
 */
 bool is_empty(T_STACK_PTR stack){
-    return stack->countItems == 0 && stack->top == NULL;
+    return stack->countItems == 0 || stack->top == NULL;
 }
 
 /**
