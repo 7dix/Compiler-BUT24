@@ -62,12 +62,13 @@ typedef struct Symbol {
     SymbolData data;
     bool used;
     struct Symbol *next; // For handling collisions in the hashtable
-    bool occupied; // Marks if this slot is occupied or has been deleted
+    bool occupied; // Marks if this slot is occupied
+    bool deleted; // Marks if this slot was deleted
 } Symbol;
 
 //-----------------------------------HASH TABLE-----------------------------------//
 
-#define HASHTABLE_SIZE 2000
+#define HASHTABLE_SIZE 1999
 
 // Hashtable structure
 typedef struct {

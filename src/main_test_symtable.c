@@ -76,6 +76,28 @@ int main() {
     }
 
     symtable_remove_scope(table);
+    symtable_add_scope(table);
+
+    // Fill up the hashtable
+    for (int i = 0; i < HASHTABLE_SIZE; i++) {
+        char key[10];
+        sprintf(key, "key%d", i);
+        data = (SymbolData) {
+            .var = { 
+                .is_const = false,
+                .type = VAR_INT,
+                .value = NULL }
+            };
+        symbol = symtable_add_symbol(table, key, SYM_VAR, data);
+        if (symbol == NULL) {
+            fprintf(stderr, "Error: Memory allocation failed in symtable_add_symbol, iteration: %d\n", i);
+            return 1;
+        }
+    }
+
+
+
+    symtable_remove_scope(table);
     symtable_remove_scope(table);
 
     symtable_free(table);

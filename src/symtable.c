@@ -50,7 +50,7 @@ unsigned int secondary_hash(const char *key) {
     while (*key) {
         hash = (hash * 17) + *key++;
     }
-    return (hash % (HASHTABLE_SIZE - 1)) + 1;
+    return (hash % (HASHTABLE_SIZE - 2)) + 1;
 }
 
 // Insert into hashtable using open addressing with Brent's optimization
@@ -67,6 +67,11 @@ Symbol *hashtable_insert(Hashtable *ht, const char *key, SymbolType type, Symbol
         if (strcmp(ht->table[index].name, key) == 0) {
             free(new_symbol.name);  // Avoid duplicate insertion
             return NULL;
+        }
+        if (ht->table[index].deleted) {
+            // Reuse a deleted slot
+            ht->table[index].deleted = false;
+            ht->table[index].occupied = true;
         }
 
         // Implement Brent's Optimization: Calculate an alternative position
@@ -98,9 +103,9 @@ Symbol *hashtable_find(Hashtable *ht, const char *key) {
     unsigned int step = secondary_hash(key);
     int probe_count = 0;
 
-    while (ht->table[index].occupied) { // Only continue if the slot is occupied
-        if (strcmp(ht->table[index].name, key) == 0) {
-            return &ht->table[index]; // Return the address of the found symbol
+    while (ht->table[index].occupied || ht->table[index].deleted) { // Only continue if the slot is occupied or was deleted
+        if (ht->table[index].occupied && strcmp(ht->table[index].name, key) == 0) {
+            return &ht->table[index];
         }
         if (probe_count++ >= HASHTABLE_SIZE) break; // Avoid infinite loop if table is full
         index = (index + step) % HASHTABLE_SIZE;
@@ -129,6 +134,7 @@ void hashtable_remove(Hashtable *ht, const char *key) {
 
             // Mark slot as unoccupied
             ht->table[index].occupied = false;
+            ht->table[index].deleted = true;
             ht->count--;
             return;
         }
@@ -197,6 +203,8 @@ Symbol *symtable_find_symbol(T_SYM_TABLE *table, const char *key) {
     while (current_scope != NULL) {
         Symbol *symbol = hashtable_find(current_scope->ht, key);
         if (symbol != NULL) {
+            // WATCH! This may be a bug, because it sets the symbol as used
+            symbol->used = true;
             return symbol;
         }
         current_scope = current_scope->parent;
