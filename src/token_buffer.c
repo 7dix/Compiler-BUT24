@@ -37,7 +37,7 @@ T_TOKEN_BUFFER *init_token_buffer() {
     }
 
     // Set the dummy EOF token
-    buffer->dummy_eof_token->type = EOF_TOKEN;
+    buffer->dummy_eof_token->type = VOID_TOKEN;
     buffer->dummy_eof_token->lexeme = NULL;
     buffer->dummy_eof_token->line = 0;
     buffer->dummy_eof_token->length = 0;

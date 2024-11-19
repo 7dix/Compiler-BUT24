@@ -61,6 +61,7 @@ typedef enum TOKEN_TYPE{
     VOID,
     IFJ,
     EOF_TOKEN,
+    VOID_TOKEN // Special token used in token buffer to return when no token is found
 } TOKEN_TYPE;
 
 /**
