@@ -83,4 +83,16 @@ Symbol *hashtable_find(Hashtable *ht, const char *key);
 void hashtable_remove(Hashtable *ht, const char *key);
 
 
+
+//-----------------------------------SYMBOL TABLE-----------------------------------//
+
+typedef struct T_SCOPE {
+    Hashtable *ht;
+    struct Scope *parent;
+} T_SCOPE;
+
+typedef struct T_SYM_TABLE {
+    Scope *top;
+} T_SYM_TABLE;
+
 #endif // H_SYMTABLE

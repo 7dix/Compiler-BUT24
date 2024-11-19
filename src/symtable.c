@@ -136,3 +136,84 @@ void hashtable_remove(Hashtable *ht, const char *key) {
         index = (index + step) % HASHTABLE_SIZE;
     }
 }
+
+// Initialize symbol table
+T_SYM_TABLE *symtable_init()
+{
+    T_SYM_TABLE *table = (T_SYM_TABLE*) malloc(sizeof(T_SYM_TABLE));
+    if (table == NULL)
+    {
+        return NULL;
+    }
+    table->top = NULL;
+    return table;
+}
+
+// Add a new scope to the symbol table
+bool symtable_add_scope(T_SYM_TABLE *table) {
+    if (table == NULL) {
+        return false;
+    }
+    T_SCOPE *new_scope = (T_SCOPE *) malloc(sizeof(T_SCOPE));
+    if (new_scope == NULL) {
+        return false;
+    }
+    new_scope->ht = hashtable_init();
+    if (new_scope->ht == NULL) {
+        free(new_scope);
+        return false;
+    }
+    new_scope->parent = table->top;
+    table->top = new_scope;
+    return true;
+}
+
+// Remove the top scope from the symbol table
+void symtable_remove_scope(T_SYM_TABLE *table) {
+    if (table == NULL || table->top == NULL) {
+        return;
+    }
+    T_SCOPE *old_scope = table->top;
+    table->top = old_scope->parent;
+    hashtable_free(old_scope->ht);
+    free(old_scope);
+}
+
+// Add a new symbol to the current scope
+Symbol *symtable_add_to_scope(T_SYM_TABLE *table, const char *key, SymbolType type, SymbolData data) {
+    if (table == NULL || table->top == NULL) {
+        return NULL;
+    }
+    return hashtable_insert(table->top->ht, key, type, data);
+}
+
+// Find a symbol in the symbol table,  go through all scopes
+Symbol *find_in_symtable(T_SYM_TABLE *table, const char *key) {
+    if (table == NULL || table->top == NULL) {
+        return;
+    }
+    
+    T_SCOPE *current_scope = table->top;
+    while (current_scope != NULL) {
+        Symbol *symbol = hashtable_find(current_scope->ht, key);
+        if (symbol != NULL) {
+            return symbol;
+        }
+        current_scope = current_scope->parent;
+    }
+
+    return NULL;
+}
+
+// Free the symbol table
+void symtable_free(T_SYM_TABLE *table) {
+    if (table == NULL) {
+        return;
+    }
+    while (table->top != NULL) {
+        symtable_remove_scope(table);
+    }
+    free(table);
+}
+
+
