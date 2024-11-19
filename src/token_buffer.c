@@ -57,10 +57,18 @@ void free_token_buffer(T_TOKEN_BUFFER **buffer) {
     T_TOKEN_BUFFER_NODE *next;
 
     // Free all nodes, one by one
-    // also need to free the token and its lexeme
+    // also need to free the token its lexeme and string value
     while (current != NULL) {
         next = current->next;
-        free(current->token->lexeme);
+        if (current->token->lexeme != NULL) {
+            free(current->token->lexeme);
+        }
+        if (    (current->token->type == TYPE_STRING ||
+                current->token->type == TYPE_STRING_NULL) &&
+                current->token->value.stringVal != NULL
+            ) {
+            free(current->token->value.stringVal);
+        }
         free(current->token);
         free(current);
         current = next;

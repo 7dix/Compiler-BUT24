@@ -171,7 +171,7 @@ bool syntax_fp_prolog(T_TOKEN_BUFFER *buffer) {
     }
 
     // check that string is equal to "ifj24.zig"
-    if (strcmp(token->lexeme, "ifj24.zig") != 0) {
+    if (strcmp(token->value.stringVal, "ifj24.zig") != 0) {
         // TODO: process error
         // TODO: is this syntax or semantic error?
         error_flag_fp = RET_VAL_SYNTAX_ERR;
