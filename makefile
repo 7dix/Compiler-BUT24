@@ -10,7 +10,7 @@ CFLAGS = -Wall -Wextra -Werror
 DEBUG_FLAGS = -g -O0
 
 # Source files
-SRC = src/main.c src/scanner.c src/token_buffer.c src/parser.c src/first_phase.c src/precedence.c src/precedence_stack.c src/precedence_tree.c
+SRC = src/main.c src/scanner.c src/token_buffer.c src/parser.c src/first_phase.c src/precedence.c src/precedence_stack.c src/precedence_tree.c src/symtable.c
 SRC_SCANNER_TEST = src/main_test_scanner.c src/scanner.c
 SRC_TOKEN_BUFFER_TEST = src/main_test_token_buffer.c src/token_buffer.c src/scanner.c
 SRC_PRECEDENCE_TEST = src/main_test_precedence.c src/scanner.c src/token_buffer.c src/precedence.c src/precedence_stack.c src/precedence_tree.c 

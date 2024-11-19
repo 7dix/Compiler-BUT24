@@ -379,7 +379,7 @@ int get_token(T_TOKEN *token) {
                     lexeme[lexeme_length++] = c;
                     lexeme[lexeme_length] = '\0';
                     token->lexeme = strdup(lexeme);
-                            token->length = lexeme_length;
+                    token->length = lexeme_length;
 
                     free(lexeme);
                     return RET_VAL_OK;
@@ -389,7 +389,8 @@ int get_token(T_TOKEN *token) {
                     lexeme[lexeme_length++] = c;
                     lexeme[lexeme_length] = '\0';
                     token->lexeme = strdup(lexeme);
-                            token->length = lexeme_length;
+                    token->length = lexeme_length;
+                    
                     free(lexeme);
                     return RET_VAL_OK;
                 } else if (c == '[') {

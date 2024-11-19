@@ -25,7 +25,8 @@ typedef enum {
     VAR_STRING,
     VAR_INT_NULL,
     VAR_FLOAT_NULL,
-    VAR_STRING_NULL
+    VAR_STRING_NULL,
+    VAR_VOID
 } VarType;
 
 // Parameter structure
@@ -53,6 +54,8 @@ typedef union
         Param *argv;
     } func;
 } SymbolData;
+
+int add_param_to_symbol_data(SymbolData *data, Param param);
 
 
 // Symbol structure
@@ -103,5 +106,7 @@ void symtable_remove_scope(T_SYM_TABLE *table);
 Symbol *symtable_add_symbol(T_SYM_TABLE *table, const char *key, SymbolType type, SymbolData data);
 Symbol *symtable_find_symbol(T_SYM_TABLE *table, const char *key);
 void symtable_free(T_SYM_TABLE *table);
+
+extern T_SYM_TABLE *ST;
 
 #endif // H_SYMTABLE

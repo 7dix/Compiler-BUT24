@@ -17,7 +17,10 @@
 #include "first_phase.h"
 #include "parser.h"
 #include "token_buffer.h"
+#include "symtable.h"
 // TODO: include symtable when ready
+
+T_SYM_TABLE *ST;
 
 int main() {
     // TODO: stuff before ??
@@ -28,8 +31,16 @@ int main() {
         return RET_VAL_INTERNAL_ERR;
     }
 
-    // TODO: init symtable
-    // ...
+    // Initialize symtable and add global scope
+    ST = symtable_init();
+    if (ST == NULL) {
+        fprintf(stderr, "Error: Memory allocation failed in symtable_init\n");
+        return RET_VAL_INTERNAL_ERR;
+    }
+    if (!symtable_add_scope(ST)) {
+        fprintf(stderr, "Error: Memory allocation failed in symtable_add_scope\n");
+        return 1;
+    }
 
     // Run first phase of the compiler
     // TODO: give first_phase symtable

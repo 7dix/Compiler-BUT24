@@ -224,4 +224,24 @@ void symtable_free(T_SYM_TABLE *table) {
     free(table);
 }
 
+// Add a parameter to the symbol data
+int add_param_to_symbol_data(SymbolData *data, Param param) {
+    if (data == NULL) {
+        return RET_VAL_INTERNAL_ERR;
+    }
+    if (data->func.argc == 0) {
+        data->func.argv = (Param *) malloc(sizeof(Param));
+        if (data->func.argv == NULL) {
+            return RET_VAL_INTERNAL_ERR;
+        }
+    } else {
+        Param *new_argv = (Param *) realloc(data->func.argv, (data->func.argc + 1) * sizeof(Param));
+        if (new_argv == NULL) {
+            return RET_VAL_INTERNAL_ERR;
+        }
+        data->func.argv = new_argv;
+    }
+    data->func.argv[data->func.argc++] = param;
+    return RET_VAL_OK;
+}
 

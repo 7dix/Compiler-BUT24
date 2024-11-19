@@ -245,6 +245,12 @@ bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
     T_TOKEN *token;
 
+    // Create new symbol data
+    SymbolData data;
+    data.func.return_type = VAR_VOID;
+    data.func.argc = 0;
+    data.func.argv = NULL;
+
     if (!get_save_token(buffer, &token)) 
         return false; // pub
     if (token->type != PUB) {
@@ -269,6 +275,9 @@ bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
+    // save function name
+    char *fn_name = strdup(token->lexeme);
+
     if (!get_save_token(buffer, &token)) 
         return false; // (
     if (token->type != BRACKET_LEFT_SIMPLE) {
@@ -277,7 +286,7 @@ bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
-    if (!syntax_fp_params(buffer)) { // PARAMS
+    if (!syntax_fp_params(buffer, &data)) { // PARAMS
         return false;
     }
 
@@ -289,9 +298,15 @@ bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
-    if (!syntax_fp_fn_def_remaining(buffer)) { // FN_DEF_REMAINING
+    if (!syntax_fp_fn_def_remaining(buffer, &data)) { // FN_DEF_REMAINING
         return false;
     }
+
+    // Add function to symtable
+    if (!symtable_add_symbol(ST, fn_name, SYM_FUNC, data)) {
+        return false;
+    }
+
 
     return true;
 }
@@ -362,7 +377,7 @@ bool syntax_fp_fn_def_next(T_TOKEN_BUFFER *buffer) {
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
+bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer, SymbolData *data) {
     // TODO: add semantic checks, cleaning, etc.
     // TODO: possible simplification by checking only void type
 
@@ -377,7 +392,8 @@ bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
         token->type == TYPE_FLOAT_NULL || token->type == TYPE_STRING_NULL) {
 
         needs_last_token = true; // token needed in TYPE
-        if (!syntax_fp_type(buffer)) { // TYPE
+        // save return type
+        if (!syntax_fp_type(buffer, &(data->func.return_type))) { // TYPE
             return false;
         }
 
@@ -410,6 +426,8 @@ bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
         if (!simulate_fn_body(buffer)) { // CODE_BLOCK_NEXT
             return false;
         }
+        // Set return type to void
+        data->func.return_type = VAR_VOID;
 
         return true;
     }
@@ -432,11 +450,12 @@ bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
  * 
  * - `int error_flag_fp`
  * @param *token_buffer pointer to token buffer
+ * @param *data pointer to symbol data
  * @return `bool`
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_fp_params(T_TOKEN_BUFFER *buffer) {
+bool syntax_fp_params(T_TOKEN_BUFFER *buffer, SymbolData *data) {
     // TODO: add semantic checks, cleaning, etc.
     T_TOKEN *token;
     
@@ -451,10 +470,10 @@ bool syntax_fp_params(T_TOKEN_BUFFER *buffer) {
     // second branch -> PARAM PARAM_NEXT
     if (token->type == IDENTIFIER) { // identifier is first in PARAM
 
-        if (!syntax_fp_param(buffer)) { // PARAM
+        if (!syntax_fp_param(buffer, data)) { // PARAM
             return false;
         }
-        if (!syntax_fp_param_next(buffer)) { // PARAM_NEXT
+        if (!syntax_fp_param_next(buffer, data)) { // PARAM_NEXT
             return false;
         }
 
@@ -481,9 +500,12 @@ bool syntax_fp_params(T_TOKEN_BUFFER *buffer) {
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_fp_param(T_TOKEN_BUFFER *buffer) {
+bool syntax_fp_param(T_TOKEN_BUFFER *buffer, SymbolData *data) {
     // TODO: add semantic checks, cleaning, etc.
     T_TOKEN *token;
+    Param param;
+    param.name = NULL;
+    param.type = VAR_VOID;
 
     if (!get_save_token(buffer, &token)) 
         return false; // identifier
@@ -493,6 +515,8 @@ bool syntax_fp_param(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
+    param.name = strdup(token->lexeme);
+
     if (!get_save_token(buffer, &token)) 
         return false; // :
     if (token->type != COLON) {
@@ -501,7 +525,14 @@ bool syntax_fp_param(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
-    if (!syntax_fp_type(buffer)) { // TYPE
+    if (!syntax_fp_type(buffer, &(param.type))) { // TYPE
+        return false;
+    }
+
+    // Add parameter to the symbol data
+    int ret = add_param_to_symbol_data(data, param);
+    if (ret != 0) {
+        error_flag_fp = ret;
         return false;
     }
 
@@ -533,7 +564,7 @@ bool syntax_fp_param(T_TOKEN_BUFFER *buffer) {
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_fp_type(T_TOKEN_BUFFER *buffer) {
+bool syntax_fp_type(T_TOKEN_BUFFER *buffer, VarType *type) {
     // TODO: add semantic checks, cleaning, etc.
     T_TOKEN *token;
 
@@ -546,6 +577,30 @@ bool syntax_fp_type(T_TOKEN_BUFFER *buffer) {
         // TODO: process error
         error_flag_fp = RET_VAL_SYNTAX_ERR;
         return false;
+    }
+
+    // Set the type
+    switch (token->type) {
+        case TYPE_INT:
+            *type = VAR_INT;
+            break;
+        case TYPE_FLOAT:
+            *type = VAR_FLOAT;
+            break;
+        case TYPE_STRING:
+            *type = VAR_STRING;
+            break;
+        case TYPE_INT_NULL:
+            *type = VAR_INT_NULL;
+            break;
+        case TYPE_FLOAT_NULL:
+            *type = VAR_FLOAT_NULL;
+            break;
+        case TYPE_STRING_NULL:
+            *type = VAR_STRING_NULL;
+            break;
+        default:
+            break;
     }
 
     return true;
@@ -568,7 +623,7 @@ bool syntax_fp_type(T_TOKEN_BUFFER *buffer) {
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_fp_param_next(T_TOKEN_BUFFER *buffer) {
+bool syntax_fp_param_next(T_TOKEN_BUFFER *buffer, SymbolData *data) {
     // TODO: add semantic checks, cleaning, etc.
     T_TOKEN *token;
 
@@ -584,7 +639,7 @@ bool syntax_fp_param_next(T_TOKEN_BUFFER *buffer) {
     // second branch -> , PARAM_AFTER_COMMA
     if (token->type == COMMA) { // ,
 
-        if (!syntax_fp_param_after_comma(buffer)) { // PARAM_AFTER_COMMA
+        if (!syntax_fp_param_after_comma(buffer, data)) { // PARAM_AFTER_COMMA
             return false;
         }
 
@@ -613,7 +668,7 @@ bool syntax_fp_param_next(T_TOKEN_BUFFER *buffer) {
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_fp_param_after_comma(T_TOKEN_BUFFER *buffer) {
+bool syntax_fp_param_after_comma(T_TOKEN_BUFFER *buffer, SymbolData *data) {
     // TODO: add semantic checks, cleaning, etc.
     T_TOKEN *token;
 
@@ -629,10 +684,10 @@ bool syntax_fp_param_after_comma(T_TOKEN_BUFFER *buffer) {
     // second branch -> PARAM PARAM_NEXT
     if (token->type == IDENTIFIER) { // identifier is first in PARAM
         
-        if (!syntax_fp_param(buffer)) { // PARAM
+        if (!syntax_fp_param(buffer, data)) { // PARAM
             return false;
         }
-        if (!syntax_fp_param_next(buffer)) { // PARAM_NEXT
+        if (!syntax_fp_param_next(buffer, data)) { // PARAM_NEXT
             return false;
         }
 
