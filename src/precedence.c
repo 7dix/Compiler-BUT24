@@ -157,9 +157,9 @@ int canReduce(T_STACK_PTR stack){
     T_STACK_ITEM_PTR right = operator->prev;
 
     // E -> E + E | E - E | E * E | E / E  IT IS EQUAL TO 3
-    if(countOfVarRed == 3 && (left->type == NON_TERMINAL_E || right->type == NON_TERMINAL_E) && (operator->token->type == PLUS || operator->token->type == MINUS || operator->token->type == MULTIPLY || operator->token->type == DIVIDE)) return 3;
+    if(countOfVarRed == 3 && (left->type == NON_TERMINAL_E && right->type == NON_TERMINAL_E) && (operator->token->type == PLUS || operator->token->type == MINUS || operator->token->type == MULTIPLY || operator->token->type == DIVIDE)) return 3;
     // T -> E < E | E > E | E <= E | E >= E | E == E | E != E IT IS EQUAL TO 4
-    if (countOfVarRed == 3 && (left->type == NON_TERMINAL_E || right->type == NON_TERMINAL_E) && (operator->token->type == LESS_THAN || operator->token->type == GREATER_THAN || operator->token->type == LESS_THAN_EQUAL || operator->token->type == GREATER_THAN_EQUAL || operator->token->type == EQUAL || operator->token->type == NOT_EQUAL)) return 4;
+    if (countOfVarRed == 3 && (left->type == NON_TERMINAL_E && right->type == NON_TERMINAL_E) && (operator->token->type == LESS_THAN || operator->token->type == GREATER_THAN || operator->token->type == LESS_THAN_EQUAL || operator->token->type == GREATER_THAN_EQUAL || operator->token->type == EQUAL || operator->token->type == NOT_EQUAL)) return 4;
     // E -> (E) IT IS EQUAL TO 5
     if (countOfVarRed == 3 && left->node->token->type == BRACKET_RIGHT_SIMPLE && (operator->type == NON_TERMINAL_E || operator->type == NON_TERMINAL_R) && right->node->token->type == BRACKET_LEFT_SIMPLE) return 5;
 
