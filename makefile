@@ -68,7 +68,7 @@ test_precedence: debug_precedence
 test_symtable: debug_symtable
 	bin/symtabledebug
 
-test: test_scanner test_token_buffer
+test: test_scanner test_token_buffer test_precedence test_symtable test_parser_retcode
 
 # Clean target to remove the executables
 clean:

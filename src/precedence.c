@@ -174,12 +174,12 @@ bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool makeTree){
     T_STACK_ITEM_PTR right = NULL;
     T_STACK_ITEM_PTR top = stack_top(stack);
     T_STACK_ITEM_PTR left = NULL;
-    
+    T_TREE_NODE_PTR root = NULL;
 
     switch (rule){
         // E -> id | int_value | float_value
         case 1:
-
+        {
             // Get node of tree of reduce item
             T_TREE_NODE_PTR neterminalNode = (stack_top(stack))->node;
 
@@ -193,11 +193,12 @@ bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool makeTree){
 
             // Set node of non terminal E
             (stack->top)->node = neterminalNode;    
-        return true;
+            return true;
+        }
 
         // E -> R | T
         case 2:
-
+        {
             // Get node of tree of reduce item
             T_TREE_NODE_PTR root = (stack_top(stack))->node;
 
@@ -208,12 +209,12 @@ bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool makeTree){
 
             // This is final state so node of reduce item is root of tree
             *tree = root;
-
-        return true;
+            return true;
+        }
 
         // E -> E + E | E - E | E * E | E / E
         case 3:
-                
+        {                
             // Get right neterminal
             right = top;
             // Get operator
@@ -241,12 +242,12 @@ bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool makeTree){
 
             // Set new node of non terminal E
             stack->top->node = root;
-
-        return true;
+            return true;
+        }
 
         // T -> E < E | E > E | E <= E | E >= E | E == E | E != E
         case 4:
-                
+        {   
             // Get right neterminal
             right = top;
             // Get operator
@@ -273,14 +274,12 @@ bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool makeTree){
 
             // Set new node of non terminal R
             stack->top->node = root;
-
-        return true;
+            return true;
+        }
 
         // E -> (E) 
         case 5:
-    
-            
-
+        {
             // Get neterminal
             T_STACK_ITEM_PTR neterminal = (stack_top(stack))->prev;
             root = neterminal->node;
@@ -299,8 +298,8 @@ bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool makeTree){
             if(stack_push(stack, NULL, neterminal->type)) return false;
             // Set new node, what is root of tree
             stack->top->node = root;
-
-        return true;
+            return true;
+        }
     }
 
     return false;
