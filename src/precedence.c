@@ -103,10 +103,8 @@ PRECEDENCE getPrecedence(OPERATOR_INDEX row, OPERATOR_INDEX coll){
 /**
  * @brief Function for freed memory of stack and tree
  * @param stack Pointer on stack for freed memory
- * @param treeStruct Pointer on structure of tree for freed memory 
 */
-void destroy_all(T_STACK_PTR stack, T_TREE_PTR treeStruct){
-    tree_dispose(treeStruct);
+void destroy_all(T_STACK_PTR stack){
     stack_dispose(stack);
     return;
 }
@@ -199,7 +197,7 @@ bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool makeTree){
             stack_pop(stack);
 
             // Push non terminal E
-            if(stack_push(stack, NULL, NON_TERMINAL_E, NULL)) return false;
+            if(stack_push(stack, NULL, NON_TERMINAL_E)) return false;
 
             // Set node of non terminal E
             (stack->top)->node = neterminalNode;    
@@ -247,7 +245,7 @@ bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool makeTree){
             stack_pop(stack);
 
             // Push non terminal E
-            if(stack_push(stack, NULL, NON_TERMINAL_E, NULL)) return false;
+            if(stack_push(stack, NULL, NON_TERMINAL_E)) return false;
 
             // Set new node of non terminal E
             stack->top->node = root;
@@ -279,7 +277,7 @@ bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool makeTree){
             stack_pop(stack);
             
             // Push non terminal R
-            if(stack_push(stack, NULL, NON_TERMINAL_R, NULL)) return false;
+            if(stack_push(stack, NULL, NON_TERMINAL_R)) return false;
 
             // Set new node of non terminal R
             stack->top->node = root;
@@ -305,7 +303,8 @@ bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool makeTree){
             stack_pop(stack);
 
             // Push non terminal E
-            if(stack_push(stack, NULL, neterminal->type, NULL)) return false;
+            
+            if(stack_push(stack, NULL, neterminal->type)) return false;
             // Set new node, what is root of tree
             stack->top->node = root;
 
@@ -319,12 +318,12 @@ bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool makeTree){
 /**
  * @brief Main function for precedence syntax analysis
  * @param buffer Pointer on buffer of tokens
- * @param tree Pointer on structure of tree
+ * @param tree Pointer on tree
  * @param typeEnd Type of end of expression
  * @param makeTree Flag for create tree
  * @return 0 if analysis is successful, 2 if syntax error, 99 if internal error (malloc for example)
 */
-RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_PTR treeStruct, TYPE_END typeEnd){
+RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_END typeEnd){
 
     // Create and init stack
     T_STACK stack;
@@ -368,7 +367,7 @@ RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_PTR treeStruct, TYPE_
 
         // If the number of relational operators is more than one, then is it error
         if(!continueReduction && (notEndDollar || beginDollar) && (countRelOperatoes > 1)){
-            destroy_all(&stack,treeStruct);
+            destroy_all(&stack);
             return RET_VAL_SYNTAX_ERR;
         }
         
@@ -378,7 +377,7 @@ RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_PTR treeStruct, TYPE_
 
         // If there are more right brackets than left brackets, then is it error
         if (!continueReduction && (notEndDollar || beginDollar) && countBrac < 0){
-            destroy_all(&stack,treeStruct);
+            destroy_all(&stack);
             return RET_VAL_SYNTAX_ERR;
         }
 
@@ -403,13 +402,13 @@ RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_PTR treeStruct, TYPE_
             
             // Shift
             if (stack_insert_less(&stack, topTerminal)){
-                destroy_all(&stack,treeStruct);
+                destroy_all(&stack);
                 return RET_VAL_INTERNAL_ERR;
             }
             
             // Push new terminal on stack
-            if(stack_push(&stack, token, TERMINAL, treeStruct)){
-                destroy_all(&stack,treeStruct);
+            if(stack_push(&stack, token, TERMINAL)){
+                destroy_all(&stack);
                 return RET_VAL_INTERNAL_ERR;
             }
 
@@ -424,8 +423,8 @@ RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_PTR treeStruct, TYPE_
             // The closest terminal to top of stack has the same precedence as the input symbol(=)
             case EQ_COMP:
 
-                if(stack_push(&stack, token, TERMINAL, treeStruct)){
-                    destroy_all(&stack,treeStruct);
+                if(stack_push(&stack, token, TERMINAL)){
+                    destroy_all(&stack);
                     return RET_VAL_INTERNAL_ERR;
                 }
                 continueReduction = false;
@@ -435,11 +434,11 @@ RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_PTR treeStruct, TYPE_
             // The closest terminal to top of stack has lower precedence than the input symbol(<) <=> shift
             case LSS_COMP:
                 if(stack_insert_less(&stack, topTerminal)){
-                    destroy_all(&stack,treeStruct);
+                    destroy_all(&stack);
                     return RET_VAL_INTERNAL_ERR;
                 }
-                if(stack_push(&stack, token, TERMINAL, treeStruct)){
-                    destroy_all(&stack,treeStruct);
+                if(stack_push(&stack, token, TERMINAL)){
+                    destroy_all(&stack);
                     return RET_VAL_INTERNAL_ERR;
                 }
                 break;
@@ -449,14 +448,14 @@ RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_PTR treeStruct, TYPE_
 
                 // Number of reduce rul
                 if (!canReduce(&stack)){
-                    destroy_all(&stack,treeStruct);
+                    destroy_all(&stack);
                     return RET_VAL_SYNTAX_ERR;
                 }
                 
 
                 
-                if(!reduce(&stack, &(treeStruct->tree) , canReduce(&stack), !notEndDollar)){
-                    destroy_all(&stack,treeStruct);
+                if(!reduce(&stack, tree , canReduce(&stack), !notEndDollar)){
+                    destroy_all(&stack);
                     return RET_VAL_INTERNAL_ERR;
                 }
                 
@@ -466,7 +465,7 @@ RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_PTR treeStruct, TYPE_
             
             // Error
             case ERR:
-                destroy_all(&stack,treeStruct);
+                destroy_all(&stack);
                 return RET_VAL_SYNTAX_ERR;
                 break;
 

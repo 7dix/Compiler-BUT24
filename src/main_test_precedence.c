@@ -8,8 +8,9 @@
 
 int main(void)
 {
-    T_TREE treeStruct;
-    tree_init(&treeStruct);
+    T_TREE_NODE_PTR tree;
+    tree_init(&tree);
+    
 
     T_TOKEN_BUFFER *buffer = init_token_buffer();
     if (buffer == NULL) {
@@ -52,13 +53,12 @@ int main(void)
     set_current_to_first(buffer);
     
     //printf("Precedence syntax analysis\n");
-    RetVal ret = precedenceSyntaxMain(buffer, &treeStruct, ASS_END);
+    RetVal ret = precedenceSyntaxMain(buffer, &tree, ASS_END);
     
     if(ret == 0){
-        T_TREE_NODE_PTR tree = getTree(&treeStruct); // Funkce getTree vrací přímo ukazatel na uzel
         printf("OK\n");
         postorder(tree); // Předání správného typu do postorder
-        tree_dispose(&treeStruct);
+        tree_dispose(&tree);
     }else{
         printf("NOK\n");
     }

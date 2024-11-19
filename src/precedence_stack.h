@@ -43,7 +43,7 @@ typedef struct T_STACK {
 void stack_init(T_STACK_PTR stack);
 
 // Function declarations for pushing push new stack item on top of stack
-RetVal stack_push(T_STACK_PTR stack, T_TOKEN *token, STACK_ITEM_TYPE type, T_TREE_PTR treeStruct);
+RetVal stack_push(T_STACK_PTR stack, T_TOKEN *token, STACK_ITEM_TYPE type);
 
 // Function declarations for poping item from top of stack, if stack is empty then nothing happens
 void stack_pop(T_STACK_PTR stack);

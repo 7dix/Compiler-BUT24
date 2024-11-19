@@ -33,10 +33,9 @@ bool is_empty(T_STACK_PTR stack){
  * @param stack Pontier on stack where item will be pushed
  * @param token Token for pushing item
  * @param type Type of item on stack
- * @param treeStruct Pointer on tree structure
  * @return 99 = RET_VAL_INTERNAL_ERR if everything is ok, 0 = RET_VAL_OK if everything is ok
  */
-RetVal stack_push(T_STACK_PTR stack, T_TOKEN *token, STACK_ITEM_TYPE type, T_TREE_PTR treeStruct){
+RetVal stack_push(T_STACK_PTR stack, T_TOKEN *token, STACK_ITEM_TYPE type){
 
     // Create new item of stack
     T_STACK_ITEM_PTR itemPush = (T_STACK_ITEM_PTR)malloc(sizeof(T_STACK_ITEM));
@@ -56,10 +55,6 @@ RetVal stack_push(T_STACK_PTR stack, T_TOKEN *token, STACK_ITEM_TYPE type, T_TRE
         // Create new node of tree
         T_TREE_NODE_PTR node = createNode(token);
 
-        // Insert new node to tree structure
-        if (tree_insert_first(treeStruct, node)) return RET_VAL_INTERNAL_ERR;
-        
-        
         // Check if node was created
         if(node == NULL) return RET_VAL_INTERNAL_ERR;
             
@@ -212,6 +207,7 @@ RetVal stack_insert_less(T_STACK_PTR stack, T_STACK_ITEM_PTR terminal){
 */
 void stack_dispose(T_STACK_PTR stack) {
     while (!is_empty(stack)) {
+        tree_dispose(&(stack->top->node));
         stack_pop(stack);
     }
     
