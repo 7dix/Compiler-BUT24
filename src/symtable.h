@@ -88,11 +88,19 @@ void hashtable_remove(Hashtable *ht, const char *key);
 
 typedef struct T_SCOPE {
     Hashtable *ht;
-    struct Scope *parent;
+    struct T_SCOPE *parent;
 } T_SCOPE;
 
 typedef struct T_SYM_TABLE {
-    Scope *top;
+    T_SCOPE *top;
 } T_SYM_TABLE;
+
+// Symbol table functions
+T_SYM_TABLE *symtable_init();
+bool symtable_add_scope(T_SYM_TABLE *table);
+void symtable_remove_scope(T_SYM_TABLE *table);
+Symbol *symtable_add_symbol(T_SYM_TABLE *table, const char *key, SymbolType type, SymbolData data);
+Symbol *symtable_find_symbol(T_SYM_TABLE *table, const char *key);
+void symtable_free(T_SYM_TABLE *table);
 
 #endif // H_SYMTABLE

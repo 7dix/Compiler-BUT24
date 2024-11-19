@@ -180,7 +180,7 @@ void symtable_remove_scope(T_SYM_TABLE *table) {
 }
 
 // Add a new symbol to the current scope
-Symbol *symtable_add_to_scope(T_SYM_TABLE *table, const char *key, SymbolType type, SymbolData data) {
+Symbol *symtable_add_symbol(T_SYM_TABLE *table, const char *key, SymbolType type, SymbolData data) {
     if (table == NULL || table->top == NULL) {
         return NULL;
     }
@@ -188,9 +188,9 @@ Symbol *symtable_add_to_scope(T_SYM_TABLE *table, const char *key, SymbolType ty
 }
 
 // Find a symbol in the symbol table,  go through all scopes
-Symbol *find_in_symtable(T_SYM_TABLE *table, const char *key) {
+Symbol *symtable_find_symbol(T_SYM_TABLE *table, const char *key) {
     if (table == NULL || table->top == NULL) {
-        return;
+        return NULL;
     }
     
     T_SCOPE *current_scope = table->top;
