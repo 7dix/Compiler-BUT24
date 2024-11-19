@@ -282,20 +282,27 @@ bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool makeTree){
         {
             // Get neterminal
             T_STACK_ITEM_PTR neterminal = (stack_top(stack))->prev;
+            STACK_ITEM_TYPE type = neterminal->type;
             root = neterminal->node;
 
+            // Free node of right bracket
+            free((stack_top(stack))->node);
             // Pop RB
             stack_pop(stack);
             // Pop Neterminal
             stack_pop(stack);
+            // Free node of left bracket
+            free((stack_top(stack))->node);
             // Pop LB
             stack_pop(stack);
             // Pop shift
             stack_pop(stack);
 
+            
+
             // Push non terminal E
             
-            if(stack_push(stack, NULL, neterminal->type)) return false;
+            if(stack_push(stack, NULL, type)) return false;
             // Set new node, what is root of tree
             stack->top->node = root;
             return true;
