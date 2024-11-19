@@ -964,6 +964,7 @@ int get_token(T_TOKEN *token) {
                     token->length = lexeme_length;
                     token->line = line_number - 1;
                     free(lexeme);
+                    unget_char(c);
                     return RET_VAL_OK;
                 }
                 break;
