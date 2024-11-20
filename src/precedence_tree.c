@@ -40,7 +40,8 @@ T_TREE_NODE_PTR createNode(T_TOKEN *token){
     node->right = NULL;
     node->token = token;
     bool convertToFloat = false;
-
+    bool convertToInt = false;
+    
     // Return node
     return node;
 
