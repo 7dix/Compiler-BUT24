@@ -24,6 +24,7 @@ typedef struct T_TREE_NODE {
     struct T_TREE_NODE *left;
     struct T_TREE_NODE *right;
     T_TOKEN *token;
+    bool convertToFloat;
 } T_TREE_NODE, *T_TREE_NODE_PTR;
 
 
