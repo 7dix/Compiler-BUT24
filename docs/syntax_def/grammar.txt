@@ -103,7 +103,7 @@ ASSIGN -> identifier ID_ASSIGN
 ASSIGN -> ifj . identifier ( ARGUMENTS ) ;
 
 ID_ASSIGN -> EXPRESSION ;
-ID_ASSIGN -> ; # vrat zpet a 
+ID_ASSIGN -> ; # vrat zpet a EXPRESSION
 ID_ASSIGN -> FUNCTION_ARGUMENTS
 
 FUNCTION_ARGUMENTS -> ( ARGUMENTS ) ;
