@@ -276,7 +276,7 @@ bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer) {
     }
 
     // save function name
-    char *fn_name = strdup(token->lexeme);
+    char *fn_name = token->lexeme;
 
     if (!get_save_token(buffer, &token)) 
         return false; // (
@@ -302,11 +302,20 @@ bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
-    // Add function to symtable
-    if (!symtable_add_symbol(ST, fn_name, SYM_FUNC, data)) {
-        return false;
+    // Add function to symtable if it does not exist
+    if (symtable_find_symbol(ST, fn_name) == NULL) {
+        if (!symtable_add_symbol(ST, fn_name, SYM_FUNC, data)) {
+            // TODO: process error
+            error_flag_fp = RET_VAL_INTERNAL_ERR;
+            return false;
+        }
     }
 
+    else {
+        // TODO: process error
+        error_flag_fp = RET_VAL_SEMANTIC_REDEF_OR_BAD_ASSIGN_ERR;
+        return false;
+    }
 
     return true;
 }
@@ -405,7 +414,7 @@ bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer, SymbolData *data) {
             return false;
         }
 
-        if (!simulate_fn_body(buffer)) {
+        if (!simulate_fn_body(buffer)) { // CODE_BLOCK_NEXT
             return false;
         }
 
@@ -515,7 +524,7 @@ bool syntax_fp_param(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         return false;
     }
 
-    param.name = strdup(token->lexeme);
+    param.name = token->lexeme;
 
     if (!get_save_token(buffer, &token)) 
         return false; // :

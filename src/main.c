@@ -34,12 +34,15 @@ int main() {
     // Initialize symtable and add global scope
     ST = symtable_init();
     if (ST == NULL) {
+        free_token_buffer(&token_buffer);
         fprintf(stderr, "Error: Memory allocation failed in symtable_init\n");
         return RET_VAL_INTERNAL_ERR;
     }
     if (!symtable_add_scope(ST)) {
+        free_token_buffer(&token_buffer);
+        symtable_free(ST);
         fprintf(stderr, "Error: Memory allocation failed in symtable_add_scope\n");
-        return 1;
+        return RET_VAL_INTERNAL_ERR;
     }
 
     // Run first phase of the compiler
@@ -61,7 +64,7 @@ int main() {
                 break;
         }
         free_token_buffer(&token_buffer);
-        // TODO: free symtable as well
+        symtable_free(ST);
         return error_code;
     }
 
@@ -87,7 +90,7 @@ int main() {
                 break;
         }
         free_token_buffer(&token_buffer);
-        // TODO: free symtable as well
+        symtable_free(ST);
         return error_code;
     }
 
@@ -97,7 +100,7 @@ int main() {
     // TODO: cleaning, ...
 
     free_token_buffer(&token_buffer);
-    // TODO: free symtable as well
+    symtable_free(ST);
 
     return RET_VAL_OK;
 }
