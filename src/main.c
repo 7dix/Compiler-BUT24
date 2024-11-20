@@ -59,6 +59,16 @@ int main() {
             case RET_VAL_INTERNAL_ERR:
                 fprintf(stderr, "Internal error\n");
                 break;
+            case RET_VAL_SEMANTIC_UNDEFINED_ERR:
+            case RET_VAL_SEMANTIC_FUNCTION_ERR:
+            case RET_VAL_SEMANTIC_REDEF_OR_BAD_ASSIGN_ERR:
+            case RET_VAL_SEMANTIC_FUNC_RETURN_ERR:
+            case RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR:
+            case RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR:
+            case RET_VAL_SEMANTIC_UNUSED_VAR_ERR:
+            case RET_VAL_SEMANTIC_OTHER_ERR:
+                fprintf(stderr, "Semantic error\n");
+                break;
             default:
                 fprintf(stderr, "Unknown error\n");
                 break;
@@ -84,7 +94,16 @@ int main() {
             case RET_VAL_INTERNAL_ERR:
                 fprintf(stderr, "Internal error\n");
                 break;
-            // TODO: add more error codes, semantics mostly
+            case RET_VAL_SEMANTIC_UNDEFINED_ERR:
+            case RET_VAL_SEMANTIC_FUNCTION_ERR:
+            case RET_VAL_SEMANTIC_REDEF_OR_BAD_ASSIGN_ERR:
+            case RET_VAL_SEMANTIC_FUNC_RETURN_ERR:
+            case RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR:
+            case RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR:
+            case RET_VAL_SEMANTIC_UNUSED_VAR_ERR:
+            case RET_VAL_SEMANTIC_OTHER_ERR:
+                fprintf(stderr, "Semantic error\n");
+                break;
             default:
                 fprintf(stderr, "Unknown error\n");
                 break;
