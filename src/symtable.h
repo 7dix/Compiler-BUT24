@@ -26,6 +26,8 @@ typedef enum {
     VAR_INT_NULL,
     VAR_FLOAT_NULL,
     VAR_STRING_NULL,
+    STRING_VAR_STRING, // special case for ifj.string()
+    VAR_ANY, // special case for ifj.write()
     VAR_VOID
 } VarType;
 
@@ -92,11 +94,14 @@ void hashtable_remove(Hashtable *ht, const char *key);
 
 typedef struct T_SCOPE {
     Hashtable *ht;
+    unsigned int label_cnt_1;
+    unsigned int label_cnt_2;
     struct T_SCOPE *parent;
 } T_SCOPE;
 
 typedef struct T_SYM_TABLE {
     T_SCOPE *top;
+    unsigned int label_cnt;
 } T_SYM_TABLE;
 
 // Symbol table functions

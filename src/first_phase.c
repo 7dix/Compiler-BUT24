@@ -16,6 +16,141 @@
 int error_flag_fp = RET_VAL_OK;
 bool needs_last_token = false;
 
+bool add_built_in_functions() {
+    SymbolData data;
+    
+    // ifj.readstr() ?[]u8
+    data.func.return_type = VAR_STRING_NULL;
+    data.func.argc = 0;
+    data.func.argv = NULL;
+    if (symtable_add_symbol(ST, "ifj.readstr", SYM_FUNC, data) == NULL)
+        return false;
+
+    // ifj.readi32() ?i32
+    data.func.return_type = VAR_INT_NULL;
+    if (symtable_add_symbol(ST, "ifj.readi32", SYM_FUNC, data) == NULL)
+        return false;
+
+    // ifj.readf64() ?f64
+    data.func.return_type = VAR_FLOAT_NULL;
+    if (symtable_add_symbol(ST, "ifj.readf64", SYM_FUNC, data) == NULL)
+        return false;
+
+    // ifj.write(term: any) void
+    data.func.return_type = VAR_VOID;
+    error_flag_fp = add_param_to_symbol_data(&data, (Param){"term", VAR_ANY});
+    if (error_flag_fp != RET_VAL_OK)
+        return false;
+    if (symtable_add_symbol(ST, "ifj.write", SYM_FUNC, data) == NULL)
+        return false;
+    data.func.argc = 0;
+    data.func.argv = NULL;
+
+    // ifj.i2f(term: i32) f64
+    data.func.return_type = VAR_FLOAT;
+    error_flag_fp = add_param_to_symbol_data(&data, (Param){"term", VAR_INT});
+    if (error_flag_fp != RET_VAL_OK)
+        return false;
+    if (symtable_add_symbol(ST, "ifj.i2f", SYM_FUNC, data) == NULL)
+        return false;
+    data.func.argc = 0;
+    data.func.argv = NULL;
+
+    // ifj.f2i(term: f64) i32
+    data.func.return_type = VAR_INT;
+    error_flag_fp = add_param_to_symbol_data(&data, (Param){"term", VAR_FLOAT});
+    if (error_flag_fp != RET_VAL_OK)
+        return false;
+    if (symtable_add_symbol(ST, "ifj.f2i", SYM_FUNC, data) == NULL)
+        return false;
+    data.func.argc = 0;
+    data.func.argv = NULL;
+
+    // ifj.string(term: str_u8) []u8
+    data.func.return_type = STRING_VAR_STRING;
+    error_flag_fp = add_param_to_symbol_data(&data, (Param){"term", VAR_STRING});
+    if (error_flag_fp != RET_VAL_OK)
+        return false;
+    if (symtable_add_symbol(ST, "ifj.string", SYM_FUNC, data) == NULL)
+        return false;
+    data.func.argc = 0;
+    data.func.argv = NULL;
+
+    // ifj.length(s: []u8) i32
+    data.func.return_type = VAR_INT;
+    error_flag_fp = add_param_to_symbol_data(&data, (Param){"s", VAR_STRING});
+    if (error_flag_fp != RET_VAL_OK)
+        return false;
+    if (symtable_add_symbol(ST, "ifj.length", SYM_FUNC, data) == NULL)
+        return false;
+    data.func.argc = 0;
+    data.func.argv = NULL;
+
+    // ifj.concat(s1: []u8, s2: []u8) []u8
+    data.func.return_type = VAR_STRING;
+    error_flag_fp = add_param_to_symbol_data(&data, (Param){"s1", VAR_STRING});
+    if (error_flag_fp != RET_VAL_OK)
+        return false;
+    error_flag_fp = add_param_to_symbol_data(&data, (Param){"s2", VAR_STRING});
+    if (error_flag_fp != RET_VAL_OK)
+        return false;
+    if (symtable_add_symbol(ST, "ifj.concat", SYM_FUNC, data) == NULL)
+        return false;
+    data.func.argc = 0;
+    data.func.argv = NULL;
+
+    // ifj.substr(s: []u8, i: i32, j: i32) ?[]u8
+    data.func.return_type = VAR_STRING_NULL;
+    error_flag_fp = add_param_to_symbol_data(&data, (Param){"s", VAR_STRING});
+    if (error_flag_fp != RET_VAL_OK)
+        return false;
+    error_flag_fp = add_param_to_symbol_data(&data, (Param){"i", VAR_INT});
+    if (error_flag_fp != RET_VAL_OK)
+        return false;
+    error_flag_fp = add_param_to_symbol_data(&data, (Param){"j", VAR_INT});
+    if (error_flag_fp != RET_VAL_OK)
+        return false;
+    if (symtable_add_symbol(ST, "ifj.substr", SYM_FUNC, data) == NULL)
+        return false;
+    data.func.argc = 0;
+    data.func.argv = NULL;
+
+    // ifj.strcmp(s1: []u8, s2: []u8) i32
+    data.func.return_type = VAR_INT;
+    error_flag_fp = add_param_to_symbol_data(&data, (Param){"s1", VAR_STRING});
+    if (error_flag_fp != RET_VAL_OK)
+        return false;
+    error_flag_fp = add_param_to_symbol_data(&data, (Param){"s2", VAR_STRING});
+    if (error_flag_fp != RET_VAL_OK)
+        return false;
+    if (symtable_add_symbol(ST, "ifj.strcmp", SYM_FUNC, data) == NULL)
+        return false;
+    data.func.argc = 0;
+    data.func.argv = NULL;
+
+    // ifj.ord(s: []u8, i: i32) i32
+    data.func.return_type = VAR_INT;
+    error_flag_fp = add_param_to_symbol_data(&data, (Param){"s", VAR_STRING});
+    if (error_flag_fp != RET_VAL_OK)
+        return false;
+    error_flag_fp = add_param_to_symbol_data(&data, (Param){"i", VAR_INT});
+    if (error_flag_fp != RET_VAL_OK)
+        return false;
+    if (symtable_add_symbol(ST, "ifj.ord", SYM_FUNC, data) == NULL)
+        return false;
+    data.func.argc = 0;
+    data.func.argv = NULL;
+    
+    // ifj.chr(i: i32) []u8
+    data.func.return_type = VAR_STRING;
+    error_flag_fp = add_param_to_symbol_data(&data, (Param){"i", VAR_INT});
+    if (error_flag_fp != RET_VAL_OK)
+        return false;
+    if (symtable_add_symbol(ST, "ifj.chr", SYM_FUNC, data) == NULL)
+        return false;
+
+    return true;
+}
 
 bool get_save_token(T_TOKEN_BUFFER *token_buffer, T_TOKEN **token) {
 
@@ -61,6 +196,17 @@ int first_phase(T_TOKEN_BUFFER *token_buffer) {
     // Run simplified parser to obtain function signatures
     if (!syntax_fp_start(token_buffer)) {
         return error_flag_fp;
+    }
+
+    // Check existence of main function
+    if (symtable_find_symbol(ST, "main") == NULL) {
+        // TODO: process error
+        return RET_VAL_SYNTAX_ERR; // maybe RET_VAL_SEMANTIC_UNDEFINED_ERR
+    }
+
+    // Add built-in functions to symtable
+    if (!add_built_in_functions()) {
+        return RET_VAL_INTERNAL_ERR;
     }
 
     return RET_VAL_OK;
