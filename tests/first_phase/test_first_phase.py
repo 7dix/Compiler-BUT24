@@ -64,6 +64,25 @@ def run_test(test_folder, test_number):
     expected_lines = set(expected_output.splitlines())
     actual_lines = set(actual_output.splitlines())
     
+    # Concat excepted lines with buil-in funcs
+    builtins = [
+        "pub fn ifj.readf64() ?f64",
+        "pub fn ifj.f2i(term: f64) i32",
+        "pub fn ifj.substr(s: []u8, i: i32, j: i32) ?[]u8",
+        "pub fn ifj.length(s: []u8) i32",
+        "pub fn ifj.readstr() ?[]u8",
+        "pub fn ifj.concat(s1: []u8, s2: []u8) []u8",
+        "pub fn ifj.ord(s: []u8, i: i32) i32",
+        "pub fn ifj.readi32() ?i32",
+        "pub fn ifj.write(term: unknown) void",
+        "pub fn ifj.chr(i: i32) []u8",
+        "pub fn ifj.i2f(term: i32) f64",
+        "pub fn ifj.string(term: []u8) unknown",
+        "pub fn ifj.strcmp(s1: []u8, s2: []u8) i32",
+    ]
+    
+    expected_lines = expected_lines.union(set(builtins))
+    
     # Compare sets of lines
     if expected_lines == actual_lines:
         print_colored(f"TEST {test_number} SUCCESSFUL", "green")
