@@ -4,6 +4,7 @@
 // AUTHORS:
 //  <Marek Tenora> (xtenor02)
 // <Otakar Kočí> (xkocio00)
+// Martin Zůbek (253206)
 //
 // YEAR: 2024
 #include "symtable.h"
