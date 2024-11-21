@@ -72,6 +72,7 @@ OPERATOR_INDEX precedenceIndex(TOKEN_TYPE type){
         case IDENTIFIER:return ID;
         case INT:return ID;
         case FLOAT:return ID;
+        case NULL_TOKEN:return ID;
         case PLUS:return PL;
         case MINUS:return MIN;
         case MULTIPLY:return MUL;
