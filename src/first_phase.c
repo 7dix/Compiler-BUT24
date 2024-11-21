@@ -280,7 +280,7 @@ int first_phase(T_TOKEN_BUFFER *token_buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_start(T_TOKEN_BUFFER *token_buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
 
     if (!syntax_fp_prolog(token_buffer)) { // PROLOG
         return false;
@@ -310,7 +310,7 @@ bool syntax_fp_start(T_TOKEN_BUFFER *token_buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_prolog(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
     T_TOKEN *token;
 
     if (!get_save_token(buffer, &token)) // const
@@ -412,7 +412,7 @@ bool syntax_fp_prolog(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_fn_defs(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
 
     if (!syntax_fp_fn_def(buffer)) { // FN_DEF
         return false;
@@ -439,7 +439,7 @@ bool syntax_fp_fn_defs(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
     T_TOKEN *token;
 
     // Create new symbol data
@@ -534,7 +534,7 @@ bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_fn_def_next(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
     T_TOKEN *token;
     
     // we have two branches, choose here
@@ -584,7 +584,7 @@ bool syntax_fp_fn_def_next(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer, SymbolData *data) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
     // TODO: possible simplification by checking only void type
 
     T_TOKEN *token;
@@ -662,7 +662,7 @@ bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_params(T_TOKEN_BUFFER *buffer, SymbolData *data) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
     T_TOKEN *token;
     
     // we have two branches, choose here
@@ -707,7 +707,7 @@ bool syntax_fp_params(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_param(T_TOKEN_BUFFER *buffer, SymbolData *data) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
     T_TOKEN *token;
     Param param;
     param.name = NULL;
@@ -771,7 +771,7 @@ bool syntax_fp_param(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_type(T_TOKEN_BUFFER *buffer, VarType *type) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
     T_TOKEN *token;
 
     // check whether token is one of the types
@@ -830,7 +830,7 @@ bool syntax_fp_type(T_TOKEN_BUFFER *buffer, VarType *type) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_param_next(T_TOKEN_BUFFER *buffer, SymbolData *data) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
     T_TOKEN *token;
 
     // we have two branches, choose here
@@ -875,7 +875,7 @@ bool syntax_fp_param_next(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_param_after_comma(T_TOKEN_BUFFER *buffer, SymbolData *data) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
     T_TOKEN *token;
 
     // we have two branches, choose here
