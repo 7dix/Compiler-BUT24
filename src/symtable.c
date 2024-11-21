@@ -157,6 +157,7 @@ T_SYM_TABLE *symtable_init()
     {
         return NULL;
     }
+    table->var_id_cnt = 0;
     table->top = NULL;
     return table;
 }
@@ -196,6 +197,7 @@ Symbol *symtable_add_symbol(T_SYM_TABLE *table, const char *key, SymbolType type
     if (table == NULL || table->top == NULL) {
         return NULL;
     }
+    data.var.id = table->var_id_cnt++;
     return hashtable_insert(table->top->ht, key, type, data);
 }
 
@@ -249,23 +251,6 @@ int add_param_to_symbol_data(SymbolData *data, Param param) {
     return RET_VAL_OK;
 }
 
-// Checks for unused and unmodified variables in the symbol table
-int check_for_unused_vars(T_SYM_TABLE *table) {
-    if (table == NULL || table->top == NULL) {
-        return RET_VAL_INTERNAL_ERR;
-    }
-
-    Hashtable *ht = table->top->ht;
-    for (int i = 0; i < HASHTABLE_SIZE; i++) {
-        if (ht->table[i].occupied && ht->table[i].type == SYM_VAR) {
-            if (!ht->table[i].data.var.used || !ht->table[i].data.var.modified) {
-                return RET_VAL_SEMANTIC_UNUSED_VAR_ERR;
-            }
-        }
-    }
-
-    return RET_VAL_OK;
-}
 
 // Set the variable as modified
 void set_var_modified(Symbol *symbol) {
@@ -287,4 +272,23 @@ void set_var_used(Symbol *symbol) {
     }
 }
 
+// Get the var id
+int get_var_id(T_SYM_TABLE *table, const char *key) {
+    Symbol *symbol = symtable_find_symbol(table, key);
+    if (symbol == NULL) {
+        return -1;
+    }
+    return symbol->data.var.id;
+}
 
+// get variable
+Symbol *get_var(T_SYM_TABLE *table, const char *name) {
+    Symbol *symbol = symtable_find_symbol(table, name);
+    if (symbol == NULL) {
+        return NULL;
+    }
+    if (symbol->type != SYM_VAR) {
+        return NULL;
+    }
+    return symbol;
+}

@@ -51,6 +51,7 @@ typedef union
         bool used;
         VarType type;
         void *value;
+        int id;
     } var;
     struct {
         VarType return_type;
@@ -103,6 +104,7 @@ typedef struct T_SCOPE {
 typedef struct T_SYM_TABLE {
     T_SCOPE *top;
     unsigned int label_cnt;
+    int var_id_cnt;
 } T_SYM_TABLE;
 
 // Symbol table functions
@@ -112,6 +114,10 @@ void symtable_remove_scope(T_SYM_TABLE *table);
 Symbol *symtable_add_symbol(T_SYM_TABLE *table, const char *key, SymbolType type, SymbolData data);
 Symbol *symtable_find_symbol(T_SYM_TABLE *table, const char *key);
 void symtable_free(T_SYM_TABLE *table);
+void set_var_modified(Symbol *symbol);
+void set_var_used(Symbol *symbol);
+int get_var_id(T_SYM_TABLE *table, const char *key);
+Symbol *get_var(T_SYM_TABLE *table, const char *name);
 
 extern T_SYM_TABLE *ST;
 

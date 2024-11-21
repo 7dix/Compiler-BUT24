@@ -96,14 +96,20 @@ void free_fn_call_args(T_FN_CALL *fn_call) {
     free(fn_call->argv);
 }
 
-// get variable
-Symbol *get_var(T_SYM_TABLE *table, const char *name) {
-    Symbol *symbol = symtable_find_symbol(table, name);
-    if (symbol == NULL) {
-        return NULL;
+// Checks for unused and unmodified variables in the symbol table
+int check_for_unused_vars(T_SYM_TABLE *table) {
+    if (table == NULL || table->top == NULL) {
+        return RET_VAL_INTERNAL_ERR;
     }
-    if (symbol->type != SYM_VAR) {
-        return NULL;
+
+    Hashtable *ht = table->top->ht;
+    for (int i = 0; i < HASHTABLE_SIZE; i++) {
+        if (ht->table[i].occupied && ht->table[i].type == SYM_VAR) {
+            if (!ht->table[i].data.var.used || !ht->table[i].data.var.modified) {
+                return RET_VAL_SEMANTIC_UNUSED_VAR_ERR;
+            }
+        }
     }
-    return symbol;
+
+    return RET_VAL_OK;
 }
