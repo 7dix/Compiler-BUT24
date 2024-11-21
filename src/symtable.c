@@ -249,8 +249,8 @@ int add_param_to_symbol_data(SymbolData *data, Param param) {
     return RET_VAL_OK;
 }
 
-// Checks for unused symbols in current top scope
-int check_for_unused_symbols(T_SYM_TABLE *table) {
+// Checks for unused and unmodified variables in the symbol table
+int check_for_unused_vars(T_SYM_TABLE *table) {
     if (table == NULL || table->top == NULL) {
         return RET_VAL_INTERNAL_ERR;
     }
@@ -267,8 +267,8 @@ int check_for_unused_symbols(T_SYM_TABLE *table) {
     return RET_VAL_OK;
 }
 
-// Set the symbol as modified
-void set_symbol_modified(Symbol *symbol) {
+// Set the variable as modified
+void set_var_modified(Symbol *symbol) {
     if (symbol == NULL) {
         return;
     }
@@ -277,8 +277,8 @@ void set_symbol_modified(Symbol *symbol) {
     }
 }
 
-// Set the symbol as used
-void set_symbol_used(Symbol *symbol) {
+// Set the variable as used
+void set_var_used(Symbol *symbol) {
     if (symbol == NULL) {
         return;
     }
@@ -286,3 +286,5 @@ void set_symbol_used(Symbol *symbol) {
         symbol->data.var.used = true;
     }
 }
+
+
