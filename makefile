@@ -15,6 +15,7 @@ SRC_SCANNER_TEST = src/main_test_scanner.c src/scanner.c
 SRC_TOKEN_BUFFER_TEST = src/main_test_token_buffer.c src/token_buffer.c src/scanner.c
 SRC_PRECEDENCE_TEST = src/main_test_precedence.c src/scanner.c src/token_buffer.c src/precedence.c src/precedence_stack.c src/precedence_tree.c 
 SRC_SYMTABLE_TEST = src/main_test_symtable.c src/symtable.c
+SRC_FIRST_PHASE_TEST = src/main_test_first_phase.c src/scanner.c src/token_buffer.c src/first_phase.c src/symtable.c
 
 # Output executables
 OUTPUT = bin/ifj24
@@ -23,6 +24,7 @@ DEBUG_SCANNER_OUTPUT = bin/scannerdebug
 DEBUG_TOKEN_BUFFER_OUTPUT = bin/tokenbufferdebug
 DEBUG_PRECEDENCE_OUTPUT = bin/precedencedebug
 DEBUG_SYMTABLE_OUTPUT = bin/symtabledebug
+DEBUG_FIRST_PHASE_OUTPUT = bin/firstphasedebug
 
 # Default target
 all: $(OUTPUT)
@@ -52,6 +54,10 @@ debug_precedence: bin $(SRC_PRECEDENCE_TEST)
 debug_symtable: bin $(SRC_SYMTABLE_TEST)
 	$(CC) $(CFLAGS) $(DEBUG_FLAGS) -o $(DEBUG_SYMTABLE_OUTPUT) $(SRC_SYMTABLE_TEST)
 
+debug_first_phase: bin $(SRC_FIRST_PHASE_TEST)
+	$(CC) $(CFLAGS) $(DEBUG_FLAGS) -o $(DEBUG_FIRST_PHASE_OUTPUT) $(SRC_FIRST_PHASE_TEST)
+
+
 # Test targets
 test_scanner: debug_scanner
 	cd tests/scanner &&  python3 test_scanner.py
@@ -68,10 +74,13 @@ test_precedence: debug_precedence
 test_symtable: debug_symtable
 	bin/symtabledebug
 
+test_first_phase: debug_first_phase
+	cd tests/first_phase && python3 test_first_phase.py -pubfn
+
 test: test_scanner test_token_buffer test_precedence test_symtable test_parser_retcode
 
 # Clean target to remove the executables
 clean:
-	rm -f $(OUTPUT) $(DEBUG_OUTPUT) $(DEBUG_SCANNER_OUTPUT) $(DEBUG_TOKEN_BUFFER_OUTPUT)
+	rm -f $(OUTPUT) $(DEBUG_OUTPUT) $(DEBUG_SCANNER_OUTPUT) $(DEBUG_TOKEN_BUFFER_OUTPUT) $(DEBUG_FIRST_PHASE_OUTPUT)
 
 .PHONY: all debug clean bin test

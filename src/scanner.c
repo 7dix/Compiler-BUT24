@@ -294,6 +294,9 @@ int get_token(T_TOKEN *token) {
 
         // Update token line number
         token->line = line_number;
+        if (line_number == 29) {
+            line_number = 29;
+        }
 
         if (c == EOF) {
             // End of file

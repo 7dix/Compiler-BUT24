@@ -14,6 +14,12 @@ Hashtable *hashtable_init() {
     if (!ht) return NULL;
     for (int i = 0; i < HASHTABLE_SIZE; i++) {
         ht->table[i].occupied = false; // Mark all slots as unoccupied initially
+        ht->table[i].deleted = false;
+        ht->table[i].name = NULL;
+        ht->table[i].type = SYM_VAR;
+        ht->table[i].data.var.is_const = false;
+        ht->table[i].data.var.type = VAR_VOID;
+        ht->table[i].data.var.value = NULL;
     }
     ht->count = 0;
     return ht;
