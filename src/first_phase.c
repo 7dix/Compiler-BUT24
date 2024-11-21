@@ -18,31 +18,40 @@ bool needs_last_token = false;
 
 bool add_built_in_functions() {
     SymbolData data;
+    Symbol *symbol;
     
     // ifj.readstr() ?[]u8
     data.func.return_type = VAR_STRING_NULL;
     data.func.argc = 0;
     data.func.argv = NULL;
-    if (symtable_add_symbol(ST, "ifj.readstr", SYM_FUNC, data) == NULL)
+    if ((symbol = symtable_add_symbol(ST, "ifj.readstr", SYM_FUNC, data)) == NULL)
         return false;
+    else
+        symbol->used = true;
 
     // ifj.readi32() ?i32
     data.func.return_type = VAR_INT_NULL;
-    if (symtable_add_symbol(ST, "ifj.readi32", SYM_FUNC, data) == NULL)
+    if ((symbol = symtable_add_symbol(ST, "ifj.readi32", SYM_FUNC, data)) == NULL)
         return false;
+    else
+        symbol->used = true;
 
     // ifj.readf64() ?f64
     data.func.return_type = VAR_FLOAT_NULL;
-    if (symtable_add_symbol(ST, "ifj.readf64", SYM_FUNC, data) == NULL)
+    if ((symbol = symtable_add_symbol(ST, "ifj.readf64", SYM_FUNC, data)) == NULL)
         return false;
+    else
+        symbol->used = true;
 
     // ifj.write(term: any) void
     data.func.return_type = VAR_VOID;
     error_flag_fp = add_param_to_symbol_data(&data, (Param){"term", VAR_ANY});
     if (error_flag_fp != RET_VAL_OK)
         return false;
-    if (symtable_add_symbol(ST, "ifj.write", SYM_FUNC, data) == NULL)
+    if ((symbol = symtable_add_symbol(ST, "ifj.write", SYM_FUNC, data)) == NULL)
         return false;
+    else
+        symbol->used = true;
     data.func.argc = 0;
     data.func.argv = NULL;
 
@@ -51,8 +60,10 @@ bool add_built_in_functions() {
     error_flag_fp = add_param_to_symbol_data(&data, (Param){"term", VAR_INT});
     if (error_flag_fp != RET_VAL_OK)
         return false;
-    if (symtable_add_symbol(ST, "ifj.i2f", SYM_FUNC, data) == NULL)
+    if ((symbol = symtable_add_symbol(ST, "ifj.i2f", SYM_FUNC, data)) == NULL)
         return false;
+    else
+        symbol->used = true;
     data.func.argc = 0;
     data.func.argv = NULL;
 
@@ -61,8 +72,10 @@ bool add_built_in_functions() {
     error_flag_fp = add_param_to_symbol_data(&data, (Param){"term", VAR_FLOAT});
     if (error_flag_fp != RET_VAL_OK)
         return false;
-    if (symtable_add_symbol(ST, "ifj.f2i", SYM_FUNC, data) == NULL)
+    if ((symbol = symtable_add_symbol(ST, "ifj.f2i", SYM_FUNC, data)) == NULL)
         return false;
+    else
+        symbol->used = true;
     data.func.argc = 0;
     data.func.argv = NULL;
 
@@ -71,8 +84,10 @@ bool add_built_in_functions() {
     error_flag_fp = add_param_to_symbol_data(&data, (Param){"term", VAR_STRING});
     if (error_flag_fp != RET_VAL_OK)
         return false;
-    if (symtable_add_symbol(ST, "ifj.string", SYM_FUNC, data) == NULL)
+    if ((symbol = symtable_add_symbol(ST, "ifj.string", SYM_FUNC, data)) == NULL)
         return false;
+    else
+        symbol->used = true;
     data.func.argc = 0;
     data.func.argv = NULL;
 
@@ -81,8 +96,10 @@ bool add_built_in_functions() {
     error_flag_fp = add_param_to_symbol_data(&data, (Param){"s", VAR_STRING});
     if (error_flag_fp != RET_VAL_OK)
         return false;
-    if (symtable_add_symbol(ST, "ifj.length", SYM_FUNC, data) == NULL)
+    if ((symbol = symtable_add_symbol(ST, "ifj.length", SYM_FUNC, data)) == NULL)
         return false;
+    else
+        symbol->used = true;
     data.func.argc = 0;
     data.func.argv = NULL;
 
@@ -94,8 +111,10 @@ bool add_built_in_functions() {
     error_flag_fp = add_param_to_symbol_data(&data, (Param){"s2", VAR_STRING});
     if (error_flag_fp != RET_VAL_OK)
         return false;
-    if (symtable_add_symbol(ST, "ifj.concat", SYM_FUNC, data) == NULL)
+    if ((symbol = symtable_add_symbol(ST, "ifj.concat", SYM_FUNC, data)) == NULL)
         return false;
+    else
+        symbol->used = true;
     data.func.argc = 0;
     data.func.argv = NULL;
 
@@ -110,8 +129,10 @@ bool add_built_in_functions() {
     error_flag_fp = add_param_to_symbol_data(&data, (Param){"j", VAR_INT});
     if (error_flag_fp != RET_VAL_OK)
         return false;
-    if (symtable_add_symbol(ST, "ifj.substr", SYM_FUNC, data) == NULL)
+    if ((symbol = symtable_add_symbol(ST, "ifj.substr", SYM_FUNC, data)) == NULL)
         return false;
+    else
+        symbol->used = true;
     data.func.argc = 0;
     data.func.argv = NULL;
 
@@ -123,8 +144,10 @@ bool add_built_in_functions() {
     error_flag_fp = add_param_to_symbol_data(&data, (Param){"s2", VAR_STRING});
     if (error_flag_fp != RET_VAL_OK)
         return false;
-    if (symtable_add_symbol(ST, "ifj.strcmp", SYM_FUNC, data) == NULL)
+    if ((symbol = symtable_add_symbol(ST, "ifj.strcmp", SYM_FUNC, data)) == NULL)
         return false;
+    else
+        symbol->used = true;
     data.func.argc = 0;
     data.func.argv = NULL;
 
@@ -136,8 +159,10 @@ bool add_built_in_functions() {
     error_flag_fp = add_param_to_symbol_data(&data, (Param){"i", VAR_INT});
     if (error_flag_fp != RET_VAL_OK)
         return false;
-    if (symtable_add_symbol(ST, "ifj.ord", SYM_FUNC, data) == NULL)
+    if ((symbol = symtable_add_symbol(ST, "ifj.ord", SYM_FUNC, data)) == NULL)
         return false;
+    else
+        symbol->used = true;
     data.func.argc = 0;
     data.func.argv = NULL;
     
@@ -146,8 +171,10 @@ bool add_built_in_functions() {
     error_flag_fp = add_param_to_symbol_data(&data, (Param){"i", VAR_INT});
     if (error_flag_fp != RET_VAL_OK)
         return false;
-    if (symtable_add_symbol(ST, "ifj.chr", SYM_FUNC, data) == NULL)
+    if ((symbol = symtable_add_symbol(ST, "ifj.chr", SYM_FUNC, data)) == NULL)
         return false;
+    else
+        symbol->used = true;
 
     return true;
 }
