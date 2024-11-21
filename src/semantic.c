@@ -73,6 +73,7 @@ int check_function_call(T_SYM_TABLE *table, T_FN_CALL *fn_call) {
     return RET_VAL_OK;
 }
 
+// add argument to function call
 int add_arg_to_fn_call(T_FN_CALL *fn_call, T_TOKEN *arg) {
     if (fn_call->argc == 0) {
         fn_call->argv = (T_TOKEN **) malloc(sizeof(T_TOKEN *));
@@ -90,6 +91,19 @@ int add_arg_to_fn_call(T_FN_CALL *fn_call, T_TOKEN *arg) {
     return RET_VAL_OK;
 }
 
+// free function call arguments
 void free_fn_call_args(T_FN_CALL *fn_call) {
     free(fn_call->argv);
+}
+
+// get variable
+Symbol *get_var(T_SYM_TABLE *table, const char *name) {
+    Symbol *symbol = symtable_find_symbol(table, name);
+    if (symbol == NULL) {
+        return NULL;
+    }
+    if (symbol->type != SYM_VAR) {
+        return NULL;
+    }
+    return symbol;
 }
