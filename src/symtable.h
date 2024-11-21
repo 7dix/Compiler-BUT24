@@ -47,6 +47,8 @@ typedef union
 {
     struct {
         bool is_const;
+        bool modified;
+        bool used;
         VarType type;
         void *value;
     } var;
@@ -65,7 +67,6 @@ typedef struct Symbol {
     char *name;
     SymbolType type;
     SymbolData data;
-    bool used;
     struct Symbol *next; // For handling collisions in the hashtable
     bool occupied; // Marks if this slot is occupied
     bool deleted; // Marks if this slot was deleted

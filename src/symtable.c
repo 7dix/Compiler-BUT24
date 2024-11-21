@@ -67,7 +67,7 @@ Symbol *hashtable_insert(Hashtable *ht, const char *key, SymbolType type, Symbol
     unsigned int step = secondary_hash(key);
     int probe_count = 0;
 
-    Symbol new_symbol = { .name = strdup(key), .type = type, .data = data, .used = false, .occupied = true };
+    Symbol new_symbol = { .name = strdup(key), .type = type, .data = data, .occupied = true };
 
     while (ht->table[index].occupied) {
         if (strcmp(ht->table[index].name, key) == 0) {
@@ -209,8 +209,6 @@ Symbol *symtable_find_symbol(T_SYM_TABLE *table, const char *key) {
     while (current_scope != NULL) {
         Symbol *symbol = hashtable_find(current_scope->ht, key);
         if (symbol != NULL) {
-            // WATCH! This may be a bug, because it sets the symbol as used
-            symbol->used = true;
             return symbol;
         }
         current_scope = current_scope->parent;
@@ -251,3 +249,40 @@ int add_param_to_symbol_data(SymbolData *data, Param param) {
     return RET_VAL_OK;
 }
 
+// Checks for unused symbols in current top scope
+int check_for_unused_symbols(T_SYM_TABLE *table) {
+    if (table == NULL || table->top == NULL) {
+        return RET_VAL_INTERNAL_ERR;
+    }
+
+    Hashtable *ht = table->top->ht;
+    for (int i = 0; i < HASHTABLE_SIZE; i++) {
+        if (ht->table[i].occupied && ht->table[i].type == SYM_VAR) {
+            if (!ht->table[i].data.var.used || !ht->table[i].data.var.modified) {
+                return RET_VAL_SEMANTIC_UNUSED_VAR_ERR;
+            }
+        }
+    }
+
+    return RET_VAL_OK;
+}
+
+// Set the symbol as modified
+void set_symbol_modified(Symbol *symbol) {
+    if (symbol == NULL) {
+        return;
+    }
+    if (symbol->type == SYM_VAR) {
+        symbol->data.var.modified = true;
+    }
+}
+
+// Set the symbol as used
+void set_symbol_used(Symbol *symbol) {
+    if (symbol == NULL) {
+        return;
+    }
+    if (symbol->type == SYM_VAR) {
+        symbol->data.var.used = true;
+    }
+}
