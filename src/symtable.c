@@ -198,7 +198,8 @@ Symbol *symtable_add_symbol(T_SYM_TABLE *table, const char *key, SymbolType type
     if (table == NULL || table->top == NULL) {
         return NULL;
     }
-    data.var.id = table->var_id_cnt++;
+    if (type == SYM_VAR)
+        data.var.id = table->var_id_cnt++;
     return hashtable_insert(table->top->ht, key, type, data);
 }
 
