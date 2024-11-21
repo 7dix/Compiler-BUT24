@@ -41,6 +41,7 @@ T_TREE_NODE_PTR createNode(T_TOKEN *token){
     node->token = token;
     node->convertToFloat = false;
     node->convertToInt = false;
+    node->resultType = TYPE_NOTSET_RESULT;
     
     // Return node
     return node;

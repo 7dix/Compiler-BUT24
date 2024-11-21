@@ -18,6 +18,13 @@
 #ifndef H_TREE
 #define H_TREE
 
+// Declaration of result type for semantic analysis
+typedef enum RESULT_TYPE{
+    TYPE_NOTSET_RESULT,
+    TYPE_INT_RESULT,
+    TYPE_FLOAT_RESULT,
+    TYPE_BOOL_RESULT,
+} RESULT_TYPE;
 
 // Declaration of tree node
 typedef struct T_TREE_NODE {
@@ -26,6 +33,8 @@ typedef struct T_TREE_NODE {
     T_TOKEN *token;
     bool convertToFloat;
     bool convertToInt;
+    RESULT_TYPE resultType;
+
 } T_TREE_NODE, *T_TREE_NODE_PTR;
 
 

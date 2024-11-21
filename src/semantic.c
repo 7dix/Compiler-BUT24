@@ -3,6 +3,7 @@
 // TEAM: Martin Zůbek (253206)
 // AUTHORS:
 // <Otakar Kočí> (xkocio00)
+// Martin Zůbek (253206)
 //
 // YEAR: 2024
 #include "semantic.h"
@@ -106,4 +107,62 @@ Symbol *get_var(T_SYM_TABLE *table, const char *name) {
         return NULL;
     }
     return symbol;
+}
+
+
+/**
+ * @brief Function for semantic analysis of expression
+ * @param table Pointer to the symbol table
+ * @param tree Pointer to the root of the tree
+ * @return 0=RET_VAL_OK if the expression is valid, otherwise return one of semnatic errors
+ */
+RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
+    // Check internal failure
+    if (tree == NULL || table == NULL) return RET_VAL_INTERNAL_ERR;
+
+    // Create list for postfix notation
+    T_LIST_PTR listPostfix = NULL;
+    // Initialize list
+    list_init(listPostfix);
+    // Get postfix notation from tree to list
+    if(list_get_postfix_notation(listPostfix, tree)) return RET_VAL_INTERNAL_ERR;
+
+
+
+    // Set literal type of every element in list
+    if(set_literal_type(table, listPostfix)){
+        list_dispose(listPostfix);
+        return RET_VAL_SEMANTIC_UNDEFINED_ERR;
+    }
+
+
+    // TODO: IMPLEMENT FOR ONE OPERAND IN EXPRESSION
+
+    // Until list has only one element, sumulating of operation
+    while(listPostfix->size != 1){
+        // Get first three elements from list, operator is always binary
+        T_LIST_ELEMENT_PTR operandOne = listPostfix->first;
+        T_LIST_ELEMENT_PTR operandTwo = operandOne->next;
+        T_LIST_ELEMENT_PTR operator = operandTwo->next;
+        T_TREE_NODE_PTR lastResult = NULL;
+
+        if((operandOne->literalType == NLITERAL_INT && operandTwo == NLITERAL_FLOAT) || (operandOne->literalType == NLITERAL_FLOAT && operandTwo == NLITERAL_INT)){
+            list_dispose(listPostfix);
+            return RET_VAL_SEMANTIC_TYPE_ERR;
+        }
+
+        if ((operandOne->literalType == LITERAL_INT && operandTwo->literalType == LITERAL_FLOAT) || (operandOne->literalType == LITERAL_FLOAT && operandTwo->literalType == LITERAL_INT)){
+            list_dispose(listPostfix);
+            return RET_VAL_SEMANTIC_TYPE_ERR;
+        }
+
+        if (operandOne->literalType == LITERAL_INT_NLL || operandTwo->literalType == LITERAL_INT_NLL){
+            list_dispose(listPostfix);
+            return RET_VAL_SEMANTIC_TYPE_ERR;
+        }
+        
+        
+
+
+    return RET_VAL_OK;
 }
