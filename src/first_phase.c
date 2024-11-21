@@ -179,6 +179,32 @@ bool add_built_in_functions() {
     return true;
 }
 
+/**
+ * @brief Checks if main function exists
+ * 
+ * @return `bool`
+ * @retval `true` - main function exists
+ * @retval `false` - main function does not exist
+ */
+bool check_main_exists() {
+    Symbol *symbol;
+    if ((symbol = symtable_find_symbol(ST, "main")) == NULL) {
+        // TODO: process error
+        error_flag_fp = RET_VAL_SEMANTIC_UNDEFINED_ERR;
+        return false;
+    }
+    if (symbol->data.func.return_type != VAR_VOID) {
+        error_flag_fp = RET_VAL_SEMANTIC_FUNCTION_ERR;
+        return false;
+    }
+    if (symbol->data.func.argc != 0) {
+        error_flag_fp = RET_VAL_SEMANTIC_FUNCTION_ERR;
+        return false;
+    }
+
+    return true;
+}
+
 bool get_save_token(T_TOKEN_BUFFER *token_buffer, T_TOKEN **token) {
 
     if (!needs_last_token)  {
@@ -225,10 +251,8 @@ int first_phase(T_TOKEN_BUFFER *token_buffer) {
         return error_flag_fp;
     }
 
-    // Check existence of main function
-    if (symtable_find_symbol(ST, "main") == NULL) {
-        // TODO: process error
-        return RET_VAL_SYNTAX_ERR; // maybe RET_VAL_SEMANTIC_UNDEFINED_ERR
+    if (!check_main_exists()) {
+        return error_flag_fp;
     }
 
     // Add built-in functions to symtable
