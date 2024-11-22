@@ -198,7 +198,7 @@ int check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
         T_LIST_ELEMENT_PTR operandOne = operandTwo->prev;
         
         // Check devide by zero
-        if(listPostfix->active->node->token->type == DIVIDE && operandOne->node->token->value.intVal == 0){
+        if(listPostfix->active->node->token->type == DIVIDE && operandTwo->node->token->value.intVal == 0){
             list_dispose(listPostfix);
             return RET_VAL_SEMANTIC_OTHER_ERR ;
         }
