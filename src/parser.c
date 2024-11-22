@@ -1076,6 +1076,10 @@ bool syntax_if_statement(T_TOKEN_BUFFER *buffer) {
     }
 
     // TODO: get expression type
+    error_flag = check_expression(ST, &tree);
+    if (error_flag != 0){
+        return false;
+    }
 
     next_token(buffer, &token); // )
     if (token->type != BRACKET_RIGHT_SIMPLE) {
@@ -1347,6 +1351,10 @@ bool syntax_while_statement(T_TOKEN_BUFFER *buffer) {
 
 
     // TODO: get expression type
+    error_flag = check_expression(ST, &tree);
+    if (error_flag != 0){
+        return false;
+    }
 
 
     next_token(buffer, &token); // )
@@ -2034,6 +2042,28 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         }
 
         // TODO: get expression type
+        error_flag = check_expression(ST, &tree);
+        if (error_flag != 0){
+            return false;
+        }
+
+        // tree->resultType
+        VarType exprRes = VAR_VOID;
+        switch(tree->resultType) {
+            case TYPE_INT_RESULT:
+                exprRes = VAR_INT;
+                break;
+            case TYPE_FLOAT_RESULT:
+                exprRes = VAR_FLOAT;
+                break;
+            default:
+                break;
+        }
+
+        if (compare_var_types(&(data->var.type), &exprRes) != 0) {
+            error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            return false;
+        }
 
         // codegen print expression
         createStackByPostorder(tree);
@@ -2135,7 +2165,28 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         }
 
         // TODO: get expression type
+        error_flag = check_expression(ST, &tree);
+        if (error_flag != 0){
+            return false;
+        }
 
+        // tree->resultType
+        VarType exprRes = VAR_VOID;
+        switch(tree->resultType) {
+            case TYPE_INT_RESULT:
+                exprRes = VAR_INT;
+                break;
+            case TYPE_FLOAT_RESULT:
+                exprRes = VAR_FLOAT;
+                break;
+            default:
+                break;
+        }
+
+        if (compare_var_types(&(data->var.type), &exprRes) != 0) {
+            error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            return false;
+        }
         // codegen print expression
         createStackByPostorder(tree);
 
@@ -2166,7 +2217,6 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         // TODO: get expression type
 
         // codegen print expression
-        createStackByPostorder(tree);
         error_flag = check_expression(ST, &tree);
         if (error_flag != 0){
             return false;
@@ -2189,6 +2239,8 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             return false;
         }
+
+        createStackByPostorder(tree);
 
         tree_dispose(&tree);
 
