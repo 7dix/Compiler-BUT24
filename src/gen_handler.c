@@ -61,7 +61,7 @@ void callBIFn(T_FN_CALL *fn) {
 }
 
 void generateUniqueIdentifier(char *name, char *uniq_name) {
-    sprintf(uniq_name, "%s$%d", name, get_var_id(ST, name));
+    snprintf(uniq_name, 0, "%s$%d", name, get_var_id(ST, name));
 }
 
 
@@ -389,19 +389,19 @@ void callBISubstring(T_TOKEN *var, T_TOKEN *beg, T_TOKEN *end) {
     char *uniq_beg = NULL, *uniq_end = NULL;
 
     if (beg->type == INT) {
-        sprintf(_beg, "int@%d", beg->value.intVal);
+        snprintf(_beg, 0, "int@%d", beg->value.intVal);
     }
     else if (beg->type == IDENTIFIER) {
         generateUniqueIdentifier(beg->lexeme, uniq_beg);
-        sprintf(_beg, "LF@%s", uniq_beg);
+        snprintf(_beg, 0, "LF@%s", uniq_beg);
     }
 
     if (end->type == INT) {
-        sprintf(_end, "int@%d", end->value.intVal);
+        snprintf(_end, 0, "int@%d", end->value.intVal);
     }
     else if (end->type == IDENTIFIER) {
         generateUniqueIdentifier(end->lexeme, uniq_end);
-        sprintf(_end, "LF@%s", uniq_end);
+        snprintf(_end, 0, "LF@%s", uniq_end);
     }
 
     char *uniq = NULL;
@@ -547,11 +547,11 @@ void callBIOrd (T_TOKEN *var, T_TOKEN *index) {
     char *_index = NULL;
 
     if (index->type == INT) {
-        sprintf(_index, "int@%d", index->value.intVal);
+        snprintf(_index, 0, "int@%d", index->value.intVal);
     }
     else if (index->type == IDENTIFIER) {
         generateUniqueIdentifier(index->lexeme, uniq);
-        sprintf(_index, "LF@%s", uniq);
+        snprintf(_index, 0, "LF@%s", uniq);
     }
 
     generateUniqueIdentifier(var->lexeme, uniq);

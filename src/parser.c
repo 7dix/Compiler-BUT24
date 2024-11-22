@@ -361,7 +361,7 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
             return false;
         }
 
-    create_function_header(current_fn_name);
+    createFnHeader(current_fn_name);
 
     // we have two branches, choose here
     next_token(buffer, &token);
@@ -407,7 +407,7 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
-        
+
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;
         }
@@ -902,7 +902,7 @@ bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
         }
 
         // codegen print var definition
-        handleUniqDefvar(name);
+        handleUniqDefvar(token);
         // codegen print mov for right side
         handleAssign(name);
 
@@ -946,7 +946,7 @@ bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
         }
 
         // codegen print var definition
-        handleUniqDefvar(name);
+        handleUniqDefvar(token);
         // codegen print mov for right side
         handleAssign(name);
 
@@ -1506,7 +1506,7 @@ bool syntax_return(T_TOKEN_BUFFER *buffer) {
     }
 
     // codegen print return
-    handleReturn();
+    createReturn();
 
     return true;
 }
