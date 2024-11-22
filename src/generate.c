@@ -51,8 +51,9 @@ void handleCorrectStringFormat(char *input, char *output) {
         //     strcat(output, hex);
         // }
         if (current == 35 || current == 92 || current <= 32) {
-            char hex[5];
-            snprintf(hex, 0, "\\%03d", current);
+            char hex[6];
+        
+            sprintf(hex, "\\%03d", current);
             strcat(output, hex);
         }
         else {
@@ -114,7 +115,7 @@ void generatePushsFloat(float var) {
 }
 
 void generatePushsString(char *var) {
-    char *out;
+    char *out = NULL;
     handleCorrectStringFormat(var, out);
     printf("PUSHS string@%s\n", out);
 }

@@ -17,7 +17,7 @@
 
 // Function declarations
 void callBIFn(T_FN_CALL *fn);
-void generateUniqueIdentifier(char *name, char *uniq_name);
+void generateUniqueIdentifier(char *name, char **uniq_name);
 void createFnHeader(char *name);
 void callBIWrite(T_TOKEN *var);
 void createProgramHeader();
