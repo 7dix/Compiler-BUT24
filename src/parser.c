@@ -252,6 +252,7 @@ bool syntax_fn_def(T_TOKEN_BUFFER *buffer) {
     // save current function name
     current_fn_name = token->lexeme;
 
+
     next_token(buffer, &token); // (
     if (token->type != BRACKET_LEFT_SIMPLE) {
         // TODO: process error
@@ -398,6 +399,7 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false; 
         }
+        if (put_param_to_symtable(current_fn_name));
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;

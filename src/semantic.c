@@ -191,3 +191,31 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
               
     return RET_VAL_OK;
 }
+
+// put parameter to symbol table
+int put_param_to_symtable(char *name) {
+    Symbol *symbol = symtable_find_symbol(ST, name);
+    if (symbol == NULL) {
+        return RET_VAL_INTERNAL_ERR;
+    }
+
+    SymbolData data = symbol->data;
+
+    if (data.func.argc == 0) {
+        return RET_VAL_OK;
+    } else {
+        for (int i = 0; i < data.func.argc; i++) {
+            SymbolData sym_data;
+            sym_data.var.type = data.func.argv[i].type;
+            sym_data.var.is_const = false;
+            sym_data.var.modified = false;
+            sym_data.var.used = false;
+            sym_data.var.id = -1;
+
+            if (!symtable_add_symbol(ST, data.func.argv[i].name, SYM_VAR, sym_data)) {
+                return RET_VAL_INTERNAL_ERR;
+            }
+        }
+    }
+    return RET_VAL_OK;
+}
