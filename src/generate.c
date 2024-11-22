@@ -115,9 +115,9 @@ void generatePushsFloat(float var) {
 }
 
 void generatePushsString(char *var) {
-    char *out = NULL;
-    handleCorrectStringFormat(var, out);
-    printf("PUSHS string@%s\n", out);
+    //char *out = NULL;
+    //handleCorrectStringFormat(var, out);
+    printf("PUSHS string@%s\n", var);
 }
 
 void generatePops(char *frame, char *var) {

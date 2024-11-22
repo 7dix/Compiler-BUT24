@@ -1812,7 +1812,7 @@ bool syntax_id_start(T_TOKEN_BUFFER *buffer, Symbol *symbol) {
             return false;
         }
 
-        // TODO maybe check if the varType is not void
+        // TODO: maybe check if the varType is not void
 
         return true;
     }

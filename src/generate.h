@@ -15,6 +15,7 @@
 #include <string.h>
 #include <stdbool.h>
 
+void handleCorrectStringFormat(char *input, char *output);
 void generateHeader();
 void generateMove(char *frame, char *var, char *_frame, char *_var);
 void generateCreateFrame();

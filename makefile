@@ -28,7 +28,7 @@ DEBUG_PRECEDENCE_OUTPUT = bin/precedencedebug
 DEBUG_SYMTABLE_OUTPUT = bin/symtabledebug
 DEBUG_FIRST_PHASE_OUTPUT = bin/firstphasedebug
 
-LOGIN = 253206
+LOGIN = xvalenk00
 
 # Default target
 all: $(OUTPUT)
@@ -91,8 +91,10 @@ test: test_scanner test_token_buffer test_precedence test_symtable test_parser_r
 clean:
 	rm -f $(OUTPUT) $(DEBUG_OUTPUT) $(DEBUG_SCANNER_OUTPUT) $(DEBUG_TOKEN_BUFFER_OUTPUT) $(DEBUG_FIRST_PHASE_OUTPUT) $(DEBUG_SYMTABLE_OUTPUT) $(DEBUG_PRECEDENCE_OUTPUT)
 	rm -f $(LOGIN).zip
+	rm -f *vgcore*
+	rm -rf temp
 
-.PHONY: all debug clean bin test pack
+.PHONY: all debug clean bin test pack test_scanner test_token_buffer test_parser_retcode test_precedence test_symtable test_first_phase test debug_from_file debug_scanner debug_token_buffer debug_precedence debug_symtable debug_first_phase
 
 pack:
 	mkdir temp
