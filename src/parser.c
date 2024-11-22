@@ -351,11 +351,15 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
     T_TOKEN *token;
 
     // SCOPE INCREASE
-    if (!symtable_add_scope(ST)) {
-        error_flag = RET_VAL_INTERNAL_ERR;
-        return false; 
-    }
-    if (put_param_to_symtable(current_fn_name));
+        if (!symtable_add_scope(ST)) {
+            error_flag = RET_VAL_INTERNAL_ERR;
+            return false; 
+        }
+        int put_par = put_param_to_symtable(current_fn_name);
+        if (put_par != RET_VAL_OK) {
+            error_flag = put_par;
+            return false;
+        }
 
     create_function_header(current_fn_name);
 
@@ -404,7 +408,6 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
             return false;
         }
         
-
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;
         }

@@ -13,11 +13,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "shared.h"
-#include "first_phase.h"
-#include "parser.h"
-#include "token_buffer.h"
-#include "symtable.h"
+#include "../../src/shared.h"
+#include "../../src/first_phase.h"
+#include "../../src/parser.h"
+#include "../../src/token_buffer.h"
+#include "../../src/symtable.h"
 // TODO: include symtable when ready
 
 T_SYM_TABLE *ST;
