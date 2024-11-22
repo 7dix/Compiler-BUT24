@@ -99,6 +99,20 @@ void callBIWrite(T_TOKEN *var) {
 }
 
 // Function to create program header
+/***********************************************************************
+ *                  FUNCTION HANDLERS & GENERATORS
+ ***********************************************************************
+ * Functions that handle the generation of the IFJ24 language instructions
+ * for the provided functions, statements, expressions and other necessary
+ * constructs.
+ */
+
+/**
+ * @brief Creates the program header.
+ * 
+ * This function creates the program header for the IFJ24 language. The header includes
+ * the necessary ".IFJcode24" directive and the definition of the necessary global variables.
+ */
 void createProgramHeader() {
     generateHeader();
     generateDefvar("GF", "tmp1");
@@ -112,6 +126,53 @@ void createProgramHeader() {
     generateExit(0);
 }
 
+/**
+ * @brief Convert the provided indentifier to a unique identifier.
+ * 
+ * This function appends a unique identifier to the provided indentifier, creating
+ * a unique identifier for the variable to be used in the local frame.
+ * 
+ * @param name The name of the variable.
+ * 
+ * @param uniq_name The unique name of the variable.
+ */
+void generateUniqueIdentifier(char *name, char *uniq_name) {
+    sprintf(uniq_name, "%s$%d", name, get_var_id(ST, name));
+}
+
+/**
+ * @brief Creates a function header.
+ * 
+ * This function creates a function header for the provided function name and arguments.
+ * 
+ * @param name The name of the function.
+ * @param args The arguments of the function.
+ * @param argCount The total number of arguments.
+ */
+void createFnHeader(char *name, T_TOKEN **args, int argCount) {
+    generateLabel(name);
+    generateCreateFrame();
+    generatePushFrame();
+    for (int i = argCount; i > 0; i--) {
+        char *uniq;
+        generateUniqueIdentifier(args[i]->lexeme, uniq);
+        generateDefvar("LF", uniq);
+        generatePops("LF", uniq);
+    }
+}
+
+/**
+ * @brief Calls a function with the provided arguments.
+ * 
+ * This function pushes all arguments onto the interpreter stack and
+ * calls the function with the provided name.
+ * 
+ * @param name The name of the function to call.
+ * @param args The arguments to push onto the stack & pass to the function.
+ * @param argCount The total number of arguments.
+ * 
+ * @note The function also handles the conversion of the arguments to the correct type.
+ */
 void callFunction(char *name, T_TOKEN **args, int argCount) {
     for (int i = 0; i < argCount; i++) {
         if (args[i]->type == IDENTIFIER) {
@@ -133,23 +194,49 @@ void callFunction(char *name, T_TOKEN **args, int argCount) {
     generateCall(name);
 }
 
-// Function to create return statement
+/**
+ * @brief Creates a return statement.
+ * 
+ * This function pops the current frame and creates a return statement.
+ */
 void createReturn() {
     generatePopFrame();
     generateReturn();
 }
 
+/**
+ * @brief Handles the discard of a variable.
+ * 
+ * This function handles the discard of a variable by moving the variable to the trash variable.
+ * 
+ * @note The trash variable is a special variable used to discard variables.
+ */
 void handleDiscard() {
     generatePops("GF", "trash");
 }
 
+/**
+ * @brief Handles the definition of a unique variable.
+ * 
+ * This function handles the definition of a unique variable by generating a unique identifier
+ * and defining the variable in the local frame.
+ * 
+ * @param var The variable to define.
+ */
 void handleUniqDefvar(T_TOKEN *var) {
     char *uniq = NULL;
     generateUniqueIdentifier(var->lexeme, uniq);
     generateDefvar("LF", uniq);
 }
 
-// Function to solve expression via stack by postorder traversal
+/**
+ * @brief Traverses the expression tree in postorder and solves the expression.
+ * 
+ * This function traverses the expression tree in postorder, pushing the operands and operators
+ * to the interpreter stack and solving the expression within the stack.
+ * 
+ * @param tree The expression tree to traverse.
+ */
 void createStackByPostorder(T_TREE_NODE *tree) {
 
     if (tree == NULL) return; // Empty tree
@@ -260,19 +347,39 @@ void handleAssign(char *var) {
     generatePops("LF", uniq);
 }
 
-// Function to handle built-in read int
+
+/***********************************************************************
+ *                         BUILT-IN FUNCTIONS
+ ***********************************************************************
+ * Functions that realize the defined built-in functions of the IFJ24
+ * language provided in the documentation.
+ */
+
+/**
+ * @brief Reads an integer from the input and stores it in the interpreter stack.
+ * 
+ * This function reads an integer from the input and stores it in the interpreter stack.
+ */
 void callBIReadInt() {
     generateRead("GF", "tmp1", "int");
     generatePushs("GF", "tmp1");
 }
 
-// Function to handle built-in read float
+/**
+ * @brief Reads a floating-point number from the input and stores it in the interpreter stack.
+ * 
+ * This function reads a floating-point number from the input and stores it in the interpreter stack.
+ */
 void callBIReadFloat() {
     generateRead("GF", "tmp1", "float");
     generatePushs("GF", "tmp1");
 }
 
-// Function to handle built-in read string
+/**
+ * @brief Reads a string from the input and stores it in the interpreter stack.
+ * 
+ * This function reads a string from the input and stores it in the interpreter stack.
+ */
 void callBIReadString() {
     generateRead("GF", "tmp1", "string");
     generatePushs("GF", "tmp1");
@@ -583,11 +690,91 @@ void callBIOrd (T_TOKEN *var, T_TOKEN *index) {
     generateLabel("ord_ret");
 }
 
+/**
+ * @brief Converts an integer to a char.
+ * 
+ * This function converts an integer to a character and stores the result in the interpreter stack.
+ * 
+ * @param var The integer to convert.
+ */
 void callBIChr(T_TOKEN *var) {
     char *uniq = NULL;
     generateUniqueIdentifier(var->lexeme, uniq);
     generatePushs("LF", uniq);
     generateInt2Chars();
+}
+
+/**
+ * @brief Prints the provided variable to the output.
+ * 
+ * This function prints the provided variable to standard output.
+ * 
+ * @param var The variable to print
+ */
+void callBIWrite(T_TOKEN *var) {
+    if (var->type == IDENTIFIER) {
+        char *uniq;
+        generateUniqueIdentifier(var->lexeme, uniq);
+        generateWrite("LF", uniq);
+    }
+    else if (var->type == INT) {
+        printf("WRITE int@%d\n", var->value.intVal);
+    }
+    else if (var->type == FLOAT) {
+        printf("WRITE float@%lf\n", var->value.intVal);
+    }
+    else if (var->type == STRING) {
+        generateWrite("string", var->value.stringVal);
+    }
+}
+
+/**
+ * @brief Runs the correct built-in function based on the provided function call.
+ * 
+ * This function runs the correct built-in function based on the provided function call.
+ * 
+ * @param fn The function call to run.
+ */
+void callBIFn(T_FN_CALL *fn) {
+    if (strcmp(fn->name, "ifj.readstr") == 0) {
+        callBIReadString();
+    }
+    else if (strcmp(fn->name, "ifj.readi32") == 0) {
+        callBIReadInt();
+    }
+    else if (strcmp(fn->name, "ifj.readf64") == 0) {
+        callBIReadFloat();
+    }
+    else if (strcmp(fn->name, "ifj.write") == 0) {
+        callBIWrite(fn->argv[0]);
+    }
+    else if (strcmp(fn->name, "ifj.i2f") == 0) {
+        callBIInt2Float(fn->argv[0]);
+    }
+    else if (strcmp(fn->name, "ifj.f2i") == 0) {
+        callBIFloat2Int(fn->argv[0]);
+    }
+    else if (strcmp(fn->name, "ifj.string") == 0) {
+        callBIString(fn->argv[0]);
+    }
+    else if (strcmp(fn->name, "ifj.length") == 0) {
+        callBILength(fn->argv[0]);
+    }
+    else if (strcmp(fn->name, "ifj.concat") == 0) {
+        callBIConcat(fn->argv[0], fn->argv[1]);
+    }
+    else if (strcmp(fn->name, "ifj.substring") == 0) {
+        callBISubstr(fn->argv[0], fn->argv[1], fn->argv[2]);
+    }
+    else if (strcmp(fn->name, "ifj.strcmp") == 0) {
+        callBIStrcmp(fn->argv[0], fn->argv[1]);
+    }
+    else if (strcmp(fn->name, "ifj.ord") == 0) {
+        callBIFind(fn->argv[0], fn->argv[1]);
+    }
+    else if (strcmp(fn->name, "ifj.chr") == 0) {
+        callBISort(fn->argv[0]);
+    }
 }
 
 /***********************************************************************
@@ -598,13 +785,32 @@ void callBIChr(T_TOKEN *var) {
  * solution must be generated.
  */
 
-// Function to handle if start with boolean
+/**
+ * @brief Handles the start of an if statement with a boolean expression.
+ * 
+ * This function handles the start of an if statement with a boolean expression, jumps
+ * accordingly to the labelElse if the expression is False.
+ * 
+ * @param labelElse The label to jump to.
+ * 
+ * @note The expression must be solved before calling this function.
+ */
 void handleIfStartBool(char *labelElse) {
     generatePops("GF", "tmp1");
     generateJumpifneq(labelElse, "GF", "tmp1", "bool", "true");
 }
 
-// Function to handle if start with nil
+/**
+ * @brief Handles the start of an if statement with a numerical expression.
+ * 
+ * This function handles the start of an if statement with a numerical expression, jumps
+ * accordingly to the labelElse if the expression is NULL (end of loop).
+ * 
+ * @param labelElse The label to jump to.
+ * @param var The variable to store the expression result.
+ * 
+ * @note The expression must be solved before calling this function.
+ */
 void handleIfStartNil(char *labelElse, T_TOKEN *var) {
     generatePops("GF", "tmp1");
     generateType("GF", "tmp2", "GF", "tmp1");
@@ -615,23 +821,49 @@ void handleIfStartNil(char *labelElse, T_TOKEN *var) {
     generateMove("LF", uniq, "GF", "tmp1");
 }
 
-// Function to create if else
+/**
+ * @brief Creates the else part of an if statement.
+ * 
+ * This function creates the else part of an if statement and jumps to the end of the if statement.
+ * 
+ * @param labelEnd The end label to jump to.
+ * @param labelElse The else label to jump to.
+ */
 void createIfElse(char *labelEnd, char *labelElse) {
     generateJump(labelEnd);
     generateLabel(labelElse);
 }
 
-// Function to create if end
+/**
+ * @brief Creates the end of an if statement.
+ * 
+ * This function creates the end of an if statement.
+ * 
+ * @param labelEnd The end label to jump to.
+ */
 void createIfEnd(char *labelEnd) {
     generateLabel(labelEnd);
 }
 
-// Function to create while header with boolean
+/**
+ * @brief Creates the start of a while statement with a boolean expression.
+ * 
+ * This function creates the start of a while statement with a boolean expression.
+ * 
+ * @param labelStart The start label to jump to.
+ */
 void createWhileBoolHeader(char *labelStart) {
     generateLabel(labelStart);
 }
 
-// Function to create while header with nil
+/**
+ * @brief Creates the start of a while statement with a numerical expression.
+ * 
+ * This function creates the start of a while statement with a numerical expression.
+ * 
+ * @param labelStart The start label to jump to.
+ * @param var The variable to store the expression result.
+ */
 void createWhileNilHeader(char *labelStart, T_TOKEN *var) {
     char *uniq = NULL;
     generateUniqueIdentifier(var->lexeme, uniq);
@@ -640,13 +872,26 @@ void createWhileNilHeader(char *labelStart, T_TOKEN *var) {
     generateLabel(labelStart);
 }
 
-// Function to handle while with boolean
+/**
+ * @brief Handles the while statement with a boolean expression.
+ * 
+ * This function handles the while statement with a boolean expression.
+ * 
+ * @param labelEnd The end label to jump to.
+ */
 void handleWhileBool(char *labelEnd) {
     generatePops("GF", "tmp1");
     generateJumpifneq(labelEnd, "GF", "tmp1", "bool", "true");
 }
 
-// Function to handle while with nil
+/**
+ * @brief Handles the while statement with a numerical expression.
+ * 
+ * This function handles the while statement with a numerical expression.
+ * 
+ * @param labelEnd The end label to jump to.
+ * @param var The variable to store the expression result.
+ */
 void handleWhileNil(char *labelEnd, T_TOKEN *var) {
     generatePops("GF", "tmp1");
     generateType("GF", "tmp2", "GF", "tmp1");
@@ -657,7 +902,14 @@ void handleWhileNil(char *labelEnd, T_TOKEN *var) {
     generateMove("LF", uniq, "GF", "tmp1");
 }
 
-// Function to create while end
+/**
+ * @brief Creates the end of a while statement.
+ * 
+ * This function creates the end of a while statement.
+ * 
+ * @param labelStart The start label to jump to.
+ * @param labelEnd The end label to jump to.
+ */
 void createWhileEnd(char *labelStart, char *labelEnd) {
     generateJump(labelStart);
     generateLabel(labelEnd);

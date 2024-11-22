@@ -15,7 +15,59 @@
 
 // #include <math.h>  // For float conversion, add if enabled
 
-/** Instruction generative functions */
+/***********************************************************************
+ *                  CONVERSION TO PRINTABLE STRING
+ ***********************************************************************
+*/
+ 
+void handleCorrectStringFormat(char *input, char *output) {
+    while (*input) {
+        char current = *input;
+
+        // if (current == "\n") {
+        //     strcat(output, "\\010");
+        // }
+        // else if (current == "\r") {
+        //     strcat(output, "\\013");
+        // }
+        // else if (current == "\t") {
+        //     strcat(output, "\\009");
+        // }
+        // else if (current == ' ') {
+        //     strcat(output, "\\032");
+        // }
+        // else if (current == "#") {
+        //     strcat(output, "\\035");
+        // }
+        // else if (current == "\\") {
+        //     strcat(output, "\\092");
+        // }
+        // else if (current == '"') {
+        //     strcat(output, "\\034");
+        // }
+        // else if (current >= 127 || current < 32) {
+        //     char hex[5];
+        //     sprintf(hex, "\\%03d", current);
+        //     strcat(output, hex);
+        // }
+        if (current == 35 || current == 92 || current <= 32) {
+            char hex[5];
+            snprintf(hex, 0, "\\%03d", current);
+            strcat(output, hex);
+        }
+        else {
+            strncat(output, &current, 1);
+        }
+        input++;
+    }
+}
+
+/***********************************************************************
+ *                  INSTRUCTION GENERATIVE FUNCTIONS
+ ***********************************************************************
+ * Functions that generate the IFJ24 language instructions to call in the
+ * interpreter.
+*/
 
 void generateHeader() {
     printf(".IFJcode24\n");
@@ -62,8 +114,9 @@ void generatePushsFloat(float var) {
 }
 
 void generatePushsString(char *var) {
-    // TODO: REPLACE WHITESPACES WITH XY
-    printf("PUSHS string@\"%s\"\n", var);
+    char *out;
+    handleCorrectStringFormat(var, out);
+    printf("PUSHS string@%s\n", out);
 }
 
 void generatePops(char *frame, char *var) {
