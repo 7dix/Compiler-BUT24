@@ -16,7 +16,7 @@ SRC_TOKEN_BUFFER_TEST = tests/src/main_test_token_buffer.c src/token_buffer.c sr
 SRC_PRECEDENCE_TEST = tests/src/main_test_precedence.c src/scanner.c src/token_buffer.c src/precedence.c src/precedence_stack.c src/precedence_tree.c 
 SRC_SYMTABLE_TEST = tests/src/main_test_symtable.c src/symtable.c
 SRC_FIRST_PHASE_TEST = tests/src/main_test_first_phase.c src/scanner.c src/token_buffer.c src/first_phase.c src/symtable.c
-SRC_IN_FROM_FILE = tests/src/main_test.c src/scanner.c src/token_buffer.c src/parser.c src/first_phase.c src/semantic.c src/semantic_list.c src/precedence.c src/precedence_stack.c src/precedence_tree.c src/symtable.c
+SRC_IN_FROM_FILE = tests/src/main_test.c src/scanner.c src/token_buffer.c src/parser.c src/first_phase.c src/semantic.c src/semantic_list.c src/precedence.c src/precedence_stack.c src/precedence_tree.c src/symtable.c src/generate.c src/gen_handler.c
 
 # Output executables
 OUTPUT = bin/ifj24

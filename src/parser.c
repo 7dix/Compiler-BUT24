@@ -384,9 +384,23 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
             return false;
         }
 
+        // SCOPE INCREASE
+        if (!symtable_add_scope(ST)) {
+            error_flag = RET_VAL_INTERNAL_ERR;
+            return false; 
+        }
+        int put_par = put_param_to_symtable(current_fn_name);
+        if (put_par != RET_VAL_OK) {
+            error_flag = put_par;
+            return false;
+        }
+
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;
         }
+
+        // SCOPE DECREASE
+        symtable_remove_scope(ST);
 
         next_token(buffer, &token); // }
         if (token->type != BRACKET_RIGHT_CURLY) {
@@ -1989,7 +2003,7 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
     // fourth branch -> identifier ID_ASSIGN
     if (token->type == IDENTIFIER) { // identifier
 
-        if (!syntax_id_assign(buffer)) { // ID_ASSIGN
+        if (!syntax_id_assign(buffer, data)) { // ID_ASSIGN
             return false;
         }
 
@@ -2008,7 +2022,7 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         return true;
     }
 
-    // third branch -> EXPRESSION ;
+    // fourth branch -> EXPRESSION ;
     if (is_token_in_expr(token)) {
         move_back(buffer);
         // TODO: change based on api of bottom-up parser
@@ -2036,9 +2050,6 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         return true;
     }
 
-    
-
-    
 
     // TODO: process error
     error_flag = RET_VAL_SYNTAX_ERR;
@@ -2058,11 +2069,12 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * 
  * - `int error_flag`
  * @param *token_buffer pointer to token buffer
+ * @param *data symbol data
  * @return `bool`
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_id_assign(T_TOKEN_BUFFER *buffer) {
+bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
     // TODO: add semantic checks, cleaning, etc.
 
     T_TOKEN *token;
@@ -2077,6 +2089,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer) {
         fn_call.argc = 0;
         
         move_back(buffer); // token needed for func name
+        move_back(buffer); // token needed in FUNCTION_ARGUMENTS
         next_token(buffer, &token); // IDENTIFIER
 
         // Check if the function is defined
@@ -2086,12 +2099,16 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer) {
             return false;
         }
 
+        if (compare_var_types(&(data->var.type), &(symbol->data.func.return_type)) != 0) {
+            error_flag = RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
+            return false;
+        }
+
         // Set the function call name
         fn_call.name = token->lexeme;
         fn_call.ret_type = symbol->data.func.return_type;
 
 
-        move_back(buffer); // token needed in FUNCTION_ARGUMENTS
         if (!syntax_function_arguments(buffer, &fn_call)) { // FUNCTION_ARGUMENTS
             return false;
         }
@@ -2133,7 +2150,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer) {
         return true;
     }
 
-    // second branch -> EXPRESSION ;
+    // third branch -> EXPRESSION ;
     if (is_token_in_expr(token)) { // is token in expression ?
         // we have to move back twice to get to the beginning of the expression
         // we ate the first token of the expression as identifier in ASSIGN non-terminal
@@ -2150,6 +2167,28 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer) {
 
         // codegen print expression
         createStackByPostorder(tree);
+        error_flag = check_expression(ST, &tree);
+        if (error_flag != 0){
+            return false;
+        }
+
+        // tree->resultType
+        VarType exprRes = VAR_VOID;
+        switch(tree->resultType) {
+            case TYPE_INT_RESULT:
+                exprRes = VAR_INT;
+                break;
+            case TYPE_FLOAT_RESULT:
+                exprRes = VAR_FLOAT;
+                break;
+            default:
+                break;
+        }
+
+        if (compare_var_types(&(data->var.type), &exprRes) != 0) {
+            error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            return false;
+        }
 
         tree_dispose(&tree);
 
