@@ -14,10 +14,56 @@
 #include "generate.h"
 #include "precedence_tree.h"
 #include "symtable.h"
+#include "semantic.h"
+
+// call built-in function base on fn name
+void callBIFn(T_FN_CALL *fn) {
+    if (strcmp(fn->name, "ifj.readstr") == 0) {
+        callBIReadString();
+    }
+    else if (strcmp(fn->name, "ifj.readi32") == 0) {
+        callBIReadInt();
+    }
+    else if (strcmp(fn->name, "ifj.readf64") == 0) {
+        callBIReadFloat();
+    }
+    else if (strcmp(fn->name, "ifj.write") == 0) {
+        callBIWrite(fn->argv[0]);
+    }
+    else if (strcmp(fn->name, "ifj.i2f") == 0) {
+        callBIInt2Float(fn->argv[0]);
+    }
+    else if (strcmp(fn->name, "ifj.f2i") == 0) {
+        callBIFloat2Int(fn->argv[0]);
+    }
+    else if (strcmp(fn->name, "ifj.string") == 0) {
+        callBIString(fn->argv[0]);
+    }
+    else if (strcmp(fn->name, "ifj.length") == 0) {
+        callBILength(fn->argv[0]);
+    }
+    else if (strcmp(fn->name, "ifj.concat") == 0) {
+        callBIConcat(fn->argv[0], fn->argv[1]);
+    }
+    else if (strcmp(fn->name, "ifj.substring") == 0) {
+        callBISubstr(fn->argv[0], fn->argv[1], fn->argv[2]);
+    }
+    else if (strcmp(fn->name, "ifj.strcmp") == 0) {
+        callBIStrcmp(fn->argv[0], fn->argv[1]);
+    }
+    else if (strcmp(fn->name, "ifj.ord") == 0) {
+        callBIFind(fn->argv[0], fn->argv[1]);
+    }
+    else if (strcmp(fn->name, "ifj.chr") == 0) {
+        callBISort(fn->argv[0]);
+    }
+}
 
 void generateUniqueIdentifier(char *name, char *uniq_name) {
     sprintf(uniq_name, "%s$%d", name, get_var_id(ST, name));
 }
+
+
 
 // Function to create function header
 void createFnHeader(char *name, T_TOKEN **args, int argCount) {
@@ -29,6 +75,24 @@ void createFnHeader(char *name, T_TOKEN **args, int argCount) {
         generateUniqueIdentifier(args[i]->lexeme, uniq);
         generateDefvar("LF", uniq);
         generatePops("LF", uniq);
+    }
+}
+
+// Function to create write
+void callBIWrite(T_TOKEN *var) {
+    if (var->type == IDENTIFIER) {
+        char *uniq;
+        generateUniqueIdentifier(var->lexeme, uniq);
+        generateWrite("LF", uniq);
+    }
+    else if (var->type == INT) {
+        printf("WRITE int@%d\n", var->value.intVal);
+    }
+    else if (var->type == FLOAT) {
+        printf("WRITE float@%lf\n", var->value.intVal);
+    }
+    else if (var->type == STRING) {
+        generateWrite("string", var->value.stringVal);
     }
 }
 
