@@ -52,7 +52,7 @@ void handleCorrectStringFormat(char *input, char *output) {
         // }
         if (current == 35 || current == 92 || current <= 32) {
             char hex[5];
-            sprintf(hex, "\\%03d", current);
+            snprintf(hex, 0, "\\%03d", current);
             strcat(output, hex);
         }
         else {
