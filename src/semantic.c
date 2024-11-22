@@ -167,9 +167,7 @@ int check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
     }
     
     // Create list for postfix notation
-    T_LIST_PTR listPostfix = NULL;
-    // Initialize list
-    list_init(listPostfix);
+    T_LIST_PTR listPostfix = list_init();
     // Get postfix notation from tree to list
     if(list_get_postfix_notation(listPostfix, tree)) return RET_VAL_INTERNAL_ERR;
 

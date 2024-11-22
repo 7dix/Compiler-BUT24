@@ -13,12 +13,13 @@
  * @brief Function to initialize list
  * @param list Pointer to the list
  */
-void list_init(T_LIST_PTR list){
+T_LIST_PTR list_init(){
+    T_LIST_PTR list = (T_LIST_PTR)malloc(sizeof(T_LIST));
     list->first = NULL;
     list->last = NULL;
     list->active = NULL;
     list->size = 0;
-    return;
+    return list;
 }
 
 
@@ -481,5 +482,6 @@ void list_dispose(T_LIST_PTR list){
     list->last = NULL;
     list->active = NULL;
     list->size = 0;
+    free(list);
     return;
 }

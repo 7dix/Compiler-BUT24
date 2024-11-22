@@ -82,7 +82,7 @@ typedef struct T_LIST {
 
 
 // Function declaration for init list
-void list_init(T_LIST_PTR list);
+T_LIST_PTR list_init();
 
 // Function declaration for get postfix notation from tree to list
 RetVal list_get_postfix_notation(T_LIST_PTR list, T_TREE_NODE_PTR *tree);
