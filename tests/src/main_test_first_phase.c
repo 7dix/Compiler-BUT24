@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "first_phase.h"
-#include "token_buffer.h"
-#include "symtable.h"
+#include "../../src/first_phase.h"
+#include "../../src/token_buffer.h"
+#include "../../src/symtable.h"
 
 T_SYM_TABLE *ST;
 
