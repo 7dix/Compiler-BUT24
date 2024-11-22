@@ -399,7 +399,12 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false; 
         }
-        if (put_param_to_symtable(current_fn_name));
+        int put_par = put_param_to_symtable(current_fn_name);
+        if (put_par != RET_VAL_OK) {
+            error_flag = put_par;
+            return false;
+        }
+        
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;
