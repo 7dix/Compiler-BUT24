@@ -8,6 +8,7 @@
 // YEAR: 2024
 #include "semantic.h"
 
+
 // check if the function call is valid
 int check_function_call(T_SYM_TABLE *table, T_FN_CALL *fn_call) {
     Symbol *fn = symtable_find_symbol(table, fn_call->name);
@@ -125,6 +126,24 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
     // Check internal failure
     if (tree == NULL || table == NULL) return RET_VAL_INTERNAL_ERR;
 
+    if(*tree != NULL && (*tree)->right == NULL && (*tree)->left == NULL){
+        // Check if the node is identifier
+        if((*tree)->token->type == IDENTIFIER){
+            // Find symbol in symbol table
+            Symbol *symbol = symtable_find_symbol(table, (*tree)->token->lexeme);
+            // Check if the symbol is in symbol table
+            if(symbol == NULL) return RET_VAL_SEMANTIC_UNDEFINED_ERR;
+            // Set used of variable to true
+            symbol->data.var.used = true;
+            
+            if (symbol->data.var.type == VAR_FLOAT) (*tree)->resultType = TYPE_FLOAT_RESULT;
+            if (symbol->data.var.type == VAR_INT) (*tree)->resultType = TYPE_INT_RESULT; 
+        } 
+        if((*tree)->token->type == INT) (*tree)->resultType = TYPE_INT_RESULT;
+        if((*tree)->token->type == FLOAT) (*tree)->resultType = TYPE_FLOAT_RESULT;
+        return RET_VAL_OK;
+    }
+    
     // Create list for postfix notation
     T_LIST_PTR listPostfix = NULL;
     // Initialize list
@@ -135,37 +154,213 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
 
 
     // Set literal type of every element in list
-    if(set_literal_type(table, listPostfix)){
+    if(list_set_literal(listPostfix, table)){
         list_dispose(listPostfix);
         return RET_VAL_SEMANTIC_UNDEFINED_ERR;
     }
 
 
-    // TODO: IMPLEMENT FOR ONE OPERAND IN EXPRESSION
 
+    
+    bool boolResult = false;
+
+    listPostfix->active = listPostfix->first;
     // Until list has only one element, sumulating of operation
-    while(listPostfix->size != 1){
+    while(listPostfix->size > 1 && listPostfix->active != NULL){
+    
+
+    if(listPostfix->active->node->token->type == PLUS || listPostfix->active->node->token->type == MINUS || listPostfix->active->node->token->type == MULTIPLY || listPostfix->active->node->token->type == DIVIDE || listPostfix->active->node->token->type == LESS_THAN || listPostfix->active->node->token->type == GREATER_THAN || listPostfix->active->node->token->type == LESS_THAN_EQUAL || listPostfix->active->node->token->type == GREATER_THAN_EQUAL || listPostfix->active->node->token->type == EQUAL || listPostfix->active->node->token->type == NOT_EQUAL){
         // Get first three elements from list, operator is always binary
-        T_LIST_ELEMENT_PTR operandOne = listPostfix->first;
-        T_LIST_ELEMENT_PTR operandTwo = operandOne->next;
-        T_LIST_ELEMENT_PTR operator = operandTwo->next;
-        T_TREE_NODE_PTR lastResult = NULL;
-
-        if((operandOne->literalType == NLITERAL_INT && operandTwo == NLITERAL_FLOAT) || (operandOne->literalType == NLITERAL_FLOAT && operandTwo == NLITERAL_INT)){
+        T_LIST_ELEMENT_PTR operator = listPostfix->active;
+        T_LIST_ELEMENT_PTR operandTwo = operator->prev;
+        T_LIST_ELEMENT_PTR operandOne = operandTwo->prev;
+        
+        // Check devide by zero
+        if(listPostfix->active->node->token->type == DIVIDE && operandOne->node->token->value.intVal == 0){
             list_dispose(listPostfix);
-            return RET_VAL_SEMANTIC_TYPE_ERR;
+            return RET_VAL_SEMANTIC_OTHER_ERR ;
         }
+        
+        if (listPostfix->active->node->token->type == LESS_THAN || listPostfix->active->node->token->type == GREATER_THAN || listPostfix->active->node->token->type == LESS_THAN_EQUAL || listPostfix->active->node->token->type == GREATER_THAN_EQUAL || listPostfix->active->node->token->type == EQUAL || listPostfix->active->node->token->type == NOT_EQUAL){
+            boolResult = true;
+        }
+        
+        
+        
 
+        // Neliteral and Neliteral of different types is error
+        if((operandOne->literalType == NLITERAL_INT && operandTwo->literalType == NLITERAL_FLOAT) || (operandOne->literalType == NLITERAL_FLOAT && operandTwo->literalType == NLITERAL_INT)){
+            list_dispose(listPostfix);
+            return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+        }
+        
+
+        // Literal and literal of different types is error
         if ((operandOne->literalType == LITERAL_INT && operandTwo->literalType == LITERAL_FLOAT) || (operandOne->literalType == LITERAL_FLOAT && operandTwo->literalType == LITERAL_INT)){
             list_dispose(listPostfix);
-            return RET_VAL_SEMANTIC_TYPE_ERR;
+            return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+
         }
 
-        if (operandOne->literalType == LITERAL_INT_NLL || operandTwo->literalType == LITERAL_INT_NLL){
-            list_dispose(listPostfix);
-            return RET_VAL_SEMANTIC_TYPE_ERR;
+
+
+
+        // Literal and literal of same types
+        if ((operandOne->literalType == LITERAL_INT && operandTwo->literalType == LITERAL_INT)) {
+            if(createOperation(listPostfix, operandOne, operator, operandTwo, LLI)){
+                list_dispose(listPostfix);
+                return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            }
+
+            if (boolResult){
+                boolResult = false;
+                listPostfix->active->node->resultType = TYPE_BOOL_RESULT;
+            }
         }
+        if (operandOne->literalType == LITERAL_FLOAT && operandTwo->literalType == LITERAL_FLOAT) {
+            if(createOperation(listPostfix, operandOne, operator, operandTwo, LLF)){
+                list_dispose(listPostfix);
+                return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            }
+            if (boolResult){
+            boolResult = false;
+            listPostfix->active->node->resultType = TYPE_BOOL_RESULT;
+            }
+            
+        }
+
+
+
+        // Non literal and Non literal of same types
+        if (operandOne->literalType == NLITERAL_INT && operandTwo->literalType == NLITERAL_INT) {
+            if(createOperation(listPostfix, operandOne, operator, operandTwo, NNI)){
+                list_dispose(listPostfix);
+                return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            }
+            if (boolResult){
+            boolResult = false;
+            listPostfix->active->node->resultType = TYPE_BOOL_RESULT;
+            }
+        }
+        
+        if (operandOne->literalType == NLITERAL_INT && operandTwo->literalType == NLITERAL_INT){
+            if(createOperation(listPostfix, operandOne, operator, operandTwo, NNF)){
+                list_dispose(listPostfix);
+                return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            }
+            if (boolResult){
+                boolResult = false;
+                listPostfix->active->node->resultType = TYPE_BOOL_RESULT;
+            }
+        }
+
+
+
+
+
+        // Non literal and literal of same types
+        if (operandOne->literalType == NLITERAL_INT && operandTwo->literalType == LITERAL_INT) {
+            if(createOperation(listPostfix, operandOne, operator, operandTwo,LNI)){
+                list_dispose(listPostfix);
+                return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            }
+            if (boolResult){
+                boolResult = false;
+                listPostfix->active->node->resultType = TYPE_BOOL_RESULT;
+            }
+            
+        }
+
+        if (operandOne->literalType == LITERAL_INT && operandTwo->literalType == NLITERAL_INT) {
+            if(createOperation(listPostfix, operandOne, operator, operandTwo, LNI)){
+                list_dispose(listPostfix);
+                return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            }
+            if (boolResult){
+                boolResult = false;
+                listPostfix->active->node->resultType = TYPE_BOOL_RESULT;
+            }
+        }
+
+        if (operandOne->literalType == NLITERAL_FLOAT && operandTwo->literalType == LITERAL_FLOAT) {
+            if(createOperation(listPostfix, operandOne, operator, operandTwo, LNF)){
+                list_dispose(listPostfix);
+                return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            }
+            if (boolResult){
+                boolResult = false;
+                listPostfix->active->node->resultType = TYPE_BOOL_RESULT;
+            }
+        }
+
+        if (operandOne->literalType == LITERAL_FLOAT && operandTwo->literalType == NLITERAL_FLOAT) {
+            if(createOperation(listPostfix, operandOne, operator, operandTwo, LNF)){
+                list_dispose(listPostfix);
+                return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            }
+            if (boolResult){
+                boolResult = false;
+                listPostfix->active->node->resultType = TYPE_BOOL_RESULT;
+            }
+        }
+
+
+
+
+        // Literal and NON literal of different types
+        if (operandOne->literalType == LITERAL_INT && operandTwo->literalType == NLITERAL_FLOAT) {
+            if(createOperation(listPostfix, operandOne, operator, operandTwo, LNIF)){
+                list_dispose(listPostfix);
+                return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            }
+            if (boolResult){
+                boolResult = false;
+                listPostfix->active->node->resultType = TYPE_BOOL_RESULT;
+            }
+        }
+
+        if (operandOne->literalType == NLITERAL_FLOAT && operandTwo->literalType == LITERAL_INT) {
+            if(createOperation(listPostfix, operandOne, operator, operandTwo, NLIF)){
+                list_dispose(listPostfix);
+                return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            }
+            if (boolResult){
+                boolResult = false;
+                listPostfix->active->node->resultType = TYPE_BOOL_RESULT;
+            }
+        }
+
+        if (operandOne->literalType == LITERAL_FLOAT && operandTwo->literalType == NLITERAL_INT) {
+            if(createOperation(listPostfix, operandOne, operator, operandTwo, NLFI)){
+                list_dispose(listPostfix);
+                return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            }
+            if (boolResult){
+                boolResult = false;
+                listPostfix->active->node->resultType = TYPE_BOOL_RESULT;
+            }
+        }
+
+
+        if (operandOne->literalType == NLITERAL_INT && operandTwo->literalType == LITERAL_FLOAT) {
+            if(createOperation(listPostfix, operandOne, operator, operandTwo,LNFI)){
+                list_dispose(listPostfix);
+                return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            }
+            if (boolResult){
+                boolResult = false;
+                listPostfix->active->node->resultType = TYPE_BOOL_RESULT;
+            }
+        }
+            
+    } else list_next(listPostfix);
+
+
+            
     }
-              
-    return RET_VAL_OK;
+
+    list_dispose(listPostfix);
+    return RET_VAL_OK;  
+        
 }
+

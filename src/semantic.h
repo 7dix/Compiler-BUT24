@@ -13,7 +13,7 @@
 #include "scanner.h"
 #include "shared.h"
 #include "precedence_tree.h"
-#include "semantic_list.h"s
+#include "semantic_list.h"
 
 typedef struct FN_CALL {
     char *name;
