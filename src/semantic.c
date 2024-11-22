@@ -27,6 +27,7 @@ int check_function_call(T_SYM_TABLE *table, T_FN_CALL *fn_call) {
 
         switch (fn_call->argv[i]->type) {
             case IDENTIFIER:
+            {
                 // check if the identifier is in the symbol table
                 Symbol *symbol = symtable_find_symbol(table, fn_call->argv[i]->lexeme);
                 if (symbol == NULL) {
@@ -41,7 +42,7 @@ int check_function_call(T_SYM_TABLE *table, T_FN_CALL *fn_call) {
                     return RET_VAL_SEMANTIC_FUNCTION_ERR;
                 }
                 break;
-            
+            }
             case INT:
                 if (fn->data.func.argv[i].type != VAR_INT &&
                     fn->data.func.argv[i].type != VAR_INT_NULL &&
@@ -97,22 +98,43 @@ void free_fn_call_args(T_FN_CALL *fn_call) {
     free(fn_call->argv);
 }
 
-// Checks for unused and unmodified variables in the symbol table
-int check_for_unused_vars(T_SYM_TABLE *table) {
-    if (table == NULL || table->top == NULL) {
-        return RET_VAL_INTERNAL_ERR;
+
+
+// Compare variable types
+int compare_var_types(VarType *existing, VarType *new) {
+    if (*existing == *new) {
+        return RET_VAL_OK;
     }
 
-    Hashtable *ht = table->top->ht;
-    for (int i = 0; i < HASHTABLE_SIZE; i++) {
-        if (ht->table[i].occupied && ht->table[i].type == SYM_VAR) {
-            if (!ht->table[i].data.var.used || !ht->table[i].data.var.modified) {
-                return RET_VAL_SEMANTIC_UNUSED_VAR_ERR;
-            }
-        }
+    if (*existing == VAR_INT_NULL && *new == VAR_INT) {
+        *existing = VAR_INT;
+        return RET_VAL_OK;
     }
 
-    return RET_VAL_OK;
+    if (*existing == VAR_FLOAT_NULL && *new == VAR_FLOAT) {
+        *existing = VAR_FLOAT;
+        return RET_VAL_OK;
+    }
+
+    if (*existing == VAR_STRING && *new == STRING_VAR_STRING) {
+        return RET_VAL_OK;
+    }
+
+    if (*existing == VAR_STRING_NULL && *new == STRING_VAR_STRING) {
+        *existing = VAR_STRING;
+        return RET_VAL_OK;
+    }
+
+    if (*new == VAR_ANY) {
+        return RET_VAL_OK;
+    }
+
+    if (*existing == VAR_VOID) {
+        *existing = *new;
+        return RET_VAL_OK;
+    }
+
+    return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
 }
 
 /**

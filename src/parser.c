@@ -15,6 +15,9 @@
 // Stores error defined in  `shared.h`
 int error_flag = RET_VAL_OK;
 
+// Current function name
+char *current_fn_name = NULL;
+
 
 /**
  * @brief Entry point of the parser.
@@ -194,7 +197,7 @@ bool syntax_prolog(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_fn_defs(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
 
     if (!syntax_fn_def(buffer)) { // FN_DEF
         return false;
@@ -221,7 +224,7 @@ bool syntax_fn_defs(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_fn_def(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
 
@@ -246,6 +249,9 @@ bool syntax_fn_def(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
+    // save current function name
+    current_fn_name = token->lexeme;
+
     next_token(buffer, &token); // (
     if (token->type != BRACKET_LEFT_SIMPLE) {
         // TODO: process error
@@ -267,6 +273,8 @@ bool syntax_fn_def(T_TOKEN_BUFFER *buffer) {
     if (!syntax_fn_def_remaining(buffer)) { // FN_DEF_REMAINING
         return false;
     }
+
+    current_fn_name = NULL; // reset current function name
 
     return true;
 }
@@ -337,7 +345,7 @@ bool syntax_fn_def_next(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
     // TODO: possible simplification by checking only void type
     T_TOKEN *token;
     // we have two branches, choose here
@@ -349,7 +357,8 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
         token->type == TYPE_FLOAT_NULL || token->type == TYPE_STRING_NULL) {
 
         move_back(buffer); // token needed in TYPE
-        if (!syntax_type(buffer)) { // TYPE
+        VarType type_void; // dummy variable
+        if (!syntax_type(buffer, &type_void)) { // TYPE
             return false;
         }
 
@@ -383,10 +392,19 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
+        
+        // SCOPE INCREASE
+        if (!symtable_add_scope(ST)) {
+            error_flag = RET_VAL_INTERNAL_ERR;
+            return false; 
+        }
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;
         }
+
+        // SCOPE DECREASE
+        symtable_remove_scope(ST);
 
         next_token(buffer, &token); // }
         if (token->type != BRACKET_RIGHT_CURLY) {
@@ -421,7 +439,7 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_params(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
     // we have two branches, choose here
@@ -465,7 +483,7 @@ bool syntax_params(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_param(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
 
@@ -483,7 +501,8 @@ bool syntax_param(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
-    if (!syntax_type(buffer)) { // TYPE
+    VarType type_void; // dummy variable
+    if (!syntax_type(buffer, &type_void)) { // TYPE
         return false;
     }
 
@@ -511,12 +530,13 @@ bool syntax_param(T_TOKEN_BUFFER *buffer) {
  * 
  * - `int error_flag`
  * @param *token_buffer pointer to token buffer
+ * @param *type pointer to variable type
  * @return `bool`
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_type(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+bool syntax_type(T_TOKEN_BUFFER *buffer, VarType *type) {
+    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
     // check whether token is one of the types
@@ -527,6 +547,31 @@ bool syntax_type(T_TOKEN_BUFFER *buffer) {
         // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
+    }
+    
+    // Set the type
+    switch(token->type) {
+        case TYPE_INT:
+            *type = VAR_INT;
+            break;
+        case TYPE_FLOAT:
+            *type = VAR_FLOAT;
+            break;
+        case TYPE_STRING:
+            *type = VAR_STRING;
+            break;
+        case TYPE_INT_NULL:
+            *type = VAR_INT_NULL;
+            break;
+        case TYPE_FLOAT_NULL:
+            *type = VAR_FLOAT_NULL;
+            break;
+        case TYPE_STRING_NULL:
+            *type = VAR_STRING_NULL;
+            break;
+        default:
+            // We should never get here
+            break;
     }
 
     return true;
@@ -550,7 +595,7 @@ bool syntax_type(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_param_next(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
     // we have two branches, choose here
@@ -594,7 +639,7 @@ bool syntax_param_next(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_param_after_comma(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
     // we have two branches, choose here
@@ -669,7 +714,7 @@ bool syntax_end(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_code_block_next(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
     // we have two branches, choose here
@@ -798,12 +843,22 @@ bool syntax_code_block(T_TOKEN_BUFFER *buffer) {
  */
 bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
     // TODO: add semantic checks, cleaning, etc.
-
     T_TOKEN *token;
+
+    // Create new symbol data
+    char *name = NULL;
+    SymbolData data;
+    data.var.is_const = false;
+    data.var.modified = false;
+    data.var.used = false;
+    data.var.type = VAR_VOID;
+    data.var.id = -1;
+
     // we have two branches, choose here
     next_token(buffer, &token);
     // first branch -> const identifier VAR_DEF_AFTER_ID
     if (token->type == CONST) { // const
+        data.var.is_const = true;
 
         next_token(buffer, &token); // identifier
         if (token->type != IDENTIFIER) {
@@ -812,7 +867,28 @@ bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
             return false;
         }
 
-        if (!syntax_var_def_after_id(buffer)) { // VAR_DEF_AFTER_ID
+        // save variable name
+        name = token->lexeme;
+        // Check if variable already exists
+        if (symtable_find_symbol(ST, name) != NULL) {
+            error_flag = RET_VAL_SEMANTIC_REDEF_OR_BAD_ASSIGN_ERR;
+            return false;
+        }
+
+        if (!syntax_var_def_after_id(buffer, &data)) { // VAR_DEF_AFTER_ID
+            return false;
+        }
+
+        // Check if variable type was set
+        if (data.var.type == VAR_VOID) {
+            error_flag = RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;;
+            return false;
+        }
+
+        // Add variable to symtable
+        if (!symtable_add_symbol(ST, name, SYM_VAR, data)) {
+            // TODO: process error
+            error_flag = RET_VAL_INTERNAL_ERR;
             return false;
         }
 
@@ -821,6 +897,7 @@ bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
 
     // second branch -> var identifier VAR_DEF_AFTER_ID
     if (token->type == VAR) { // var
+        data.var.is_const = false;
         
         next_token(buffer, &token); // identifier
         if (token->type != IDENTIFIER) {
@@ -829,7 +906,28 @@ bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
             return false;
         }
 
-        if (!syntax_var_def_after_id(buffer)) { // VAR_DEF_AFTER_ID
+        // save variable name
+        name = token->lexeme;
+        // Check if variable already exists
+        if (symtable_find_symbol(ST, name) != NULL) {
+            error_flag = RET_VAL_SEMANTIC_REDEF_OR_BAD_ASSIGN_ERR;
+            return false;
+        }
+
+        if (!syntax_var_def_after_id(buffer, &data)) { // VAR_DEF_AFTER_ID
+            return false;
+        }
+
+        // Check if variable type was set
+        if (data.var.type == VAR_VOID) {
+            error_flag = RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;;
+            return false;
+        }
+
+        // Add variable to symtable
+        if (!symtable_add_symbol(ST, name, SYM_VAR, data)) {
+            // TODO: process error
+            error_flag = RET_VAL_INTERNAL_ERR;
             return false;
         }
 
@@ -855,12 +953,13 @@ bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
  * 
  * - `int error_flag`
  * @param *token_buffer pointer to token buffer
+ * @param *data pointer to symbol data
  * @return `bool`
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_var_def_after_id(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+bool syntax_var_def_after_id(T_TOKEN_BUFFER *buffer, SymbolData *data) {
+    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
     // we have two branches, choose here
@@ -868,7 +967,7 @@ bool syntax_var_def_after_id(T_TOKEN_BUFFER *buffer) {
     // first branch -> : TYPE = ASSIGN
     if (token->type == COLON) { // :
 
-        if (!syntax_type(buffer)) { // TYPE
+        if (!syntax_type(buffer, &(data->var.type))) { // TYPE
             return false;
         }
 
@@ -879,7 +978,7 @@ bool syntax_var_def_after_id(T_TOKEN_BUFFER *buffer) {
             return false;
         }
 
-        if (!syntax_assign(buffer)) { // ASSIGN
+        if (!syntax_assign(buffer, data)) { // ASSIGN
             return false;
         }
     
@@ -889,7 +988,7 @@ bool syntax_var_def_after_id(T_TOKEN_BUFFER *buffer) {
     // second branch -> = ASSIGN
     if (token->type == ASSIGN) { // =
 
-        if (!syntax_assign(buffer)) { // ASSIGN
+        if (!syntax_assign(buffer, data)) { // ASSIGN
             return false;
         }
 
@@ -917,7 +1016,7 @@ bool syntax_var_def_after_id(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_if_statement(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
 
@@ -942,6 +1041,8 @@ bool syntax_if_statement(T_TOKEN_BUFFER *buffer) {
     if (error_flag != RET_VAL_OK) {
         return false;
     }
+
+    // TODO: get expression type
 
     next_token(buffer, &token); // )
     if (token->type != BRACKET_RIGHT_SIMPLE) {
@@ -970,12 +1071,13 @@ bool syntax_if_statement(T_TOKEN_BUFFER *buffer) {
  * 
  * - `int error_flag`
  * @param *token_buffer pointer to token buffer
+ * @param *tree pointer to expression tree
  * @return `bool`
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
 bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
     // we have two branches, choose here
@@ -990,9 +1092,18 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         }
         tree_dispose(tree);
         
+        // SCOPE INCREASE
+        if (!symtable_add_scope(ST)) {
+            error_flag = RET_VAL_INTERNAL_ERR;
+            return false; 
+        }
+
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;
         }
+
+        // SCOPE DECREASE
+        symtable_remove_scope(ST);
 
         next_token(buffer, &token); // }
         if (token->type != BRACKET_RIGHT_CURLY) {
@@ -1015,9 +1126,18 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             return false;
         }
 
+        // SCOPE INCREASE
+        if (!symtable_add_scope(ST)) {
+            error_flag = RET_VAL_INTERNAL_ERR;
+            return false; 
+        }
+
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;
         }
+
+        // SCOPE DECREASE
+        symtable_remove_scope(ST);
 
         next_token(buffer, &token); // }
         if (token->type != BRACKET_RIGHT_CURLY) {
@@ -1046,6 +1166,25 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             return false;
         }
 
+        // SCOPE INCREASE
+        if (!symtable_add_scope(ST)) {
+            error_flag = RET_VAL_INTERNAL_ERR;
+            return false; 
+        }
+
+        // Add the | identifier | to the symtable
+        SymbolData data;
+        data.var.is_const = false;
+        data.var.modified = false;
+        data.var.used = false;
+        data.var.type = VAR_VOID;
+        data.var.id = -1;
+        if (!symtable_add_symbol(ST, token->lexeme, SYM_VAR, data)) {
+            error_flag = RET_VAL_INTERNAL_ERR;
+            return false;
+        }
+
+
         next_token(buffer, &token); // |
         if (token->type != PIPE) {
             // TODO: process error
@@ -1063,6 +1202,9 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;
         }
+
+        // SCOPE DECREASE
+        symtable_remove_scope(ST);
 
         next_token(buffer, &token); // }
         if (token->type != BRACKET_RIGHT_CURLY) {
@@ -1085,9 +1227,18 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             return false;
         }
 
+        // SCOPE INCREASE
+        if (!symtable_add_scope(ST)) {
+            error_flag = RET_VAL_INTERNAL_ERR;
+            return false; 
+        }
+
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;
         }
+
+        // SCOPE DECREASE
+        symtable_remove_scope(ST);
 
         next_token(buffer, &token); // }
         if (token->type != BRACKET_RIGHT_CURLY) {
@@ -1120,7 +1271,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
  * @retval `false` - syntax error
  */
 bool syntax_while_statement(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
 
@@ -1146,6 +1297,11 @@ bool syntax_while_statement(T_TOKEN_BUFFER *buffer) {
     if (error_flag != RET_VAL_OK) {
         return false;
     }
+
+
+
+    // TODO: get expression type
+
 
     next_token(buffer, &token); // )
     if (token->type != BRACKET_RIGHT_SIMPLE) {
@@ -1177,7 +1333,7 @@ bool syntax_while_statement(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
     // we have two branches, choose here
@@ -1192,9 +1348,18 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
         }
         tree_dispose(tree);
 
+        // SCOPE INCREASE
+        if (!symtable_add_scope(ST)) {
+            error_flag = RET_VAL_INTERNAL_ERR;
+            return false; 
+        }
+
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;
         }
+
+        // SCOPE DECREASE
+        symtable_remove_scope(ST);
 
         next_token(buffer, &token); // }
         if (token->type != BRACKET_RIGHT_CURLY) {
@@ -1223,6 +1388,24 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
             return false;
         }
 
+        // SCOPE INCREASE
+        if (!symtable_add_scope(ST)) {
+            error_flag = RET_VAL_INTERNAL_ERR;
+            return false; 
+        }
+
+        // Add the | identifier | to the symtable
+        SymbolData data;
+        data.var.is_const = false;
+        data.var.modified = false;
+        data.var.used = false;
+        data.var.type = VAR_VOID;
+        data.var.id = -1;
+        if (!symtable_add_symbol(ST, token->lexeme, SYM_VAR, data)) {
+            error_flag = RET_VAL_INTERNAL_ERR;
+            return false;
+        }
+
         next_token(buffer, &token); // |
         if (token->type != PIPE) {
             // TODO: process error
@@ -1240,6 +1423,9 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;
         }
+
+        // SCOPE DECREASE
+        symtable_remove_scope(ST);
 
         next_token(buffer, &token); // }
         if (token->type != BRACKET_RIGHT_CURLY) {
@@ -1272,7 +1458,7 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
  * @retval `false` - syntax error
  */
 bool syntax_return(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
 
@@ -1308,20 +1494,37 @@ bool syntax_return(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_return_remaining(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
     // we have two branches, choose here
     next_token(buffer, &token);
     // first branch -> ;
     if (token->type == SEMICOLON) { // ;
+        // Check if the function is void
+        if (symtable_find_symbol(ST, current_fn_name)->data.func.return_type != VAR_VOID) {
+            error_flag = RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
+            return false;
+        }
+
         return true;
     }
 
     // second branch -> ASSIGN, check first token in ASSIGN
     if (token->type == IDENTIFIER || token->type == IFJ || is_token_in_expr(token)) {
         move_back(buffer); // token needed in ASSIGN
-        if (!syntax_assign(buffer)) { // ASSIGN
+
+        // Dummy for return type
+        SymbolData data;
+        data.var.type = VAR_VOID;
+
+        if (!syntax_assign(buffer, &data)) { // ASSIGN
+            return false;
+        }
+
+        // Check if the return type of the function is the same as the return type of the expression
+        if (symtable_find_symbol(ST, current_fn_name)->data.func.return_type != data.var.type) {
+            error_flag = RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
             return false;
         }
 
@@ -1349,9 +1552,12 @@ bool syntax_return_remaining(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_built_in_void_fn_call(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
+    T_FN_CALL fn_call;
+    fn_call.argv = NULL;
+    fn_call.argc = 0;
 
     next_token(buffer, &token); // ifj
     if (token->type != IFJ) {
@@ -1374,6 +1580,19 @@ bool syntax_built_in_void_fn_call(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
+    // Check if the function is defined
+    char fn_name[256];
+    snprintf(fn_name, sizeof(fn_name), "ifj.%s", token->lexeme);
+    Symbol *symbol = symtable_find_symbol(ST, fn_name);
+    if (symbol == NULL || symbol->type != SYM_FUNC) {
+        error_flag = RET_VAL_SEMANTIC_UNDEFINED_ERR;
+        return false;
+    }
+
+    // Set the function call name
+    fn_call.name = fn_name;
+    fn_call.ret_type = symbol->data.func.return_type;
+
     next_token(buffer, &token); // (
     if (token->type != BRACKET_LEFT_SIMPLE) {
         // TODO: process error
@@ -1381,9 +1600,13 @@ bool syntax_built_in_void_fn_call(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
-    if (!syntax_arguments(buffer)) { // ARGUMENTS
+    if (!syntax_arguments(buffer, &fn_call)) { // ARGUMENTS
         return false;
     }
+
+    // Check if the function is void
+    check_function_call(ST, &fn_call);
+    free_fn_call_args(&fn_call);
 
     next_token(buffer, &token); // )
     if (token->type != BRACKET_RIGHT_SIMPLE) {
@@ -1418,7 +1641,7 @@ bool syntax_built_in_void_fn_call(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_assign_expr_or_fn_call(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
     
     T_TOKEN *token;
 
@@ -1429,7 +1652,15 @@ bool syntax_assign_expr_or_fn_call(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
-    if (!syntax_id_start(buffer)) { // ID_START
+    Symbol *symbol = symtable_find_symbol(ST, token->lexeme);
+
+    // Check if the identifier is defined
+    if (symbol == NULL) {
+        error_flag = RET_VAL_SEMANTIC_UNDEFINED_ERR;
+        return false;
+    }
+
+    if (!syntax_id_start(buffer, symbol)) { // ID_START
         return false;
     }
 
@@ -1452,7 +1683,7 @@ bool syntax_assign_expr_or_fn_call(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_assign_discard_expr_or_fn_call(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
 
@@ -1470,7 +1701,11 @@ bool syntax_assign_discard_expr_or_fn_call(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
-    if (!syntax_assign(buffer)) { // ASSIGN
+    // Dummy for return type
+    SymbolData data;
+    data.var.type = VAR_VOID;
+
+    if (!syntax_assign(buffer, &data)) { // ASSIGN
         return false;
     }
 
@@ -1490,11 +1725,12 @@ bool syntax_assign_discard_expr_or_fn_call(T_TOKEN_BUFFER *buffer) {
  * 
  * - `int error_flag`
  * @param *token_buffer pointer to token buffer
+ * @param *symbol pointer to symbol
  * @return `bool`
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_id_start(T_TOKEN_BUFFER *buffer) {
+bool syntax_id_start(T_TOKEN_BUFFER *buffer, Symbol *symbol) {
     // TODO: add semantic checks, cleaning, etc.
 
     T_TOKEN *token;
@@ -1503,20 +1739,45 @@ bool syntax_id_start(T_TOKEN_BUFFER *buffer) {
     // first branch -> = ASSIGN
     if (token->type == ASSIGN) { // =
         
-        if (!syntax_assign(buffer)) { // ASSIGN
+        if (!syntax_assign(buffer, &(symbol->data))) { // ASSIGN
             return false;
         }
+
+        // TODO maybe check if the varType is not void
 
         return true;
     }
 
     // second branch -> FUNCTION_ARGUMENTS
     if (token->type == BRACKET_LEFT_SIMPLE) { // (
+        T_TOKEN *token;
+        T_FN_CALL fn_call;
+        fn_call.argv = NULL;
+        fn_call.argc = 0;
         
-        move_back(buffer); // token needed in FUNCTION_ARGUMENTS
-        if (!syntax_function_arguments(buffer)) { // FUNCTION_ARGUMENTS
+        move_back(buffer); // token needed for func name
+        next_token(buffer, &token); // IDENTIFIER
+
+        // Check if the function is defined
+        Symbol *symbol = symtable_find_symbol(ST, token->lexeme);
+        if (symbol == NULL || symbol->type != SYM_FUNC) {
+            error_flag = RET_VAL_SEMANTIC_UNDEFINED_ERR;
             return false;
         }
+
+        // Set the function call name
+        fn_call.name = token->lexeme;
+        fn_call.ret_type = symbol->data.func.return_type;
+
+
+        move_back(buffer); // token needed in FUNCTION_ARGUMENTS
+        if (!syntax_function_arguments(buffer, &fn_call)) { // FUNCTION_ARGUMENTS
+            return false;
+        }
+
+        // Check if the function is void
+        check_function_call(ST, &fn_call);
+        free_fn_call_args(&fn_call);
 
         return true;
     }
@@ -1541,7 +1802,7 @@ bool syntax_id_start(T_TOKEN_BUFFER *buffer) {
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_function_arguments(T_TOKEN_BUFFER *buffer) {
+bool syntax_function_arguments(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call) {
     // TODO: add semantic checks, cleaning, etc.
 
     T_TOKEN *token;
@@ -1553,7 +1814,7 @@ bool syntax_function_arguments(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
-    if (!syntax_arguments(buffer)) { // ARGUMENTS
+    if (!syntax_arguments(buffer, fn_call)) { // ARGUMENTS
         return false;
     }
 
@@ -1591,12 +1852,13 @@ bool syntax_function_arguments(T_TOKEN_BUFFER *buffer) {
  * 
  * - `int error_flag`
  * @param *token_buffer pointer to token buffer
+ * @param *data pointer to symbol data
  * @return `bool`
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_assign(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
+    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
     // we have several branches, choose here
@@ -1617,6 +1879,10 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer) {
     // second branch -> ifj . identifier ( ARGUMENTS ) ;
     if (token->type == IFJ) { // ifj
 
+        T_FN_CALL fn_call;
+        fn_call.argv = NULL;
+        fn_call.argc = 0;
+
         next_token(buffer, &token); // .
         if (token->type != DOT) {
             // TODO: process error
@@ -1631,6 +1897,28 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer) {
             return false;
         }
 
+        
+
+        // Check if the function is defined and check the return type
+        char fn_name[256];
+        sprintf(fn_name, "ifj.%s", token->lexeme);
+        Symbol *symbol = symtable_find_symbol(ST, fn_name);
+        if (symbol == NULL || symbol->type != SYM_FUNC) {
+            error_flag = RET_VAL_SEMANTIC_UNDEFINED_ERR;
+            return false;
+        }
+        // Set the function call name
+        fn_call.name = fn_name;
+        fn_call.ret_type = symbol->data.func.return_type;
+
+
+
+        if (compare_var_types(&(data->var.type), &(symbol->data.func.return_type)) != 0) {
+            error_flag = RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
+            return false;
+        }
+
+
         next_token(buffer, &token); // (
         if (token->type != BRACKET_LEFT_SIMPLE) {
             // TODO: process error
@@ -1638,9 +1926,14 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer) {
             return false;
         }
 
-        if (!syntax_arguments(buffer)) { // ARGUMENTS
+        if (!syntax_arguments(buffer, &fn_call)) { // ARGUMENTS
             return false;
         }
+
+        // Check if the function is void
+        check_function_call(ST, &fn_call);
+        free_fn_call_args(&fn_call);
+
 
         next_token(buffer, &token); // )
         if (token->type != BRACKET_RIGHT_SIMPLE) {
@@ -1659,17 +1952,7 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer) {
         return true;
     }
 
-    // third branch -> identifier ID_ASSIGN
-    if (token->type == IDENTIFIER) { // identifier
-
-        if (!syntax_id_assign(buffer)) { // ID_ASSIGN
-            return false;
-        }
-
-        return true;
-    }
-
-    // fourth branch -> EXPRESSION ;
+    // third branch -> EXPRESSION ;
     if (is_token_in_expr(token)) {
         move_back(buffer);
         // TODO: change based on api of bottom-up parser
@@ -1679,6 +1962,9 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer) {
         if (error_flag != RET_VAL_OK) {
             return false;
         }
+
+        // TODO: get expression type
+
         tree_dispose(&tree);
 
         next_token(buffer, &token); // ;
@@ -1690,6 +1976,30 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer) {
         
         return true;
     }
+
+    // fourth branch -> identifier ID_ASSIGN
+    if (token->type == IDENTIFIER) { // identifier
+
+        if (!syntax_id_assign(buffer)) { // ID_ASSIGN
+            return false;
+        }
+
+        // Check if the function is defined and check the return type
+        Symbol *symbol = symtable_find_symbol(ST, token->lexeme);
+        if (symbol == NULL || symbol->type != SYM_FUNC) {
+            error_flag = RET_VAL_SEMANTIC_UNDEFINED_ERR;
+            return false;
+        }
+
+        if (compare_var_types(&(data->var.type), &(symbol->data.func.return_type)) != 0) {
+            error_flag = RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
+            return false;
+        }
+
+        return true;
+    }
+
+    
 
     // TODO: process error
     error_flag = RET_VAL_SYNTAX_ERR;
@@ -1722,10 +2032,34 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer) {
     // first branch -> FUNCTION_ARGUMENTS
     if (token->type == BRACKET_LEFT_SIMPLE) { // (
         
-        move_back(buffer); // token needed in FUNCTION_ARGUMENTS
-        if (!syntax_function_arguments(buffer)) { // FUNCTION_ARGUMENTS
+        T_TOKEN *token;
+        T_FN_CALL fn_call;
+        fn_call.argv = NULL;
+        fn_call.argc = 0;
+        
+        move_back(buffer); // token needed for func name
+        next_token(buffer, &token); // IDENTIFIER
+
+        // Check if the function is defined
+        Symbol *symbol = symtable_find_symbol(ST, token->lexeme);
+        if (symbol == NULL || symbol->type != SYM_FUNC) {
+            error_flag = RET_VAL_SEMANTIC_UNDEFINED_ERR;
             return false;
         }
+
+        // Set the function call name
+        fn_call.name = token->lexeme;
+        fn_call.ret_type = symbol->data.func.return_type;
+
+
+        move_back(buffer); // token needed in FUNCTION_ARGUMENTS
+        if (!syntax_function_arguments(buffer, &fn_call)) { // FUNCTION_ARGUMENTS
+            return false;
+        }
+
+        // Check if the function is void
+        check_function_call(ST, &fn_call);
+        free_fn_call_args(&fn_call);
 
         return true;
     }
@@ -1740,7 +2074,11 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer) {
         if (error_flag != RET_VAL_OK) {
             return false;
         }
+
+        // TODO: get expression type
+
         tree_dispose(&tree);
+        
 
         next_token(buffer, &token);
         if (token->type == SEMICOLON) {
@@ -1762,6 +2100,9 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer) {
         if (error_flag != RET_VAL_OK) {
             return false;
         }
+
+        // TODO: get expression type
+
         tree_dispose(&tree);
 
         next_token(buffer, &token); // ;
@@ -1792,12 +2133,13 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer) {
  * 
  * - `int error_flag`
  * @param *token_buffer pointer to token buffer
+ * @param *fn_call pointer to function call struct
  * @return `bool`
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_arguments(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+bool syntax_arguments(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call) {
+    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
     // we have two branches, choose here
@@ -1812,10 +2154,10 @@ bool syntax_arguments(T_TOKEN_BUFFER *buffer) {
     if (token->type == IDENTIFIER || token->type == INT ||
         token->type == FLOAT || token->type == STRING || token->type == NULL_TOKEN) {
 
-        if (!syntax_argument(buffer)) { // ARGUMENT
+        if (!syntax_argument(buffer, fn_call)) { // ARGUMENT
             return false;
         }
-        if (!syntax_argument_next(buffer)) { // ARGUMENT_NEXT
+        if (!syntax_argument_next(buffer, fn_call)) { // ARGUMENT_NEXT
             return false;
         }
 
@@ -1840,12 +2182,13 @@ bool syntax_arguments(T_TOKEN_BUFFER *buffer) {
  * 
  * - `int error_flag`
  * @param *token_buffer pointer to token buffer
+ * @param *fn_call pointer to function call struct
  * @return `bool`
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_argument_next(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+bool syntax_argument_next(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call) {
+    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
     // we have two branches, choose here
@@ -1859,7 +2202,7 @@ bool syntax_argument_next(T_TOKEN_BUFFER *buffer) {
     // second branch -> , ARGUMENT_AFTER_COMMA
     if (token->type == COMMA) { // ,
 
-        if (!syntax_argument_after_comma(buffer)) { // ARGUMENT_AFTER_COMMA
+        if (!syntax_argument_after_comma(buffer, fn_call)) { // ARGUMENT_AFTER_COMMA
             return false;
         }
 
@@ -1884,12 +2227,13 @@ bool syntax_argument_next(T_TOKEN_BUFFER *buffer) {
  * 
  * - `int error_flag`
  * @param *token_buffer pointer to token buffer
+ * @param *fn_call pointer to function call struct
  * @return `bool`
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_argument_after_comma(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
+bool syntax_argument_after_comma(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call) {
+    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
     // we have two branches, choose here
@@ -1904,10 +2248,10 @@ bool syntax_argument_after_comma(T_TOKEN_BUFFER *buffer) {
     if (token->type == IDENTIFIER || token->type == INT ||
         token->type == FLOAT || token->type == STRING || token->type == NULL_TOKEN) {
 
-        if (!syntax_argument(buffer)) { // ARGUMENT
+        if (!syntax_argument(buffer, fn_call)) { // ARGUMENT
             return false;
         }
-        if (!syntax_argument_next(buffer)) { // ARGUMENT_NEXT
+        if (!syntax_argument_next(buffer, fn_call)) { // ARGUMENT_NEXT
             return false;
         }
 
@@ -1938,11 +2282,12 @@ bool syntax_argument_after_comma(T_TOKEN_BUFFER *buffer) {
  * 
  * - `int error_flag`
  * @param *token_buffer pointer to token buffer
+ * @param *fn_call pointer to function call struct
  * @return `bool`
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_argument(T_TOKEN_BUFFER *buffer) {
+bool syntax_argument(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call) {
     // TODO: add semantic checks, cleaning, etc.
 
     T_TOKEN *token;
@@ -1954,6 +2299,9 @@ bool syntax_argument(T_TOKEN_BUFFER *buffer) {
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
+
+    // Add the argument to the function call
+    add_arg_to_fn_call(fn_call, token);
 
     return true;
 }
