@@ -18,6 +18,7 @@
 #include "parser.h"
 #include "token_buffer.h"
 #include "symtable.h"
+#include "gen_handler.h"
 // TODO: include symtable when ready
 
 T_SYM_TABLE *ST;
@@ -78,6 +79,8 @@ int main() {
     }
 
     set_current_to_first(token_buffer);
+
+    createProgramHeader();
 
     // Run second phase of the compiler
     // TODO: give symtable to parser

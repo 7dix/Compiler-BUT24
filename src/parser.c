@@ -349,6 +349,16 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
     // TODO: add cleaning, etc.
     // TODO: possible simplification by checking only void type
     T_TOKEN *token;
+
+    // SCOPE INCREASE
+    if (!symtable_add_scope(ST)) {
+        error_flag = RET_VAL_INTERNAL_ERR;
+        return false; 
+    }
+    if (put_param_to_symtable(current_fn_name));
+
+    create_function_header(current_fn_name);
+
     // we have two branches, choose here
     next_token(buffer, &token);
     // first branch -> TYPE { CODE_BLOCK_NEXT }
@@ -394,12 +404,6 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
             return false;
         }
         
-        // SCOPE INCREASE
-        if (!symtable_add_scope(ST)) {
-            error_flag = RET_VAL_INTERNAL_ERR;
-            return false; 
-        }
-        if (put_param_to_symtable(current_fn_name));
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;
@@ -894,6 +898,11 @@ bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
             return false;
         }
 
+        // codegen print var definition
+        handleUniqDefvar(name);
+        // codegen print mov for right side
+        handleAssign(name);
+
         return true;
     }
 
@@ -932,6 +941,11 @@ bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false;
         }
+
+        // codegen print var definition
+        handleUniqDefvar(name);
+        // codegen print mov for right side
+        handleAssign(name);
 
         return true;
     }
@@ -1092,6 +1106,10 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
+
+        // codegen print expression
+        createStackByPostorder(*tree);
+
         tree_dispose(tree);
         
         // SCOPE INCREASE
@@ -1100,9 +1118,14 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             return false; 
         }
 
+        // codegen print if header
+        //handleIfStartBool()
+
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;
         }
+
+        // 
 
         // SCOPE DECREASE
         symtable_remove_scope(ST);
@@ -1159,6 +1182,10 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
+
+        // codegen print expression
+        createStackByPostorder(*tree);
+
         tree_dispose(tree);
 
         next_token(buffer, &token); // identifier
@@ -1475,6 +1502,9 @@ bool syntax_return(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
+    // codegen print return
+    handleReturn();
+
     return true;
 }
 
@@ -1608,6 +1638,10 @@ bool syntax_built_in_void_fn_call(T_TOKEN_BUFFER *buffer) {
 
     // Check if the function is void
     check_function_call(ST, &fn_call);
+
+    // codegen print built-in function call
+    callBIFn(&fn_call);
+
     free_fn_call_args(&fn_call);
 
     next_token(buffer, &token); // )
@@ -1666,6 +1700,9 @@ bool syntax_assign_expr_or_fn_call(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
+    // codegen print mov for right side
+    handleAssign(token->lexeme);
+
     return true;
 }
 
@@ -1710,6 +1747,9 @@ bool syntax_assign_discard_expr_or_fn_call(T_TOKEN_BUFFER *buffer) {
     if (!syntax_assign(buffer, &data)) { // ASSIGN
         return false;
     }
+
+    // codegen print discard operation
+    handleDiscard();
 
     return true;
 }
@@ -1842,8 +1882,6 @@ bool syntax_function_arguments(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call) {
  * 
  * `ASSIGN` is defined as:
  * 
- * `ASSIGN -> null ;`
- * 
  * `ASSIGN -> EXPRESSION ;`
  * 
  * `ASSIGN -> identifier ID_ASSIGN`
@@ -1865,18 +1903,6 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
     T_TOKEN *token;
     // we have several branches, choose here
     next_token(buffer, &token);
-    // first branch -> null ;
-    if (token->type == NULL_TOKEN) { // null
-
-        next_token(buffer, &token); // ;
-        if (token->type != SEMICOLON) {
-            // TODO: process error
-            error_flag = RET_VAL_SYNTAX_ERR;
-            return false;
-        }
-
-        return true;
-    }
     
     // second branch -> ifj . identifier ( ARGUMENTS ) ;
     if (token->type == IFJ) { // ifj
@@ -1934,6 +1960,9 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
 
         // Check if the function is void
         check_function_call(ST, &fn_call);
+        // codegen print builtin function call
+        callBIFn(&fn_call);
+
         free_fn_call_args(&fn_call);
 
 
@@ -1951,31 +1980,6 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
             return false;
         }
 
-        return true;
-    }
-
-    // third branch -> EXPRESSION ;
-    if (is_token_in_expr(token)) {
-        move_back(buffer);
-        // TODO: change based on api of bottom-up parser
-        T_TREE_NODE_PTR tree;
-        tree_init(&tree);
-        error_flag = precedenceSyntaxMain(buffer, &tree, ASS_END);
-        if (error_flag != RET_VAL_OK) {
-            return false;
-        }
-
-        // TODO: get expression type
-
-        tree_dispose(&tree);
-
-        next_token(buffer, &token); // ;
-        if (token->type != SEMICOLON) {
-            // TODO: process error
-            error_flag = RET_VAL_SYNTAX_ERR;
-            return false;
-        }
-        
         return true;
     }
 
@@ -2000,6 +2004,36 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
 
         return true;
     }
+
+    // third branch -> EXPRESSION ;
+    if (is_token_in_expr(token)) {
+        move_back(buffer);
+        // TODO: change based on api of bottom-up parser
+        T_TREE_NODE_PTR tree;
+        tree_init(&tree);
+        error_flag = precedenceSyntaxMain(buffer, &tree, ASS_END);
+        if (error_flag != RET_VAL_OK) {
+            return false;
+        }
+
+        // TODO: get expression type
+
+        // codegen print expression
+        createStackByPostorder(tree);
+
+        tree_dispose(&tree);
+
+        next_token(buffer, &token); // ;
+        if (token->type != SEMICOLON) {
+            // TODO: process error
+            error_flag = RET_VAL_SYNTAX_ERR;
+            return false;
+        }
+        
+        return true;
+    }
+
+    
 
     
 
@@ -2061,6 +2095,9 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer) {
 
         // Check if the function is void
         check_function_call(ST, &fn_call);
+        // codegen print function call
+        callFunction(fn_call.name, fn_call.argv, fn_call.argc);
+
         free_fn_call_args(&fn_call);
 
         return true;
@@ -2078,6 +2115,9 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer) {
         }
 
         // TODO: get expression type
+
+        // codegen print expression
+        createStackByPostorder(tree);
 
         tree_dispose(&tree);
         
@@ -2104,6 +2144,9 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer) {
         }
 
         // TODO: get expression type
+
+        // codegen print expression
+        createStackByPostorder(tree);
 
         tree_dispose(&tree);
 

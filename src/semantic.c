@@ -143,7 +143,7 @@ int compare_var_types(VarType *existing, VarType *new) {
  * @param tree Pointer to the root of the tree
  * @return 0=RET_VAL_OK if the expression is valid, otherwise return one of semnatic errors
  */
-RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
+int check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
     // Check internal failure
     if (tree == NULL || table == NULL) return RET_VAL_INTERNAL_ERR;
 
@@ -175,17 +175,17 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
 
         if((operandOne->literalType == NLITERAL_INT && operandTwo == NLITERAL_FLOAT) || (operandOne->literalType == NLITERAL_FLOAT && operandTwo == NLITERAL_INT)){
             list_dispose(listPostfix);
-            return RET_VAL_SEMANTIC_TYPE_ERR;
+            return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
         }
 
         if ((operandOne->literalType == LITERAL_INT && operandTwo->literalType == LITERAL_FLOAT) || (operandOne->literalType == LITERAL_FLOAT && operandTwo->literalType == LITERAL_INT)){
             list_dispose(listPostfix);
-            return RET_VAL_SEMANTIC_TYPE_ERR;
+            return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
         }
 
         if (operandOne->literalType == LITERAL_INT_NLL || operandTwo->literalType == LITERAL_INT_NLL){
             list_dispose(listPostfix);
-            return RET_VAL_SEMANTIC_TYPE_ERR;
+            return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
         }
     }
               

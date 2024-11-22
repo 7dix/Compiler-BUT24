@@ -19,6 +19,7 @@
 #include "semantic.h"
 #include "precedence.h"
 #include "precedence_tree.h"
+#include "gen_handler.h"
 
 // Function prototypes
 

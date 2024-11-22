@@ -12,6 +12,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "generate.h"
+#include "gen_handler.h"
 #include "precedence_tree.h"
 #include "symtable.h"
 #include "semantic.h"
@@ -46,16 +47,16 @@ void callBIFn(T_FN_CALL *fn) {
         callBIConcat(fn->argv[0], fn->argv[1]);
     }
     else if (strcmp(fn->name, "ifj.substring") == 0) {
-        callBISubstr(fn->argv[0], fn->argv[1], fn->argv[2]);
+        callBISubstring(fn->argv[0], fn->argv[1], fn->argv[2]);
     }
     else if (strcmp(fn->name, "ifj.strcmp") == 0) {
         callBIStrcmp(fn->argv[0], fn->argv[1]);
     }
     else if (strcmp(fn->name, "ifj.ord") == 0) {
-        callBIFind(fn->argv[0], fn->argv[1]);
+        callBIOrd(fn->argv[0], fn->argv[1]);
     }
     else if (strcmp(fn->name, "ifj.chr") == 0) {
-        callBISort(fn->argv[0]);
+        callBIChr(fn->argv[0]);
     }
 }
 
@@ -66,13 +67,14 @@ void generateUniqueIdentifier(char *name, char *uniq_name) {
 
 
 // Function to create function header
-void createFnHeader(char *name, T_TOKEN **args, int argCount) {
+void createFnHeader(char *name) {
+    Symbol *symbol = symtable_find_symbol(ST, name);
     generateLabel(name);
     generateCreateFrame();
     generatePushFrame();
-    for (int i = argCount; i > 0; i--) {
-        char *uniq;
-        generateUniqueIdentifier(args[i]->lexeme, uniq);
+    for (int i = symbol->data.func.argc; i > 0; i--) {
+        char *uniq = NULL;
+        generateUniqueIdentifier(symbol->data.func.argv[i].name, uniq);
         generateDefvar("LF", uniq);
         generatePops("LF", uniq);
     }
@@ -81,7 +83,7 @@ void createFnHeader(char *name, T_TOKEN **args, int argCount) {
 // Function to create write
 void callBIWrite(T_TOKEN *var) {
     if (var->type == IDENTIFIER) {
-        char *uniq;
+        char *uniq = NULL;
         generateUniqueIdentifier(var->lexeme, uniq);
         generateWrite("LF", uniq);
     }
@@ -89,7 +91,7 @@ void callBIWrite(T_TOKEN *var) {
         printf("WRITE int@%d\n", var->value.intVal);
     }
     else if (var->type == FLOAT) {
-        printf("WRITE float@%lf\n", var->value.intVal);
+        printf("WRITE float@%lf\n", var->value.floatVal);
     }
     else if (var->type == STRING) {
         generateWrite("string", var->value.stringVal);
@@ -113,9 +115,9 @@ void createProgramHeader() {
 void callFunction(char *name, T_TOKEN **args, int argCount) {
     for (int i = 0; i < argCount; i++) {
         if (args[i]->type == IDENTIFIER) {
-            char *uniq;
+            char *uniq = NULL;
             generateUniqueIdentifier(args[i]->lexeme, uniq);
-            generatePushsChar("LF", uniq);
+            generatePushs("LF", uniq);
         }
         else if (args[i]->type == INT) {
             generatePushsInt(args[i]->value.intVal);
@@ -142,7 +144,7 @@ void handleDiscard() {
 }
 
 void handleUniqDefvar(T_TOKEN *var) {
-    char *uniq;
+    char *uniq = NULL;
     generateUniqueIdentifier(var->lexeme, uniq);
     generateDefvar("LF", uniq);
 }
@@ -156,7 +158,7 @@ void createStackByPostorder(T_TREE_NODE *tree) {
     createStackByPostorder(tree->right);
 
     if (tree->token->type == IDENTIFIER) {
-        char *uniq;
+        char *uniq = NULL;
         generateUniqueIdentifier(tree->token->lexeme, uniq);
         generatePushs("LF", uniq);
 
@@ -253,7 +255,7 @@ void createStackByPostorder(T_TREE_NODE *tree) {
 }
 
 void handleAssign(char *var) {
-    char *uniq;
+    char *uniq = NULL;
     generateUniqueIdentifier(var, uniq);
     generatePops("LF", uniq);
 }
@@ -286,7 +288,7 @@ void callBIReadString() {
  */
 void callBIInt2Float(T_TOKEN *var) {
     if (var->type == IDENTIFIER) {
-        char *uniq;
+        char *uniq = NULL;
         generateUniqueIdentifier(var->lexeme, uniq);
         generatePushs("LF", uniq);
     }
@@ -306,7 +308,7 @@ void callBIInt2Float(T_TOKEN *var) {
  */
 void callBIFloat2Int(T_TOKEN *var) {
     if (var->type == IDENTIFIER) {
-        char *uniq;
+        char *uniq = NULL;
         generateUniqueIdentifier(var->lexeme, uniq);
         generatePushs("LF", uniq);
     }
@@ -326,7 +328,7 @@ void callBIFloat2Int(T_TOKEN *var) {
  */
 void callBIString(T_TOKEN *var) {
     if (var->type == IDENTIFIER) {
-        char *uniq;
+        char *uniq = NULL;
         generateUniqueIdentifier(var->lexeme, uniq);
         generatePushs("LF", uniq);
     }
@@ -343,7 +345,7 @@ void callBIString(T_TOKEN *var) {
  * @param var The variable to calculate the length of.
  */
 void callBILength(T_TOKEN *var) {
-    char *uniq;
+    char *uniq = NULL;
     generateUniqueIdentifier(var->lexeme, uniq);
     generateStrlen("GF", "tmp1", "LF", uniq);
     generatePushs("GF", "tmp1");
@@ -358,9 +360,9 @@ void callBILength(T_TOKEN *var) {
  * @param _var The second variable.
  */
 void callBIConcat(T_TOKEN *var, T_TOKEN *_var) {
-    char *uniq;
+    char *uniq = NULL;
     generateUniqueIdentifier(var->lexeme, uniq);
-    char *_uniq;
+    char *_uniq = NULL;
     generateUniqueIdentifier(_var->lexeme, _uniq);
     generateConcat("GF", "tmp1", "LF", uniq, "LF", _uniq);
     generatePushs("GF", "tmp1");
@@ -383,8 +385,8 @@ void callBIConcat(T_TOKEN *var, T_TOKEN *_var) {
  */
 void callBISubstring(T_TOKEN *var, T_TOKEN *beg, T_TOKEN *end) {
 
-    char *_beg, *_end;
-    char *uniq_beg, *uniq_end;
+    char *_beg = NULL, *_end = NULL;
+    char *uniq_beg = NULL, *uniq_end = NULL;
 
     if (beg->type == INT) {
         sprintf(_beg, "int@%d", beg->value.intVal);
@@ -402,7 +404,7 @@ void callBISubstring(T_TOKEN *var, T_TOKEN *beg, T_TOKEN *end) {
         sprintf(_end, "LF@%s", uniq_end);
     }
 
-    char *uniq;
+    char *uniq = NULL;
     generateUniqueIdentifier(var->lexeme, uniq);
 
     generateStrlen("GF", "tmp1", "LF", uniq);
@@ -473,7 +475,7 @@ void callBISubstring(T_TOKEN *var, T_TOKEN *beg, T_TOKEN *end) {
  * @note The destination variable will be set to 0 if the strings are equal, -1 if the first string is lesser and 1 if the first string is greater.
  */
 void callBIStrcmp(T_TOKEN *var, T_TOKEN *_var) {
-    char *uniq, *_uniq;
+    char *uniq = NULL, *_uniq = NULL;
     generateUniqueIdentifier(var->lexeme, uniq);
     generateUniqueIdentifier(_var->lexeme, _uniq);
 
@@ -541,8 +543,8 @@ void callBIStrcmp(T_TOKEN *var, T_TOKEN *_var) {
  * @param index The index of the character to convert.
  */
 void callBIOrd (T_TOKEN *var, T_TOKEN *index) {
-    char *uniq;
-    char *_index;
+    char *uniq = NULL;
+    char *_index = NULL;
 
     if (index->type == INT) {
         sprintf(_index, "int@%d", index->value.intVal);
@@ -582,7 +584,7 @@ void callBIOrd (T_TOKEN *var, T_TOKEN *index) {
 }
 
 void callBIChr(T_TOKEN *var) {
-    char *uniq;
+    char *uniq = NULL;
     generateUniqueIdentifier(var->lexeme, uniq);
     generatePushs("LF", uniq);
     generateInt2Chars();
@@ -608,7 +610,7 @@ void handleIfStartNil(char *labelElse, T_TOKEN *var) {
     generateType("GF", "tmp2", "GF", "tmp1");
     generateJumpifeq(labelElse, "GF", "tmp2", "nil", "nil");
 
-    char *uniq;
+    char *uniq = NULL;
     generateUniqueIdentifier(var->lexeme, uniq);
     generateMove("LF", uniq, "GF", "tmp1");
 }
@@ -631,7 +633,7 @@ void createWhileBoolHeader(char *labelStart) {
 
 // Function to create while header with nil
 void createWhileNilHeader(char *labelStart, T_TOKEN *var) {
-    char *uniq;
+    char *uniq = NULL;
     generateUniqueIdentifier(var->lexeme, uniq);
     generateDefvar("LF", uniq);
 
@@ -650,7 +652,7 @@ void handleWhileNil(char *labelEnd, T_TOKEN *var) {
     generateType("GF", "tmp2", "GF", "tmp1");
     generateJumpifeq(labelEnd, "GF", "tmp2", "nil", "nil");
 
-    char *uniq;
+    char *uniq = NULL;
     generateUniqueIdentifier(var->lexeme, uniq);
     generateMove("LF", uniq, "GF", "tmp1");
 }

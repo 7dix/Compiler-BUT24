@@ -139,11 +139,11 @@ void generateEqs() {
 }
 
 void generateAnd(char *frame, char *var, char *_frame, char *_symb, char *__frame, char *__symb) {
-    printf("AND %s@%s %s@%s %s@%s\n", frame, var, frame, _symb, frame, __symb);
+    printf("AND %s@%s %s@%s %s@%s\n", frame, var, _frame, _symb, __frame, __symb);
 }
 
 void generateOr(char *frame, char *var, char *_frame, char *_symb, char *__frame, char *__symb) {
-    printf("OR %s@%s %s@%s %s@%s\n", frame, var, frame, _symb, frame, __symb);
+    printf("OR %s@%s %s@%s %s@%s\n", frame, var, _frame, _symb, __frame, __symb);
 }
 
 void generateNot(char *frame, char *var, char *_frame, char *_symb) {
@@ -264,8 +264,8 @@ void generateJumpifneqs(char *label) {
     printf("JUMPIFNEQS %s\n", label);
 }
 
-void generateExit(int *symb) {
-    printf("EXIT int@%s\n", symb);
+void generateExit(int symb) {
+    printf("EXIT int@%d\n", symb);
 }
 
 void generateBreak() {
