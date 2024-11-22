@@ -22,8 +22,19 @@
 
 T_SYM_TABLE *ST;
 
-int main() {
+int main(int argc, char *argv[]) {
     // TODO: stuff before ??
+
+    if (argc < 2) {
+        fprintf(stderr, "Error: No input file provided\n");
+        return RET_VAL_INTERNAL_ERR;
+    }
+
+    // Load file into stdin
+    if (freopen(argv[1], "r", stdin) == NULL) {
+        fprintf(stderr, "Error: Could not open input file %s\n", argv[1]);
+        return RET_VAL_INTERNAL_ERR;
+    }
 
     // Initialize token buffer
     T_TOKEN_BUFFER *token_buffer = init_token_buffer();
@@ -59,12 +70,26 @@ int main() {
                 fprintf(stderr, "Internal error\n");
                 break;
             case RET_VAL_SEMANTIC_UNDEFINED_ERR:
+                fprintf(stderr, "Semantic error: Undefined function 'main'\n");
+                break;
             case RET_VAL_SEMANTIC_FUNCTION_ERR:
+                fprintf(stderr, "Semantic error: Function 'main' has wrong return type or arguments\n");
+                break;
             case RET_VAL_SEMANTIC_REDEF_OR_BAD_ASSIGN_ERR:
+                fprintf(stderr, "Semantic error: Function 'main' redefined or assigned to variable\n");
+                break;
             case RET_VAL_SEMANTIC_FUNC_RETURN_ERR:
+                fprintf(stderr, "Semantic error: Function 'main' has wrong return type or arguments\n");
+                break;
             case RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR:
+                fprintf(stderr, "Semantic error: Function 'main' has wrong return type or arguments\n");
+                break;
             case RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR:
+                fprintf(stderr, "Semantic error: Function 'main' has wrong return type or arguments\n");
+                break;
             case RET_VAL_SEMANTIC_UNUSED_VAR_ERR:
+                fprintf(stderr, "Semantic error: Function 'main' has wrong return type or arguments\n");
+                break;
             case RET_VAL_SEMANTIC_OTHER_ERR:
                 fprintf(stderr, "Semantic error\n");
                 break;
@@ -82,29 +107,44 @@ int main() {
     // Run second phase of the compiler
     // TODO: give symtable to parser
     error_code = run_parser(token_buffer);
+    int line = token_buffer->current->token->line;
     if (error_code != RET_VAL_OK) {
         switch (error_code) {
             case RET_VAL_LEXICAL_ERR:
-                fprintf(stderr, "Lexical error\n");
+                fprintf(stderr, "Lexical error. Line: %d\n", line);
                 break;
             case RET_VAL_SYNTAX_ERR:
-                fprintf(stderr, "Syntax error\n");
-                break;
-            case RET_VAL_INTERNAL_ERR:
-                fprintf(stderr, "Internal error\n");
+                fprintf(stderr, "Syntax error. Line: %d\n", line);
                 break;
             case RET_VAL_SEMANTIC_UNDEFINED_ERR:
+                fprintf(stderr, "Semantic error: Undefined function or variable. Line: %d\n", line);
+                break;
             case RET_VAL_SEMANTIC_FUNCTION_ERR:
+                fprintf(stderr, "Semantic error: Function call (wrong type or number of params), return value (wrong type or not allowed discard). Line: %d\n", line);
+                break;
             case RET_VAL_SEMANTIC_REDEF_OR_BAD_ASSIGN_ERR:
+                fprintf(stderr, "Semantic error: Redefinition of variable or function, assignment to constant. Line: %d\n", line);
+                break;
             case RET_VAL_SEMANTIC_FUNC_RETURN_ERR:
+                fprintf(stderr, "Semantic error: Missing or too many expressions in function return. Line: %d\n", line);
+                break;
             case RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR:
+                fprintf(stderr, "Semantic error: Wrong type compatibility in arithmetic, string and/or relation expression, incompatible type during assignment. Line: %d\n", line);
+                break;
             case RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR:
+                fprintf(stderr, "Semantic error: Type is not stated and cannot be derived from the expression. Line: %d\n", line);
+                break;
             case RET_VAL_SEMANTIC_UNUSED_VAR_ERR:
+                fprintf(stderr, "Semantic error: Unused variable, modifiable variable without possibility of change after initialization. Line: %d\n", line);
+                break;
             case RET_VAL_SEMANTIC_OTHER_ERR:
-                fprintf(stderr, "Semantic error\n");
+                fprintf(stderr, "Semantic error. Line: %d\n", line);
+                break;
+            case RET_VAL_INTERNAL_ERR:
+                fprintf(stderr, "Internal error. Line: %d\n", line);
                 break;
             default:
-                fprintf(stderr, "Unknown error\n");
+                fprintf(stderr, "Unknown error. Line: %d\n", line);
                 break;
         }
         free_token_buffer(&token_buffer);

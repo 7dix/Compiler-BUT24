@@ -766,6 +766,7 @@ bool syntax_fp_param(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * 
  * - `int error_flag_fp`
  * @param *token_buffer pointer to token buffer
+ * @param *type pointer to variable type
  * @return `bool`
  * @retval `true` - correct syntax
  * @retval `false` - syntax error

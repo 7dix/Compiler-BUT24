@@ -10,21 +10,25 @@ CFLAGS = -Wall -Wextra -Werror
 DEBUG_FLAGS = -g -O0
 
 # Source files
-SRC = src/main.c src/scanner.c src/token_buffer.c src/parser.c src/first_phase.c src/precedence.c src/precedence_stack.c src/precedence_tree.c src/symtable.c
-SRC_SCANNER_TEST = src/main_test_scanner.c src/scanner.c
-SRC_TOKEN_BUFFER_TEST = src/main_test_token_buffer.c src/token_buffer.c src/scanner.c
-SRC_PRECEDENCE_TEST = src/main_test_precedence.c src/scanner.c src/token_buffer.c src/precedence.c src/precedence_stack.c src/precedence_tree.c 
-SRC_SYMTABLE_TEST = src/main_test_symtable.c src/symtable.c
-SRC_FIRST_PHASE_TEST = src/main_test_first_phase.c src/scanner.c src/token_buffer.c src/first_phase.c src/symtable.c
+SRC = src/main.c src/scanner.c src/token_buffer.c src/parser.c src/first_phase.c src/semantic.c src/precedence.c src/precedence_stack.c src/precedence_tree.c src/symtable.c
+SRC_SCANNER_TEST = tests/src/main_test_scanner.c src/scanner.c
+SRC_TOKEN_BUFFER_TEST = tests/src/main_test_token_buffer.c src/token_buffer.c src/scanner.c
+SRC_PRECEDENCE_TEST = tests/src/main_test_precedence.c src/scanner.c src/token_buffer.c src/precedence.c src/precedence_stack.c src/precedence_tree.c 
+SRC_SYMTABLE_TEST = tests/src/main_test_symtable.c src/symtable.c
+SRC_FIRST_PHASE_TEST = tests/src/main_test_first_phase.c src/scanner.c src/token_buffer.c src/first_phase.c src/symtable.c
+SRC_IN_FROM_FILE = tests/src/main_test.c src/scanner.c src/token_buffer.c src/parser.c src/first_phase.c src/semantic.c src/precedence.c src/precedence_stack.c src/precedence_tree.c src/symtable.c
 
 # Output executables
 OUTPUT = bin/ifj24
+DEBUG_IN_FROM_FILE = bin/ifj24file
 DEBUG_OUTPUT = bin/ifj24debug
 DEBUG_SCANNER_OUTPUT = bin/scannerdebug
 DEBUG_TOKEN_BUFFER_OUTPUT = bin/tokenbufferdebug
 DEBUG_PRECEDENCE_OUTPUT = bin/precedencedebug
 DEBUG_SYMTABLE_OUTPUT = bin/symtabledebug
 DEBUG_FIRST_PHASE_OUTPUT = bin/firstphasedebug
+
+LOGIN = 253206
 
 # Default target
 all: $(OUTPUT)
@@ -56,6 +60,9 @@ debug_symtable: bin $(SRC_SYMTABLE_TEST)
 
 debug_first_phase: bin $(SRC_FIRST_PHASE_TEST)
 	$(CC) $(CFLAGS) $(DEBUG_FLAGS) -o $(DEBUG_FIRST_PHASE_OUTPUT) $(SRC_FIRST_PHASE_TEST)
+# Debug target for from_file
+debug_from_file: bin $(SRC_IN_FROM_FILE)
+	$(CC) $(CFLAGS) $(DEBUG_FLAGS) -o $(DEBUG_IN_FROM_FILE) $(SRC_IN_FROM_FILE)
 
 
 # Test targets
@@ -79,8 +86,18 @@ test_first_phase: debug_first_phase
 
 test: test_scanner test_token_buffer test_precedence test_symtable test_parser_retcode
 
+
 # Clean target to remove the executables
 clean:
-	rm -f $(OUTPUT) $(DEBUG_OUTPUT) $(DEBUG_SCANNER_OUTPUT) $(DEBUG_TOKEN_BUFFER_OUTPUT) $(DEBUG_FIRST_PHASE_OUTPUT)
+	rm -f $(OUTPUT) $(DEBUG_OUTPUT) $(DEBUG_SCANNER_OUTPUT) $(DEBUG_TOKEN_BUFFER_OUTPUT) $(DEBUG_FIRST_PHASE_OUTPUT) $(DEBUG_SYMTABLE_OUTPUT) $(DEBUG_PRECEDENCE_OUTPUT)
+	rm -f $(LOGIN).zip
 
-.PHONY: all debug clean bin test
+.PHONY: all debug clean bin test pack
+
+pack:
+	mkdir temp
+	cp -r src/* temp/
+	cp hand_in/Makefile temp/Makefile
+	cd temp && zip $(LOGIN).zip *
+	mv temp/$(LOGIN).zip .
+	rm -r temp

@@ -9,6 +9,7 @@
 //
 // YEAR: 2024
 #include "symtable.h"
+#include "semantic.h"
 
 // Initialize hashtable
 Hashtable *hashtable_init() {
@@ -21,7 +22,6 @@ Hashtable *hashtable_init() {
         ht->table[i].type = SYM_VAR;
         ht->table[i].data.var.is_const = false;
         ht->table[i].data.var.type = VAR_VOID;
-        ht->table[i].data.var.value = NULL;
     }
     ht->count = 0;
     return ht;
@@ -35,8 +35,6 @@ void hashtable_free(Hashtable *ht) {
             free(ht->table[i].name);
             if (ht->table[i].type == SYM_FUNC) {
                 free(ht->table[i].data.func.argv);
-            } else if (ht->table[i].type == SYM_VAR) {
-                free(ht->table[i].data.var.value);
             }
         }
     }
@@ -136,8 +134,6 @@ void hashtable_remove(Hashtable *ht, const char *key) {
             free(ht->table[index].name);
             if (ht->table[index].type == SYM_FUNC) {
                 free(ht->table[index].data.func.argv);
-            } else if (ht->table[index].type == SYM_VAR) {
-                free(ht->table[index].data.var.value);
             }
 
             // Mark slot as unoccupied
@@ -188,6 +184,10 @@ void symtable_remove_scope(T_SYM_TABLE *table) {
     if (table == NULL || table->top == NULL) {
         return;
     }
+    
+    // Check for unused and unmodified variables
+    check_for_unused_vars(table);
+
     T_SCOPE *old_scope = table->top;
     table->top = old_scope->parent;
     hashtable_free(old_scope->ht);
@@ -294,4 +294,22 @@ Symbol *get_var(T_SYM_TABLE *table, const char *name) {
         return NULL;
     }
     return symbol;
+}
+
+// Checks for unused and unmodified variables in the symbol table
+int check_for_unused_vars(T_SYM_TABLE *table) {
+    if (table == NULL || table->top == NULL) {
+        return RET_VAL_INTERNAL_ERR;
+    }
+
+    Hashtable *ht = table->top->ht;
+    for (int i = 0; i < HASHTABLE_SIZE; i++) {
+        if (ht->table[i].occupied && ht->table[i].type == SYM_VAR) {
+            if (!ht->table[i].data.var.used || !ht->table[i].data.var.modified) {
+                return RET_VAL_SEMANTIC_UNUSED_VAR_ERR;
+            }
+        }
+    }
+
+    return RET_VAL_OK;
 }

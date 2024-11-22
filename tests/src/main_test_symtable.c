@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "symtable.h"
+#include "../../src/symtable.h"
 
 int main() {
     T_SYM_TABLE *table = symtable_init();
@@ -20,7 +20,7 @@ int main() {
         .var = { 
             .is_const = false,
             .type = VAR_INT,
-            .value = NULL }
+             }
         };
     Symbol *symbol = symtable_add_symbol(table, test, SYM_VAR, data);
     if (symbol == NULL) {
@@ -49,7 +49,7 @@ int main() {
         .var = { 
             .is_const = false,
             .type = VAR_INT,
-            .value = NULL }
+             }
         };
     symbol = symtable_add_symbol(table, test, SYM_VAR, data);
     if (symbol == NULL) {
@@ -86,7 +86,7 @@ int main() {
             .var = { 
                 .is_const = false,
                 .type = VAR_INT,
-                .value = NULL }
+                 }
             };
         symbol = symtable_add_symbol(table, key, SYM_VAR, data);
         if (symbol == NULL) {

@@ -1,9 +1,9 @@
 
-#include "precedence.h"
-#include "token_buffer.h"
-#include "scanner.h"
-#include "precedence_tree.h"
-#include "precedence_tree.h"
+#include "../../src/precedence.h"
+#include "../../src/token_buffer.h"
+#include "../../src/scanner.h"
+#include "../../src/precedence_tree.h"
+#include "../../src/precedence_tree.h"
 
 
 int main(void)

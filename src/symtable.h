@@ -52,7 +52,7 @@ typedef union
         bool modified;
         bool used;
         VarType type;
-        void *value;
+        // void *value;
         int id;
     } var;
     struct {
@@ -120,6 +120,9 @@ void set_var_modified(Symbol *symbol);
 void set_var_used(Symbol *symbol);
 int get_var_id(T_SYM_TABLE *table, const char *key);
 Symbol *get_var(T_SYM_TABLE *table, const char *name);
+
+// helper functions
+int check_for_unused_vars(T_SYM_TABLE *table);
 
 extern T_SYM_TABLE *ST;
 

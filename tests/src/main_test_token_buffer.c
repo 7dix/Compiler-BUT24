@@ -1,17 +1,24 @@
-// FILE: main_test_scanner.c
+// FILE: main_test_token_buffer.c
 // PROJECT: IFJ24 - Compiler for the IFJ24 language @ FIT BUT 2BIT
 // TEAM: Martin Zůbek (253206)
 // AUTHORS:
-//  <Marek Tenora> (xtenor02)
+//  <Otakar Kočí> (xkocio00)
+//  <Marek Tenora> (xtenor02) functions json_escape_string and print_token_json
 //
 // YEAR: 2024
-// NOTES: Test Scanner with JSON output, example usage: ./main_test_scanner < input_file.ifj24 > output.json
+// NOTES: Test Token Buffer with JSON output
+//        Example usage: ./main_test_token_buffer < input_file.ifj24 > output.json
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "scanner.h"
+#include <stdbool.h>
+#include "../../src/scanner.h"
+#include "../../src/token_buffer.h"
+
 // Function to escape JSON strings
+// Copied from main_test_scanner.c
+//@author Marek Tenora (xtenor02)
 char* json_escape_string(const char* str) {
     if (str == NULL) {
         return strdup("null");
@@ -54,6 +61,8 @@ char* json_escape_string(const char* str) {
 }
 
 // Function to print the token details in JSON format
+// Copied from main_test_scanner.c
+//@author Marek Tenora (xtenor02)
 void print_token_json(T_TOKEN *token, int is_first) {
     if (token == NULL) {
         fprintf(stderr, "Error: token is NULL\n");
@@ -103,29 +112,87 @@ void print_token_json(T_TOKEN *token, int is_first) {
 
 int main()
 {
-    int err_code = 0;
-    T_TOKEN currentToken;
-    int is_first_token = 1;
+    T_TOKEN_BUFFER *buffer = init_token_buffer();
+    if (buffer == NULL) {
+        fprintf(stderr, "Error: Memory allocation failed in init_token_buffer\n");
+        return 1;
+    }
 
+
+
+    int err_code = 0;
+    T_TOKEN *currentToken;
+    // Fill the buffer with tokens
+    while (err_code == 0) {
+        currentToken = (T_TOKEN *) malloc(sizeof(T_TOKEN));
+        if (currentToken == NULL) {
+            fprintf(stderr, "Error: Memory allocation failed in main\n");
+            break;
+        }
+        err_code = get_token(currentToken);
+        if (err_code != 0){
+            fprintf(stderr, "Error: Lexical error at line %d\n", currentToken->line);
+            break;
+        }
+
+        // Add the token to the buffer
+        if (!add_token_as_last(buffer, currentToken)) {
+            fprintf(stderr, "Error: Memory allocation failed in add_token_as_last\n");
+            break;
+        }
+
+        if (currentToken->type == EOF_TOKEN){
+            break;
+        }
+    }
+    if (err_code != 0) {
+        printf("\n]\n"); // End of JSON array
+        fprintf(stderr, "..Compiling failed with exit code %d\n", err_code);
+    }
+
+    set_current_to_first(buffer);
+    int is_first_token = 1;
+    // Print the JSON array to check that the buffer is filled correctly
     printf("[\n"); // Start of JSON array
 
-    while (err_code == 0){
-        err_code = get_token(&currentToken);
-        if (err_code != 0){
-            fprintf(stderr, "Error: Lexical error at line %d\n", currentToken.line);
+    // Buffer movement test
+    move_back(buffer);
+    move_back(buffer);
+    
+    for (int i = 0; i < 100; i++) {
+        next_token(buffer, &currentToken);
+    }
+
+    for (int i = 0; i < 100; i++) {
+        move_back(buffer);
+    }
+
+    for (int i = 0; i < 100; i++) {
+        next_token(buffer, &currentToken);
+    }
+
+    set_current_to_first(buffer);
+
+
+
+    // Print the buffer
+    while (true) {
+        next_token(buffer, &currentToken);
+
+        if (currentToken->type == EOF_TOKEN)
             break;
-        }
-        if (currentToken.type == EOF_TOKEN){
-            break;
-        }
+
 
         // Print the token details
-        print_token_json(&currentToken, is_first_token);
+        print_token_json(currentToken, is_first_token);
         is_first_token = 0;
+
     }
+
     printf("\n]\n"); // End of JSON array
 
-    if (err_code != 0)
-        fprintf(stderr, "..Compiling failed with exit code %d\n", err_code);
+    // Free the buffer
+    free_token_buffer(&buffer);
+
     return err_code;
 }
