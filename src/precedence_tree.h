@@ -24,6 +24,7 @@ typedef enum RESULT_TYPE{
     TYPE_INT_RESULT,
     TYPE_FLOAT_RESULT,
     TYPE_BOOL_RESULT,
+    TYPE_NULL_RESULT,
 } RESULT_TYPE;
 
 // Declaration of tree node

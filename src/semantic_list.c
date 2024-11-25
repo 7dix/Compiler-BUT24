@@ -11,7 +11,7 @@
 
 /**
  * @brief Function to initialize list
- * @param list Pointer to the list
+ * @return Pointer to the list
  */
 T_LIST_PTR list_init(){
     T_LIST_PTR list = (T_LIST_PTR)malloc(sizeof(T_LIST));
@@ -22,436 +22,195 @@ T_LIST_PTR list_init(){
     return list;
 }
 
-
 /**
- * @brief Function to insert last element to list
+ * @brief Function to insert element to the list
  * @param list Pointer to the list
- * @param node Pointer to the node
- * @return RET_VAL_OK if everything is ok, otherwise return RET_VAL_INTERNAL_ERR
+ * @param data Pointer to the data
+ * @return 0=RET_VAL_OK if the element was inserted, else return 99=RET_VAL_INTERNAL_ERR if malloc fails
  */
 RetVal list_insert_last(T_LIST_PTR list, T_TREE_NODE_PTR node){
-    
+    // Check if list is empty
+    if(list == NULL) return RET_VAL_INTERNAL_ERR;
 
     // Create new element
     T_LIST_ELEMENT_PTR element = (T_LIST_ELEMENT_PTR)malloc(sizeof(T_LIST_ELEMENT));
     // Check if malloc was successful
     if(element == NULL) return RET_VAL_INTERNAL_ERR;
 
-    // Initialize element
-    element->node = node;
+   
     element->next = NULL;
-    element->prev = NULL;
-    element->literalType = LITERAL_NON;
+    element->node = node;
+    element->literalType = LITERAL_NOT_SET;
 
-    // Set first and last element depending on if list is empty or not
+    // Check if list is empty
     if(list->size == 0){
         list->first = element;
         list->last = element;
-    
-    // Insert element to the end of list;
+        list->active = element;
     }else{
-        // Save old last element
-        T_LIST_ELEMENT_PTR odlLast = list->last;
-        // Set new last element
-        element->prev = odlLast;
-        // Set new last element
+        list->last->next = element;
         list->last = element;
-        // Set next element of old last element
-        odlLast->next = element;
-        // Set next element of new element
-        element->next = NULL;
     }
-    // Incrementing size and return success
+
     list->size++;
     return RET_VAL_OK;
 }
+
 /**
- * @brief Function for do it postorder travel
+ * @brief Function for postorder tree traversal
  * @param tree Pointer on the tree
- * @param list Pointer to the list where we want to insert elements
- * @return RET_VAL_OK if everything is ok, otherwise return RET_VAL_INTERNAL_ERR
+ * @param list Pointer to the list, where be stored nodes
+ * @return 0=RET_VAL_OK if the tree was traversed, else return 99=RET_VAL_INTERNAL_ERR if malloc fails
  */
-RetVal postorder(T_LIST_PTR list, T_TREE_NODE_PTR *tree){
-    if (*tree == NULL) return RET_VAL_OK;
-    postorder(list, &(*tree)->left);
-    postorder(list, &(*tree)->right);
+RetVal postorder(T_TREE_NODE_PTR *tree, T_LIST_PTR list){
+    
+    if(*tree == NULL) return RET_VAL_OK;
+
+    // Postorder traversal
+    if((*tree)->right != NULL) postorder(&((*tree)->left), list);
+    
+    if((*tree)->right != NULL) postorder(&((*tree)->right), list);
+
+    // Insert node to list
     return list_insert_last(list, *tree);
-    
 }
-
 /**
- * @brief Function to get postfix notation from tree to list
+ * @brief Function to set first element as active
  * @param list Pointer to the list
- * @param node Pointer to the root of tree
- * @return RET_VAL_OK if everything is ok, otherwise return RET_VAL_INTERNAL_ERR
  */
-RetVal list_get_postfix_notation(T_LIST_PTR list, T_TREE_NODE_PTR *tree){
-
-    // Check if internal failure
-    if(*tree == NULL) return RET_VAL_INTERNAL_ERR;
-    
-    if(postorder(list, tree)){
-        // If something fails, and some elements are in list, then dispose list
-        if(list->size > 0) list_dispose(list);
-        return RET_VAL_INTERNAL_ERR;
-    }
-    else return RET_VAL_OK;
+void list_first(T_LIST_PTR list){
+    if(list == NULL || list->size == 0) return;
+    list->active = list->first;
 }
 
 /**
- * @brief Function for get first element of list
- * @param list Pointer to the list
- * @return Pointer to the first element of list
- */
-T_LIST_ELEMENT_PTR list_get_first(T_LIST_PTR list){
-    return list->first;
-}
-
-/**
- * @brief Function for detect if element is leteral or non-literal, for varibles check if they are defined, and set used for variables
- * @param list Pointer to the list
- * @return RET_VAL_OK if everything is ok, otherwise return RET_VAL_INTERNAL_ERR
- */
-RetVal list_set_literal(T_LIST_PTR list, T_SYM_TABLE *table){
-
-    T_LIST_ELEMENT_PTR element = list->first;
-
-    for(int i = 0; i < list->size && element != NULL; i++){
-
-        if(element->node->token->type == IDENTIFIER){
-            if (symtable_find_symbol(table, element->node->token->lexeme) == NULL) {
-                return RET_VAL_SEMANTIC_UNDEFINED_ERR;
-            }
-            Symbol *symbol = symtable_find_symbol(table, element->node->token->lexeme);
-            // Set used of variable to true
-            symbol->data.var.used = true;
-
-            if (symbol->data.var.type == VAR_FLOAT_NULL) element->literalType = LITERAL_FLOAT_NLL;
-            if (symbol->data.var.type == VAR_INT_NULL) element->literalType = LITERAL_INT_NLL;
-            if (symbol->data.var.type == VAR_FLOAT) element->literalType = NLITERAL_FLOAT;
-            if (symbol->data.var.type == VAR_INT) element->literalType = NLITERAL_INT; 
-            
-        } 
-        if(element->node->token->type == INT) element->literalType = LITERAL_INT;
-        if(element->node->token->type == FLOAT) element->literalType = LITERAL_FLOAT;
-        
-        element = element->next;
-    }
-    return RET_VAL_OK;
-}
-
-/**
- * @brief Function for set next element to active
+ * @brief Function to set next element as active
  * @param list Pointer to the list
  */
 void list_next(T_LIST_PTR list){
-    if(list->active != NULL) list->active = list->active->next;
+    if(list == NULL || list->size == 0 || list->active == NULL) return;
+    if(list->active == list->last){
+        list->active = NULL;
+        return;
+    }
+    list->active = list->active->next;
 }
 
-
 /**
- * @brief Function for set what element will be prev of active element in list after operation
+ * @brief Function to set types of operands
  * @param list Pointer to the list
- * @return Element that will be previus of active element, NULL if active element is firt element or if previus previus element is NULL
+ * @param table Pointer to the symbol table
+ * @return 0=RET_VAL_OK if the types was set, else return 99=RET_VAL_INTERNAL_ERR if malloc fails
  */
-T_LIST_ELEMENT_PTR list_get_red(T_LIST_PTR list){
-    if(list->active == NULL) return NULL;
-    if(list->active->prev == NULL) return NULL;
-    if(list->active->prev->prev == NULL) return NULL;
-    if(list->active->prev->prev->prev != NULL) return list->active->prev->prev;
-    else return NULL;
-}
+RetVal set_types(T_LIST_PTR list, T_SYM_TABLE *table){
 
-/**
- * @brief Function for chceck if number has same value as integer
- * @param num Number to check
- * @return True if number is rounded, otherwise false
- */
-bool is_rounded(float num) {
-    return num == (int)num;
-}
+    list_first(list);
+    while(list->active != NULL){
 
-/**
- * @brief Function for simulate operation
- * @param list Pointer to the list
- * @param op1 First operand
- * @param op2 Second operand
- * @param operator Operator
- * @param wich Wich operation will be simulated
- * @return 0 = RET_VAL_OK if everything is ok, otherwise return 99 = RET_VAL_INTERNAL_ERR or 7 = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR
- */
+        // IDENTIFIER
+        if(list->active->node->token->type == IDENTIFIER){
+            // Find symbol in the symbol table
+            Symbol *symbol = symtable_find_symbol(table, list->active->node->token->lexeme);
 
-RetVal createOperation(T_LIST_PTR list, T_LIST_ELEMENT_PTR op1, T_LIST_ELEMENT_PTR  operator, T_LIST_ELEMENT_PTR op2, POSITION_LITERAL wich){
-        T_LIST_ELEMENT_PTR prevValue = list_get_red(list);
-        
-        switch (wich) {
+            // Check if symbol is in the symbol table, else return error of undefined variable
+            if(symbol == NULL) return RET_VAL_SEMANTIC_UNDEFINED_ERR;
+            // If identifer is in the symbol table, set used flag
+            else symbol->data.var.used = true;
 
-        case LLF:{
-        
-            // Set result type of to node
-            operator->node->resultType = TYPE_FLOAT_RESULT;
-            // Set literal type of operator
-            operator->literalType = LITERAL_FLOAT;
-            
-            //Destroy op1 and op2 and operator
-            free(op1);
-            free(op2);
-            list->size -= 2;
-
-            // Linked list
-            if(prevValue != NULL){
-                prevValue->next = list->active;
-                list->active->prev = prevValue;
-            }else{
-                list->first = list->active;
-                list->active->prev = NULL;
+            // Search fot the type of identifier
+            switch (symbol->data.var.type){
+                case VAR_INT:{
+                    list->active->literalType = NLITERAL_INT;
+                }
+                case VAR_INT_NULL:{
+                    list->active->literalType = NLITERAL_INT_NULL;
+                }
+                case VAR_FLOAT:{
+                    list->active->literalType = NLITERAL_FLOAT;
+                }
+                case VAR_FLOAT_NULL:{
+                    list->active->literalType = NLITERAL_FLOAT_NULL;
+                }
+                case VAR_VOID:{
+                    // TODO: NEEDS CHECK IF IT IS OK
+                    return RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
+                    
+                }
+                default:{
+                    // If type is not of the above, return error of semantic type compatibility 
+                    return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+                }
             }
-        
+            list_next(list);
+            continue;
 
-            break;
-        }
-        case LLI:{ 
-
-            // Set result type of to node
-            operator->node->resultType = TYPE_INT_RESULT;
-            // Set literal type of operator
-            operator->literalType = LITERAL_INT;
-            
-            //Destroy op1 and op2 and operator
-            free(op1);
-            free(op2);
-            list->size -= 2;
-
-            // Linked list
-            if(prevValue != NULL){
-                prevValue->next = list->active;
-                list->active->prev = prevValue;
-            }else{
-                list->first = list->active;
-                list->active->prev = NULL;
-            }
-
-            break;
-        }
-        case NNF:{ 
-
-            // Set result type of to node
-            operator->node->resultType = TYPE_FLOAT_RESULT;
-            // Set literal type of operator
-            operator->literalType = NLITERAL_FLOAT;
-            
-            //Destroy op1 and op2 and operator
-            free(op1);
-            free(op2);
-            list->size -= 2;
-
-            // Linked list
-            if(prevValue != NULL){
-                prevValue->next = list->active;
-                list->active->prev = prevValue;
-            }else{
-                list->first = list->active;
-                list->active->prev = NULL;
-            }
-            
-            break;
-        }
-        case NNI:{ 
-
-            // Set result type of to node
-            operator->node->resultType = TYPE_INT_RESULT;
-            // Set literal type of operator
-            operator->literalType = NLITERAL_INT;
-            
-            //Destroy op1 and op2 and operator
-            free(op1);
-            free(op2);
-            list->size -= 2;
-
-            // Linked list
-            if(prevValue != NULL){
-                prevValue->next = list->active;
-                list->active->prev = prevValue;
-            }else{
-                list->first = list->active;
-                list->active->prev = NULL;
-            }
-            
-            break;
-        }
-
-        case LNI:{ 
-
-            // Set result type of to node
-            operator->node->resultType = TYPE_INT_RESULT;
-            // Set literal type of operator
-            operator->literalType = NLITERAL_INT;
-
-            
-            //Destroy op1 and op2 and operator
-            free(op1);
-            free(op2);
-            list->size -= 2;
-
-            // Linked list
-            if(prevValue != NULL){
-                prevValue->next = list->active;
-                list->active->prev = prevValue;
-            }else{
-                list->first = list->active;
-                list->active->prev = NULL;
-            }
-            
-            break;
-        }
-
-        case LNF:{ 
-
-            // Set result type of to node
-            operator->node->resultType = TYPE_FLOAT_RESULT;
-            // Set literal type of operator
-            operator->literalType = NLITERAL_FLOAT;
-
-            
-            //Destroy op1 and op2 and operator
-            free(op1);
-            free(op2);
-            list->size -= 2;
-
-            // Linked list
-            if(prevValue != NULL){
-                prevValue->next = list->active;
-                list->active->prev = prevValue;
-            }else{
-                list->first = list->active;
-                list->active->prev = NULL;
-            }
-            
-            break;
-        }
-
-        case NLFI:{
-            // Set result type of to node
-            operator->node->resultType = TYPE_FLOAT_RESULT;
-            // Set literal type of operator
-            operator->literalType = NLITERAL_FLOAT;
-
-            // Set convert to float for code generation
-            op2->node->convertToFloat = true;
-            
-            //Destroy op1 and op2 and operator
-            free(op1);
-            free(op2);
-            list->size -= 2;
-
-            // Linked list
-            if(prevValue != NULL){
-                prevValue->next = list->active;
-                list->active->prev = prevValue;
-            }else{
-                list->first = list->active;
-                list->active->prev = NULL;
-            }
-
-            break;
-        }
-
-        case LNFI:{ 
-            // Set result type of to node
-            operator->node->resultType = TYPE_FLOAT_RESULT;
-            // Set literal type of operator
-            operator->literalType = NLITERAL_FLOAT;
-
-            if (is_rounded(op1->node->token->value.floatVal)) op1->node->convertToInt = true;
-            else return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
-            
-            
-            //Destroy op1 and op2 and operator
-            free(op1);
-            free(op2);
-            list->size -= 2;
-
-
-            
-
-            // Linked list
-            if(prevValue != NULL){
-                prevValue->next = list->active;
-                list->active->prev = prevValue;
-            }else{
-                list->first = list->active;
-                list->active->prev = NULL;
-            }
-            break;
         }
         
-        case NLIF:{
-            // Set result type of to node
-            operator->node->resultType = TYPE_FLOAT_RESULT;
-            // Set literal type of operator
-            operator->literalType = NLITERAL_FLOAT;
-
-            // Set convert to float for code generation
-            op2->node->convertToFloat = true;
-            
-            if (is_rounded(op2->node->token->value.floatVal)) op2->node->convertToInt = true;
-            else return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
-
-
-            //Destroy op1 and op2 and operator
-            free(op1);
-            free(op2);
-            list->size -= 2;
-
-            // Linked list
-            if(prevValue != NULL){
-                prevValue->next = list->active;
-                list->active->prev = prevValue;
-            }else{
-                list->first = list->active;
-                list->active->prev = NULL;
-            }
+        // NULL
+        if(list->active->node->token->type == NULL_TOKEN){
+            list->active->literalType = LITERAL_NULL;
+            list_next(list);
+            continue;
         }
-            
-            break;
-            
-        case LNIF:{
-            // Set result type of to node
-            operator->node->resultType = TYPE_FLOAT_RESULT;
-            // Set literal type of operator
-            operator->literalType = NLITERAL_FLOAT;
-
-            // Set convert to float for code generation
-            op1->node->convertToFloat = true;
-            
-            //Destroy op1 and op2 and operator
-            free(op1);
-            free(op2);
-            list->size -= 2;
-
-            // Linked list
-            if(prevValue != NULL){
-                prevValue->next = list->active;
-                list->active->prev = prevValue;
-            }else{
-                list->first = list->active;
-                list->active->prev = NULL;
-            }
-
-
-            break;
-
+        // LITERAL INT
+        if(list->active->node->token->type == INT){
+            list->active->literalType = LITERAL_INT;
+            list_next(list);
+            continue;
         }
 
-        default:
-            return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
-            break;
+        // LITERAL FLOAT
+        if(list->active->node->token->type == FLOAT){
+            list->active->literalType = LITERAL_FLOAT;
+            list_next(list);
+            continue;
+        }
+
+        // OPERATOR
+        if(list->active->node->token->type == PLUS || list->active->node->token->type == MINUS || list->active->node->token->type == MULTIPLY || list->active->node->token->type == DIVIDE || list->active->node->token->type == LESS_THAN || list->active->node->token->type == GREATER_THAN || list->active->node->token->type == LESS_THAN_EQUAL || list->active->node->token->type == GREATER_THAN_EQUAL || list->active->node->token->type == EQUAL || list->active->node->token->type == NOT_EQUAL){
+            list->active->literalType = LITERAL_NOT_SET;
+            list_next(list);
+            continue;
+        }
+
+        // Error of necompatibility of types
+        return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;            
     }
 
     return RET_VAL_OK;
+}
+/**
+ * @brief Function for delete two items after active element
+ * @param list Pointer to the list
+ */
+void list_delete_two_after(T_LIST_PTR list){
     
+    // Elements for delete
+    T_LIST_ELEMENT_PTR deleteOne = list->active->prev;
+    T_LIST_ELEMENT_PTR deleteTwo = deleteOne->prev;
+
+    // Linked list depending on the position of the active element
+    if(deleteTwo->prev == NULL) list->active->prev = NULL;
+    else list->active->prev = deleteTwo->prev;
+
+    // Delete elements
+    free(deleteOne);
+    free(deleteTwo);
+
+    // Decrement size
+    list->size = list->size - 2;
+
+    return;
 }
 
+/**
+ * @brief Function for compare float and int
+ * @param float Float to comapare
+ * @return true if float is equal to int, else false 
+ * */ 
+bool is_float_int(float floatNumber){
+    return floatNumber == (int)floatNumber;
+}
 
 /**
  * @brief Function for delete all list
