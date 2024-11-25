@@ -103,17 +103,23 @@ void free_fn_call_args(T_FN_CALL *fn_call) {
 
 // Compare variable types
 int compare_var_types(VarType *existing, VarType *new) {
+    // TODO: check all is correct
     if (*existing == *new) {
         return RET_VAL_OK;
     }
 
     if (*existing == VAR_INT_NULL && *new == VAR_INT) {
-        *existing = VAR_INT;
+        //*existing = VAR_INT;
         return RET_VAL_OK;
     }
 
     if (*existing == VAR_FLOAT_NULL && *new == VAR_FLOAT) {
-        *existing = VAR_FLOAT;
+        //*existing = VAR_FLOAT;
+        return RET_VAL_OK;
+    }
+
+    if (*existing == VAR_STRING_NULL && *new == VAR_STRING) {
+        //*existing = VAR_STRING;
         return RET_VAL_OK;
     }
 
@@ -122,8 +128,12 @@ int compare_var_types(VarType *existing, VarType *new) {
     }
 
     if (*existing == VAR_STRING_NULL && *new == STRING_VAR_STRING) {
-        *existing = VAR_STRING;
+        //*existing = VAR_STRING;
         return RET_VAL_OK;
+    }
+
+    if (*new == VAR_BOOL) {
+        return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
     }
 
     if (*new == VAR_ANY) {
@@ -131,6 +141,9 @@ int compare_var_types(VarType *existing, VarType *new) {
     }
 
     if (*existing == VAR_VOID) {
+        if (*new == VAR_NULL) {
+            return RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
+        }
         *existing = *new;
         return RET_VAL_OK;
     }

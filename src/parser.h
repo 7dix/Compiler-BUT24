@@ -53,7 +53,7 @@ bool syntax_assign_discard_expr_or_fn_call(T_TOKEN_BUFFER *buffer);
 bool syntax_id_start(T_TOKEN_BUFFER *buffer, Symbol *symbol);
 bool syntax_function_arguments(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call);
 bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data);
-bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data);
+bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name);
 bool syntax_arguments(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call);
 bool syntax_argument_next(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call);
 bool syntax_argument_after_comma(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call);
