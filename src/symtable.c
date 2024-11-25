@@ -346,5 +346,3 @@ void load_fc_label_in_scope(T_SYM_TABLE *table, unsigned int label1, unsigned in
     current_scope->label_cnt_1 = label1;
     current_scope->label_cnt_2 = label2;
 }
-
-void 
