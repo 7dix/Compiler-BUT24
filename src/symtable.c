@@ -156,6 +156,7 @@ T_SYM_TABLE *symtable_init()
         return NULL;
     }
     table->var_id_cnt = 0;
+    table->label_cnt = 0;
     table->top = NULL;
     return table;
 }
@@ -317,3 +318,33 @@ int check_for_unused_vars(T_SYM_TABLE *table) {
 
     return RET_VAL_OK;
 }
+
+// TODO: finish
+void generate_fc_label_in_scope(T_SYM_TABLE *table) {
+    if (table == NULL || table->top == NULL) {
+        return;
+    }
+    T_SCOPE *current_scope = table->top;
+    current_scope->label_cnt_1 = table->label_cnt++;
+    current_scope->label_cnt_2 = table->label_cnt++;
+}
+
+void save_fc_label_in_scope(T_SYM_TABLE *table, unsigned int *label1, unsigned int *label2) {
+    if (table == NULL || table->top == NULL) {
+        return;
+    }
+    T_SCOPE *current_scope = table->top;
+    *label1 = current_scope->label_cnt_1;
+    *label2 = current_scope->label_cnt_2;
+}
+
+void load_fc_label_in_scope(T_SYM_TABLE *table, unsigned int label1, unsigned int label2) {
+    if (table == NULL || table->top == NULL) {
+        return;
+    }
+    T_SCOPE *current_scope = table->top;
+    current_scope->label_cnt_1 = label1;
+    current_scope->label_cnt_2 = label2;
+}
+
+void 

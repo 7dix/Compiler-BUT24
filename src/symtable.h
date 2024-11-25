@@ -128,4 +128,8 @@ int check_for_unused_vars(T_SYM_TABLE *table);
 
 extern T_SYM_TABLE *ST;
 
+void generate_fc_label_in_scope(T_SYM_TABLE *table);
+void save_fc_label_in_scope(T_SYM_TABLE *table, unsigned int *label1, unsigned int *label2);
+void load_fc_label_in_scope(T_SYM_TABLE *table, unsigned int label1, unsigned int label2);
+
 #endif // H_SYMTABLE

@@ -1024,20 +1024,17 @@ bool syntax_var_def_after_id(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * @retval `false` - syntax error
  */
 bool syntax_if_statement(T_TOKEN_BUFFER *buffer) {
-    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
 
     next_token(buffer, &token); // if
     if (token->type != IF) {
-        // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     next_token(buffer, &token); // (
     if (token->type != BRACKET_LEFT_SIMPLE) {
-        // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -1050,7 +1047,7 @@ bool syntax_if_statement(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
-    // TODO: get expression type
+    // get expression type
     error_flag = check_expression(ST, &tree);
     if (error_flag != 0){
         return false;
@@ -1058,7 +1055,6 @@ bool syntax_if_statement(T_TOKEN_BUFFER *buffer) {
 
     next_token(buffer, &token); // )
     if (token->type != BRACKET_RIGHT_SIMPLE) {
-        // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -1089,7 +1085,6 @@ bool syntax_if_statement(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree) {
-    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
     // we have two branches, choose here
@@ -1098,12 +1093,11 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
     if (token->type == BRACKET_LEFT_CURLY) { // {
         
         if (!is_token_relation_operator((*tree)->token)) {
-            // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
 
-        // codegen print expression
+        // CD: generate expression
         createStackByPostorder(*tree);
 
         tree_dispose(tree);
@@ -1113,6 +1107,8 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             error_flag = RET_VAL_INTERNAL_ERR;
             return false; 
         }
+
+        //generate_fc_label_in_scope(ST);
 
         // codegen print if header
         //handleIfStartBool()
