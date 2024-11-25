@@ -100,6 +100,12 @@ pack:
 	mkdir temp
 	cp -r src/* temp/
 	cp hand_in/Makefile temp/Makefile
+	cp hand_in/dokumentace.pdf temp/dokumentace.pdf
+	cp hand_in/rozdeleni temp/rozdeleni
 	cd temp && zip $(LOGIN).zip *
 	mv temp/$(LOGIN).zip .
+	rm -r temp
+
+check-pack:
+	hand_in/is_it_ok.sh $(LOGIN).zip temp
 	rm -r temp
