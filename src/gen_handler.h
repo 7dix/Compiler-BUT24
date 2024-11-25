@@ -21,7 +21,7 @@ void generateUniqueIdentifier(char *name, char **uniq_name);
 void createFnHeader(char *name);
 void callBIWrite(T_TOKEN *var);
 void createProgramHeader();
-void callFunction(char *name, T_TOKEN **args, int argCount);
+void callFunction(T_FN_CALL *fn);
 void createReturn();
 void handleDiscard();
 void handleUniqDefvar(T_TOKEN *var);

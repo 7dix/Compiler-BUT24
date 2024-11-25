@@ -30,6 +30,8 @@ typedef enum {
     VAR_STRING_NULL,
     STRING_VAR_STRING, // special case for ifj.string()
     VAR_ANY, // special case for ifj.write()
+    VAR_NULL, // not used in vars, unification with expr checks
+    VAR_BOOL, // not used in vars, unification with expr checks
     VAR_VOID
 } VarType;
 
@@ -112,7 +114,7 @@ typedef struct T_SYM_TABLE {
 // Symbol table functions
 T_SYM_TABLE *symtable_init();
 bool symtable_add_scope(T_SYM_TABLE *table);
-void symtable_remove_scope(T_SYM_TABLE *table);
+int symtable_remove_scope(T_SYM_TABLE *table);
 Symbol *symtable_add_symbol(T_SYM_TABLE *table, const char *key, SymbolType type, SymbolData data);
 Symbol *symtable_find_symbol(T_SYM_TABLE *table, const char *key);
 void symtable_free(T_SYM_TABLE *table);

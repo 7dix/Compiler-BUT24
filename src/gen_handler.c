@@ -140,26 +140,26 @@ void createFnHeader(char *name) {
  * 
  * @note The function also handles the conversion of the arguments to the correct type.
  */
-void callFunction(char *name, T_TOKEN **args, int argCount) {
-    for (int i = 0; i < argCount; i++) {
-        if (args[i]->type == IDENTIFIER) {
+void callFunction(T_FN_CALL *fn) {
+    for (int i = 0; i < fn->argc; i++) {
+        if (fn->argv[i]->type == IDENTIFIER) {
             char *uniq = NULL;
-            generateUniqueIdentifier(args[i]->lexeme, &uniq);
+            generateUniqueIdentifier(fn->argv[i]->lexeme, &uniq);
             generatePushs("LF", uniq);
             free(uniq);
         }
-        else if (args[i]->type == INT) {
-            generatePushsInt(args[i]->value.intVal);
+        else if (fn->argv[i]->type == INT) {
+            generatePushsInt(fn->argv[i]->value.intVal);
         }
-        else if (args[i]->type == FLOAT) {
-            generatePushsFloat(args[i]->value.floatVal);
+        else if (fn->argv[i]->type == FLOAT) {
+            generatePushsFloat(fn->argv[i]->value.floatVal);
         }
-        else if (args[i]->type == STRING) {
-            generatePushsString(args[i]->value.stringVal);
+        else if (fn->argv[i]->type == STRING) {
+            generatePushsString(fn->argv[i]->value.stringVal);
         }
     }
 
-    generateCall(name);
+    generateCall(fn->name);
 }
 
 /**

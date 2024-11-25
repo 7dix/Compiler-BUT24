@@ -180,18 +180,22 @@ bool symtable_add_scope(T_SYM_TABLE *table) {
 }
 
 // Remove the top scope from the symbol table
-void symtable_remove_scope(T_SYM_TABLE *table) {
+int symtable_remove_scope(T_SYM_TABLE *table) {
     if (table == NULL || table->top == NULL) {
-        return;
+        return RET_VAL_INTERNAL_ERR;
     }
     
     // Check for unused and unmodified variables
-    check_for_unused_vars(table);
+    int error_code = check_for_unused_vars(table);
+    if (error_code != RET_VAL_OK) {
+        return error_code;
+    }
 
     T_SCOPE *old_scope = table->top;
     table->top = old_scope->parent;
     hashtable_free(old_scope->ht);
     free(old_scope);
+    return RET_VAL_OK;
 }
 
 // Add a new symbol to the current scope
