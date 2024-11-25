@@ -140,6 +140,15 @@ RetVal set_types(T_LIST_PTR list, T_SYM_TABLE *table){
                     return RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
                     
                 }
+                case VAR_STRING_NULL:{
+                    list->active->literalType = NELITERAL_STRING_NULL;
+                    break;
+                }
+                case VAR_STRING:{
+                    list->active->literalType = NELITERAL_STRING;
+                    break;
+                }
+                
                 default:{
                     // If type is not of the above, return error of semantic type compatibility 
                     return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;

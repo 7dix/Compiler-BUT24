@@ -168,9 +168,9 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
         list_dispose(listPostfix);
         return errExpr;
     }
-
+    // Set first element as active
     list_first(listPostfix);
-    // TODO: need pookec
+   
     if(listPostfix->size == 1){
         switch (listPostfix->active->literalType){
             case LITERAL_INT:{ 
@@ -193,18 +193,41 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
                 (*tree)->resultType = TYPE_FLOAT_RESULT;
                 break;
             }
-            
-            default:{ 
+            case NLITERAL_INT_NULL:{ 
+                (*tree)->resultType = TYPE_INT_NULL_RESULT;
+                break;
+            }
+            case NLITERAL_FLOAT_NULL:{ 
+                (*tree)->resultType = TYPE_FLOAT_NULL_RESULT;
+                break;
+            }
+            case NELITERAL_STRING:{ 
+                (*tree)->resultType = TYPE_STRING_RESULT;
+                break;
+            }
+            case NELITERAL_STRING_NULL:{ 
+                (*tree)->resultType = TYPE_STRING_NULL_RESULT;
+                break;
+            }
+
+            default:{
+                list_dispose(listPostfix);
                 return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             }
-    }
+        }
 
         list_dispose(listPostfix);
         return RET_VAL_OK;
     }
 
-    // Set first element as active
-    
+    if (listPostfix->size == 3){
+        
+        T_LIST_ELEMENT_PTR operator = listPostfix->active;
+        T_LIST_ELEMENT_PTR secondOperator = operator->prev;
+        T_LIST_ELEMENT_PTR firstOperator = secondOperator->prev;
+
+
+    }
     while(listPostfix->size != 1 && listPostfix->active != NULL){
 
         if(listPostfix->active->node->token->type == PLUS || listPostfix->active->node->token->type == MINUS || listPostfix->active->node->token->type == MULTIPLY || listPostfix->active->node->token->type == DIVIDE || listPostfix->active->node->token->type == LESS_THAN || listPostfix->active->node->token->type == GREATER_THAN || listPostfix->active->node->token->type == LESS_THAN_EQUAL || listPostfix->active->node->token->type == GREATER_THAN_EQUAL || listPostfix->active->node->token->type == EQUAL || listPostfix->active->node->token->type == NOT_EQUAL){
