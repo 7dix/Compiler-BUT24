@@ -121,15 +121,19 @@ RetVal set_types(T_LIST_PTR list, T_SYM_TABLE *table){
             switch (symbol->data.var.type){
                 case VAR_INT:{
                     list->active->literalType = NLITERAL_INT;
+                    break;
                 }
                 case VAR_INT_NULL:{
                     list->active->literalType = NLITERAL_INT_NULL;
+                    break;
                 }
                 case VAR_FLOAT:{
                     list->active->literalType = NLITERAL_FLOAT;
+                    break;
                 }
                 case VAR_FLOAT_NULL:{
                     list->active->literalType = NLITERAL_FLOAT_NULL;
+                    break;
                 }
                 case VAR_VOID:{
                     // TODO: NEEDS CHECK IF IT IS OK
