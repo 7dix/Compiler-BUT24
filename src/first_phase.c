@@ -2,13 +2,13 @@
 // PROJECT: IFJ24 - Compiler for the IFJ24 language @ FIT BUT 2BIT
 // TEAM: Martin Zůbek (253206)
 // AUTHORS:
-//  <Otakar Kočí> (xkocio00)
+//  <Otakar Kočí>   (xkocio00)
+//  <Marek Tenora>  (xtenor02)
 //
 // YEAR: 2024
 // NOTES: First phase of the IFJ24 compiler for scanning and parsing function headers.
 //        This phase quickly scans the input file to extract function signatures into symtable.
 //        All tokens are stored in the token buffer for further processing during the main phase.
-// TODO: add creation of function signatures into symtable
 // TODO: improve comments
 
 #include "first_phase.h"
@@ -16,6 +16,13 @@
 int error_flag_fp = RET_VAL_OK;
 bool needs_last_token = false;
 
+/**
+ * @brief Fills symtable with built-in functions
+ * 
+ * @return `bool`
+ * @retval `true` - success
+ * @retval `false` - internal error occurred
+ */
 bool add_built_in_functions() {
     SymbolData data;
     Symbol *symbol;
@@ -189,7 +196,6 @@ bool add_built_in_functions() {
 bool check_main_exists() {
     Symbol *symbol;
     if ((symbol = symtable_find_symbol(ST, "main")) == NULL) {
-        // TODO: process error
         error_flag_fp = RET_VAL_SEMANTIC_UNDEFINED_ERR;
         return false;
     }
@@ -205,6 +211,15 @@ bool check_main_exists() {
     return true;
 }
 
+/**
+ * @brief Gets and saves token into the token buffer
+ * 
+ * @param *token_buffer pointer to the token buffer
+ * @param **token pointer to the token
+ * @return `bool`
+ * @retval `true` - success
+ * @retval `false` - internal error occurred
+ */
 bool get_save_token(T_TOKEN_BUFFER *token_buffer, T_TOKEN **token) {
 
     if (!needs_last_token)  {
@@ -257,16 +272,11 @@ int first_phase(T_TOKEN_BUFFER *token_buffer) {
 
     // Add built-in functions to symtable
     if (!add_built_in_functions()) {
-        return RET_VAL_INTERNAL_ERR;
+        return error_flag_fp;
     }
 
     return RET_VAL_OK;
 }
-
-// now we will use a simplified ll-grammar to only check function headers
-// function bodies are ignored, only curly brackets are checked so that
-// we know where each function ends
-
 
 /**
  * @brief Start of recursive parser. Simulates `START` non-terminal.
@@ -280,7 +290,6 @@ int first_phase(T_TOKEN_BUFFER *token_buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_start(T_TOKEN_BUFFER *token_buffer) {
-    // TODO: add cleaning, etc.
 
     if (!syntax_fp_prolog(token_buffer)) { // PROLOG
         return false;
@@ -310,14 +319,12 @@ bool syntax_fp_start(T_TOKEN_BUFFER *token_buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_prolog(T_TOKEN_BUFFER *buffer) {
-    // TODO: add cleaning, etc.
     T_TOKEN *token;
 
     if (!get_save_token(buffer, &token)) // const
         return false;
     
     if (token->type != CONST) {
-        // TODO: process error
         error_flag_fp = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -326,7 +333,6 @@ bool syntax_fp_prolog(T_TOKEN_BUFFER *buffer) {
         return false;
     
     if (token->type != IFJ) {
-        // TODO: process error
         error_flag_fp = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -335,7 +341,6 @@ bool syntax_fp_prolog(T_TOKEN_BUFFER *buffer) {
         return false;
 
     if (token->type != ASSIGN) {
-        // TODO: process error
         error_flag_fp = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -344,7 +349,6 @@ bool syntax_fp_prolog(T_TOKEN_BUFFER *buffer) {
         return false;
 
     if (token->type != IMPORT) {
-        // TODO: process error
         error_flag_fp = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -353,7 +357,6 @@ bool syntax_fp_prolog(T_TOKEN_BUFFER *buffer) {
         return false;
 
     if (token->type != BRACKET_LEFT_SIMPLE) {
-        // TODO: process error
         error_flag_fp = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -362,14 +365,12 @@ bool syntax_fp_prolog(T_TOKEN_BUFFER *buffer) {
         return false;
 
     if (token->type != STRING) {
-        // TODO: process error
         error_flag_fp = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     // check that string is equal to "ifj24.zig"
     if (strcmp(token->value.stringVal, "ifj24.zig") != 0) {
-        // TODO: process error
         // TODO: is this syntax or semantic error?
         error_flag_fp = RET_VAL_SYNTAX_ERR;
         return false;
@@ -379,7 +380,6 @@ bool syntax_fp_prolog(T_TOKEN_BUFFER *buffer) {
         return false;
 
     if (token->type != BRACKET_RIGHT_SIMPLE) {
-        // TODO: process error
         error_flag_fp = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -388,7 +388,6 @@ bool syntax_fp_prolog(T_TOKEN_BUFFER *buffer) {
         return false;
     
     if (token->type != SEMICOLON) {
-        // TODO: process error
         error_flag_fp = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -412,7 +411,6 @@ bool syntax_fp_prolog(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_fn_defs(T_TOKEN_BUFFER *buffer) {
-    // TODO: add cleaning, etc.
 
     if (!syntax_fp_fn_def(buffer)) { // FN_DEF
         return false;
@@ -439,7 +437,6 @@ bool syntax_fp_fn_defs(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer) {
-    // TODO: add cleaning, etc.
     T_TOKEN *token;
 
     // Create new symbol data
@@ -451,7 +448,6 @@ bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer) {
     if (!get_save_token(buffer, &token)) 
         return false; // pub
     if (token->type != PUB) {
-        // TODO: process error
         error_flag_fp = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -459,7 +455,6 @@ bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer) {
     if (!get_save_token(buffer, &token)) 
         return false; // fn
     if (token->type != FN) {
-        // TODO: process error
         error_flag_fp = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -467,7 +462,6 @@ bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer) {
     if (!get_save_token(buffer, &token)) 
         return false; // identifier
     if (token->type != IDENTIFIER) {
-        // TODO: process error
         error_flag_fp = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -478,7 +472,6 @@ bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer) {
     if (!get_save_token(buffer, &token)) 
         return false; // (
     if (token->type != BRACKET_LEFT_SIMPLE) {
-        // TODO: process error
         error_flag_fp = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -490,7 +483,6 @@ bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer) {
     if (!get_save_token(buffer, &token)) 
         return false; // )
     if (token->type != BRACKET_RIGHT_SIMPLE) {
-        // TODO: process error
         error_flag_fp = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -502,14 +494,11 @@ bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer) {
     // Add function to symtable if it does not exist
     if (symtable_find_symbol(ST, fn_name) == NULL) {
         if (!symtable_add_symbol(ST, fn_name, SYM_FUNC, data)) {
-            // TODO: process error
             error_flag_fp = RET_VAL_INTERNAL_ERR;
             return false;
         }
     }
-
     else {
-        // TODO: process error
         error_flag_fp = RET_VAL_SEMANTIC_REDEF_OR_BAD_ASSIGN_ERR;
         return false;
     }
@@ -534,7 +523,6 @@ bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_fn_def_next(T_TOKEN_BUFFER *buffer) {
-    // TODO: add cleaning, etc.
     T_TOKEN *token;
     
     // we have two branches, choose here
@@ -561,7 +549,6 @@ bool syntax_fp_fn_def_next(T_TOKEN_BUFFER *buffer) {
         return true;
     }
 
-    // TODO: process error
     error_flag_fp = RET_VAL_SYNTAX_ERR;
     return false;
 }
@@ -584,7 +571,6 @@ bool syntax_fp_fn_def_next(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer, SymbolData *data) {
-    // TODO: add cleaning, etc.
     // TODO: possible simplification by checking only void type
 
     T_TOKEN *token;
@@ -606,7 +592,6 @@ bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         if (!get_save_token(buffer, &token)) 
         return false; // {
         if (token->type != BRACKET_LEFT_CURLY) {
-            // TODO: process error
             error_flag_fp = RET_VAL_SYNTAX_ERR;
             return false;
         }
@@ -624,7 +609,6 @@ bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         if (!get_save_token(buffer, &token)) 
         return false; // {
         if (token->type != BRACKET_LEFT_CURLY) {
-            // TODO: process error
             error_flag_fp = RET_VAL_SYNTAX_ERR;
             return false;
         }
@@ -638,7 +622,6 @@ bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         return true;
     }
 
-    // TODO: process error
     error_flag_fp = RET_VAL_SYNTAX_ERR;
     return false;
 }
@@ -662,7 +645,6 @@ bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_params(T_TOKEN_BUFFER *buffer, SymbolData *data) {
-    // TODO: add cleaning, etc.
     T_TOKEN *token;
     
     // we have two branches, choose here
@@ -686,7 +668,6 @@ bool syntax_fp_params(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         return true;
     }
     
-    // TODO: process error
     error_flag_fp = RET_VAL_SYNTAX_ERR;
     return false;
 }
@@ -707,7 +688,6 @@ bool syntax_fp_params(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_param(T_TOKEN_BUFFER *buffer, SymbolData *data) {
-    // TODO: add cleaning, etc.
     T_TOKEN *token;
     Param param;
     param.name = NULL;
@@ -726,7 +706,6 @@ bool syntax_fp_param(T_TOKEN_BUFFER *buffer, SymbolData *data) {
     if (!get_save_token(buffer, &token)) 
         return false; // :
     if (token->type != COLON) {
-        // TODO: process error
         error_flag_fp = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -736,9 +715,8 @@ bool syntax_fp_param(T_TOKEN_BUFFER *buffer, SymbolData *data) {
     }
 
     // Add parameter to the symbol data
-    int ret = add_param_to_symbol_data(data, param);
-    if (ret != 0) {
-        error_flag_fp = ret;
+    error_flag_fp = add_param_to_symbol_data(data, param);
+    if (error_flag_fp != RET_VAL_OK) {
         return false;
     }
 
@@ -772,7 +750,6 @@ bool syntax_fp_param(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_type(T_TOKEN_BUFFER *buffer, VarType *type) {
-    // TODO: add cleaning, etc.
     T_TOKEN *token;
 
     // check whether token is one of the types
@@ -781,9 +758,9 @@ bool syntax_fp_type(T_TOKEN_BUFFER *buffer, VarType *type) {
     if (token->type != TYPE_INT && token->type != TYPE_FLOAT &&
         token->type != TYPE_STRING && token->type != TYPE_INT_NULL && 
         token->type != TYPE_FLOAT_NULL && token->type != TYPE_STRING_NULL) {
-        // TODO: process error
-        error_flag_fp = RET_VAL_SYNTAX_ERR;
-        return false;
+
+            error_flag_fp = RET_VAL_SYNTAX_ERR;
+            return false;
     }
 
     // Set the type
@@ -831,7 +808,6 @@ bool syntax_fp_type(T_TOKEN_BUFFER *buffer, VarType *type) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_param_next(T_TOKEN_BUFFER *buffer, SymbolData *data) {
-    // TODO: add cleaning, etc.
     T_TOKEN *token;
 
     // we have two branches, choose here
@@ -853,7 +829,6 @@ bool syntax_fp_param_next(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         return true;
     }
 
-    // TODO: process error
     error_flag_fp = RET_VAL_SYNTAX_ERR;
     return false;
 }
@@ -876,7 +851,6 @@ bool syntax_fp_param_next(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_param_after_comma(T_TOKEN_BUFFER *buffer, SymbolData *data) {
-    // TODO: add cleaning, etc.
     T_TOKEN *token;
 
     // we have two branches, choose here
@@ -901,7 +875,6 @@ bool syntax_fp_param_after_comma(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         return true;
     }
 
-    // TODO: process error
     error_flag_fp = RET_VAL_SYNTAX_ERR;
     return false;
 }
@@ -927,7 +900,6 @@ bool syntax_fp_end(T_TOKEN_BUFFER *buffer) {
     if (!get_save_token(buffer, &token)) 
         return false;
     if (token->type != EOF_TOKEN) {
-        // TODO: process error
         error_flag_fp = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -935,6 +907,17 @@ bool syntax_fp_end(T_TOKEN_BUFFER *buffer) {
     return true;
 }
 
+/**
+ * @brief Simulates function body.
+ * 
+ * This function simulates the function body by counting curly brackets.
+ * All tokens are stored in the token buffer.
+ * 
+ * @param *token_buffer pointer to token buffer
+ * @return `bool`
+ * @retval `true` - correct syntax
+ * @retval `false` - syntax error
+ */
 bool simulate_fn_body(T_TOKEN_BUFFER *buffer) {
     int bracket_count = 1;
     T_TOKEN *token;
