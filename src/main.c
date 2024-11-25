@@ -19,12 +19,10 @@
 #include "token_buffer.h"
 #include "symtable.h"
 #include "gen_handler.h"
-// TODO: include symtable when ready
 
 T_SYM_TABLE *ST;
 
 int main() {
-    // TODO: stuff before ??
 
     // Initialize token buffer
     T_TOKEN_BUFFER *token_buffer = init_token_buffer();
@@ -32,13 +30,15 @@ int main() {
         return RET_VAL_INTERNAL_ERR;
     }
 
-    // Initialize symtable and add global scope
+    // Initialize symtable
     ST = symtable_init();
     if (ST == NULL) {
         free_token_buffer(&token_buffer);
         fprintf(stderr, "Error: Memory allocation failed in symtable_init\n");
         return RET_VAL_INTERNAL_ERR;
     }
+
+    // Add global scope
     if (!symtable_add_scope(ST)) {
         free_token_buffer(&token_buffer);
         symtable_free(ST);
@@ -47,78 +47,29 @@ int main() {
     }
 
     // Run first phase of the compiler
+    // first phase also fills symtable with built-in functions
     int error_code = first_phase(token_buffer);
     if (error_code != RET_VAL_OK) {
-        switch (error_code) {
-            case RET_VAL_LEXICAL_ERR:
-                fprintf(stderr, "Lexical error\n");
-                break;
-            case RET_VAL_SYNTAX_ERR:
-                fprintf(stderr, "Syntax error\n");
-                break;
-            case RET_VAL_INTERNAL_ERR:
-                fprintf(stderr, "Internal error\n");
-                break;
-            case RET_VAL_SEMANTIC_UNDEFINED_ERR:
-            case RET_VAL_SEMANTIC_FUNCTION_ERR:
-            case RET_VAL_SEMANTIC_REDEF_OR_BAD_ASSIGN_ERR:
-            case RET_VAL_SEMANTIC_FUNC_RETURN_ERR:
-            case RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR:
-            case RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR:
-            case RET_VAL_SEMANTIC_UNUSED_VAR_ERR:
-            case RET_VAL_SEMANTIC_OTHER_ERR:
-                fprintf(stderr, "Semantic error\n");
-                break;
-            default:
-                fprintf(stderr, "Unknown error\n");
-                break;
-        }
+        // in case of error, free res., return error code
         free_token_buffer(&token_buffer);
         symtable_free(ST);
         return error_code;
     }
 
+    // set token buffer pointer to the first token
     set_current_to_first(token_buffer);
 
+    // CD: generate ifj bytecode header, init global vars
     createProgramHeader();
 
     // Run second phase of the compiler
-    // TODO: give symtable to parser
     error_code = run_parser(token_buffer);
     if (error_code != RET_VAL_OK) {
-        switch (error_code) {
-            case RET_VAL_LEXICAL_ERR:
-                fprintf(stderr, "Lexical error\n");
-                break;
-            case RET_VAL_SYNTAX_ERR:
-                fprintf(stderr, "Syntax error\n");
-                break;
-            case RET_VAL_INTERNAL_ERR:
-                fprintf(stderr, "Internal error\n");
-                break;
-            case RET_VAL_SEMANTIC_UNDEFINED_ERR:
-            case RET_VAL_SEMANTIC_FUNCTION_ERR:
-            case RET_VAL_SEMANTIC_REDEF_OR_BAD_ASSIGN_ERR:
-            case RET_VAL_SEMANTIC_FUNC_RETURN_ERR:
-            case RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR:
-            case RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR:
-            case RET_VAL_SEMANTIC_UNUSED_VAR_ERR:
-            case RET_VAL_SEMANTIC_OTHER_ERR:
-                fprintf(stderr, "Semantic error\n");
-                break;
-            default:
-                fprintf(stderr, "Unknown error\n");
-                break;
-        }
+        // in case of error, free res., return error code
         free_token_buffer(&token_buffer);
         symtable_free(ST);
         return error_code;
     }
-
-    // TODO: remove later, just for testing
-    fprintf(stdout, "Compilation successful\n");
-
-    // TODO: cleaning, ...
 
     free_token_buffer(&token_buffer);
     symtable_free(ST);
