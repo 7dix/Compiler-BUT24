@@ -221,11 +221,11 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
     }
 
     if (listPostfix->size == 3){
-        
-        T_LIST_ELEMENT_PTR operator = listPostfix->active;
+
+        /*T_LIST_ELEMENT_PTR operator = listPostfix->active;
         T_LIST_ELEMENT_PTR secondOperator = operator->prev;
         T_LIST_ELEMENT_PTR firstOperator = secondOperator->prev;
-
+        */
 
     }
     while(listPostfix->size != 1 && listPostfix->active != NULL){
