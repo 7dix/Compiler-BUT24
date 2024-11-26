@@ -18,49 +18,6 @@
 #include "symtable.h"
 #include "semantic.h"
 
-// call built-in function base on fn name
-void callBIFn(T_FN_CALL *fn) {
-    if (strcmp(fn->name, "ifj.readstr") == 0) {
-        callBIReadString();
-    }
-    else if (strcmp(fn->name, "ifj.readi32") == 0) {
-        callBIReadInt();
-    }
-    else if (strcmp(fn->name, "ifj.readf64") == 0) {
-        callBIReadFloat();
-    }
-    else if (strcmp(fn->name, "ifj.write") == 0) {
-        callBIWrite(fn->argv[0]);
-    }
-    else if (strcmp(fn->name, "ifj.i2f") == 0) {
-        callBIInt2Float(fn->argv[0]);
-    }
-    else if (strcmp(fn->name, "ifj.f2i") == 0) {
-        callBIFloat2Int(fn->argv[0]);
-    }
-    else if (strcmp(fn->name, "ifj.string") == 0) {
-        callBIString(fn->argv[0]);
-    }
-    else if (strcmp(fn->name, "ifj.length") == 0) {
-        callBILength(fn->argv[0]);
-    }
-    else if (strcmp(fn->name, "ifj.concat") == 0) {
-        callBIConcat(fn->argv[0], fn->argv[1]);
-    }
-    else if (strcmp(fn->name, "ifj.substring") == 0) {
-        callBISubstring(fn->argv[0], fn->argv[1], fn->argv[2]);
-    }
-    else if (strcmp(fn->name, "ifj.strcmp") == 0) {
-        callBIStrcmp(fn->argv[0], fn->argv[1]);
-    }
-    else if (strcmp(fn->name, "ifj.ord") == 0) {
-        callBIOrd(fn->argv[0], fn->argv[1]);
-    }
-    else if (strcmp(fn->name, "ifj.chr") == 0) {
-        callBIChr(fn->argv[0]);
-    }
-}
-
 // Function to create program header
 /***********************************************************************
  *                  FUNCTION HANDLERS & GENERATORS
@@ -85,6 +42,7 @@ void createProgramHeader() {
     generateDefvar("GF", "valid");
     generateDefvar("GF", "trash");
     generateDefvar("GF", "beg");
+    generateDefvar("GF", "index");
     generateCall("main");
     generateExit(0);
 }
@@ -100,9 +58,12 @@ void createProgramHeader() {
  * @param uniq_name The unique name of the variable.
  */
 void generateUniqueIdentifier(char *name, char **uniq_name) {
-    size_t len = snprintf((*uniq_name), 0, "%s$%d", name, get_var_id(ST, name));
-    (*uniq_name) = (char *) malloc((len+1)*sizeof(char));
-    sprintf((*uniq_name), "%s$%d", name, get_var_id(ST, name));
+    int id = get_var_id(ST, name);
+    size_t len = snprintf(NULL, 0, "%s$%d", name, id);
+    *uniq_name = (char *) malloc((len + 1) * sizeof(char));
+    if (*uniq_name != NULL) {
+        sprintf(*uniq_name, "%s$%d", name, id);
+    }
 }
 
 /**
@@ -576,9 +537,7 @@ void callBIStrcmp(T_TOKEN *var, T_TOKEN *_var) {
     generateUniqueIdentifier(var->lexeme, &uniq);
     generateUniqueIdentifier(_var->lexeme, &_uniq);
 
-    // TODO: CHECK SEMANTIC CORRECTNESS
-    generateDefvar("LF", "$0index"); // Char index
-    generateMove("LF", "$0index", "int", 0); // Initialize index to 0
+    generateMove("GF", "index", "int", 0); // Initialize index to 0
 
     // Loop start
     generateLabel("strcmp_loop");
@@ -588,21 +547,21 @@ void callBIStrcmp(T_TOKEN *var, T_TOKEN *_var) {
     generateStrlen("GF", "tmp2", "LF", _uniq);
 
     // If index is greater+1 than the length of the string, evaluate and return
-    generateLt("GF", "valid", "LF", "$0index", "GF", "tmp1"); // index < strlen(var1)
+    generateLt("GF", "valid", "GF", "index", "GF", "tmp1"); // index < strlen(var1)
     generateJumpifeq("strcmp_end_length", "GF", "valid", "bool", "false");
-    generateLt("GF", "valid", "LF", "$0index", "GF", "tmp2"); // index < strlen(var2)
+    generateLt("GF", "valid", "GF", "index", "GF", "tmp2"); // index < strlen(var2)
     generateJumpifeq("strcmp_end_length", "GF", "valid", "bool", "false");
 
     // Get the characters at the index
-    generateGetchar("GF", "char", "LF", uniq, "LF", "$0index");
-    generateGetchar("GF", "char2", "LF", _uniq, "LF", "$0index");
+    generateGetchar("GF", "char", "LF", uniq, "GF", "index");
+    generateGetchar("GF", "char2", "LF", _uniq, "GF", "index");
 
     // Compare the characters, if not equal, return
     generateEq("GF", "valid", "GF", "char", "GF", "char2");
     generateJumpifeq("strcmp_end", "GF", "valid", "bool", "false");
 
     // Increment the index and loop
-    generateAdd("LF", "$0index", "LF", "$0index", "int", "1");
+    generateAdd("GF", "index", "GF", "index", "int", "1");
     generateJump("strcmp_loop");
 
     // Handle the end of loop by length
@@ -728,6 +687,55 @@ void callBIWrite(T_TOKEN *var) {
         //char *out = NULL;
         //handleCorrectStringFormat(var->value.stringVal, out);
         generateWrite("string", var->value.stringVal);
+    }
+}
+
+/**
+ * @brief Calls the built-in function based on the provided function call.
+ * 
+ * This function calls the built-in function based on the provided function call.
+ * 
+ * @param fn The function call to handle.
+ */
+void callBIFn(T_FN_CALL *fn) {
+    if (strcmp(fn->name, "ifj.readstr") == 0) {
+        callBIReadString();
+    }
+    else if (strcmp(fn->name, "ifj.readi32") == 0) {
+        callBIReadInt();
+    }
+    else if (strcmp(fn->name, "ifj.readf64") == 0) {
+        callBIReadFloat();
+    }
+    else if (strcmp(fn->name, "ifj.write") == 0) {
+        callBIWrite(fn->argv[0]);
+    }
+    else if (strcmp(fn->name, "ifj.i2f") == 0) {
+        callBIInt2Float(fn->argv[0]);
+    }
+    else if (strcmp(fn->name, "ifj.f2i") == 0) {
+        callBIFloat2Int(fn->argv[0]);
+    }
+    else if (strcmp(fn->name, "ifj.string") == 0) {
+        callBIString(fn->argv[0]);
+    }
+    else if (strcmp(fn->name, "ifj.length") == 0) {
+        callBILength(fn->argv[0]);
+    }
+    else if (strcmp(fn->name, "ifj.concat") == 0) {
+        callBIConcat(fn->argv[0], fn->argv[1]);
+    }
+    else if (strcmp(fn->name, "ifj.substring") == 0) {
+        callBISubstring(fn->argv[0], fn->argv[1], fn->argv[2]);
+    }
+    else if (strcmp(fn->name, "ifj.strcmp") == 0) {
+        callBIStrcmp(fn->argv[0], fn->argv[1]);
+    }
+    else if (strcmp(fn->name, "ifj.ord") == 0) {
+        callBIOrd(fn->argv[0], fn->argv[1]);
+    }
+    else if (strcmp(fn->name, "ifj.chr") == 0) {
+        callBIChr(fn->argv[0]);
     }
 }
 
