@@ -112,7 +112,7 @@ typedef struct T_SYM_TABLE {
 // Symbol table functions
 T_SYM_TABLE *symtable_init();
 bool symtable_add_scope(T_SYM_TABLE *table);
-int symtable_remove_scope(T_SYM_TABLE *table);
+int symtable_remove_scope(T_SYM_TABLE *table, bool check_unused_vars);
 Symbol *symtable_add_symbol(T_SYM_TABLE *table, const char *key, SymbolType type, SymbolData data);
 Symbol *symtable_find_symbol(T_SYM_TABLE *table, const char *key);
 void symtable_free(T_SYM_TABLE *table);

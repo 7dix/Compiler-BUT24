@@ -375,7 +375,7 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
         }
 
         // SCOPE DECREASE, check for unused variables
-        error_flag = symtable_remove_scope(ST);
+        error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
             return false;
         }
@@ -416,7 +416,7 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
         }
 
         // SCOPE DECREASE, check for unused variables
-        error_flag = symtable_remove_scope(ST);
+        error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
             return false;
         }
@@ -1123,7 +1123,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             return false;
         }
 
-        error_flag = symtable_remove_scope(ST);
+        error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
             free(labelElse);
             free(labelEnd);
@@ -1174,7 +1174,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         free(labelEnd);
 
         // SCOPE DECREASE
-        error_flag = symtable_remove_scope(ST);
+        error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
             return false;
         }
@@ -1274,7 +1274,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         }
 
         // SCOPE DECREASE
-        error_flag = symtable_remove_scope(ST);
+        error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
             free(labelElse);
             free(labelEnd);
@@ -1323,7 +1323,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         }
 
         // SCOPE DECREASE
-        error_flag = symtable_remove_scope(ST);
+        error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
             free(labelElse);
             free(labelEnd);
@@ -1464,7 +1464,7 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
         }
 
         // SCOPE DECREASE
-        error_flag = symtable_remove_scope(ST);
+        error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
             free(labelStart);
             free(labelEnd);
@@ -1566,7 +1566,7 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
         }
 
         // SCOPE DECREASE
-        error_flag = symtable_remove_scope(ST);
+        error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
             free(labelStart);
             free(labelEnd);

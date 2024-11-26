@@ -111,7 +111,7 @@ Symbol *hashtable_find(Hashtable *ht, const char *key) {
 
     while (ht->table[index].occupied || ht->table[index].deleted) { // Only continue if the slot is occupied or was deleted
         if (ht->table[index].occupied && strcmp(ht->table[index].name, key) == 0) {
-            ht->table[index].data.var.used = true;
+            //ht->table[index].data.var.used = true;
             return &ht->table[index];
         }
         if (probe_count++ >= HASHTABLE_SIZE) break; // Avoid infinite loop if table is full
@@ -182,15 +182,17 @@ bool symtable_add_scope(T_SYM_TABLE *table) {
 }
 
 // Remove the top scope from the symbol table
-int symtable_remove_scope(T_SYM_TABLE *table) {
+int symtable_remove_scope(T_SYM_TABLE *table, bool check_unused_vars) {
     if (table == NULL || table->top == NULL) {
         return RET_VAL_INTERNAL_ERR;
     }
     
     // Check for unused and unmodified variables
-    int error_code = check_for_unused_vars(table);
-    if (error_code != RET_VAL_OK) {
-        return error_code;
+    if (check_unused_vars) {
+        int error_code = check_for_unused_vars(table);
+        if (error_code != RET_VAL_OK) {
+            return error_code;
+        }
     }
 
     T_SCOPE *old_scope = table->top;
@@ -234,7 +236,7 @@ void symtable_free(T_SYM_TABLE *table) {
         return;
     }
     while (table->top != NULL) {
-        symtable_remove_scope(table);
+        symtable_remove_scope(table, false);
     }
     free(table);
 }
@@ -311,8 +313,8 @@ int check_for_unused_vars(T_SYM_TABLE *table) {
     Hashtable *ht = table->top->ht;
     for (int i = 0; i < HASHTABLE_SIZE; i++) {
         if (ht->table[i].occupied && ht->table[i].type == SYM_VAR) {
-            if (!ht->table[i].data.var.used && !ht->table[i].data.var.modified) {
-                fprintf(stderr, "Variable '%s' was never used", ht->table[i].name);
+            if (!ht->table[i].data.var.used || !ht->table[i].data.var.modified) {
+                //fprintf(stderr, "Variable '%s' was never used", ht->table[i].name);
                 return RET_VAL_SEMANTIC_UNUSED_VAR_ERR;
             }
         }
