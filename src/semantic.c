@@ -312,6 +312,7 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
                 operator->literalType = NLITERAL_FLOAT;
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
                 else operator->node->resultType = TYPE_FLOAT_RESULT;
+                operator->literalType = NLITERAL_FLOAT;
                 list_delete_two_after(listPostfix);
                 list_next(listPostfix);
                 continue;
@@ -320,8 +321,8 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
             // Result NONLITERAL INT
             if((firstOperator->literalType == NLITERAL_INT && secondOperator->literalType != NLITERAL_INT) || (firstOperator->literalType == NLITERAL_INT && secondOperator->literalType == LITERAL_INT) || (firstOperator->literalType == LITERAL_INT && secondOperator->literalType == NLITERAL_INT)){
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
-                else operator->literalType = NLITERAL_INT;
-                operator->node->resultType = TYPE_INT_RESULT;
+                else operator->node->resultType = TYPE_INT_RESULT;
+                operator->literalType = NLITERAL_INT;
                 list_delete_two_after(listPostfix);
                 list_next(listPostfix);
                 continue;
@@ -330,8 +331,8 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
             // Result LITERAL INT
             if(firstOperator->literalType == LITERAL_INT && secondOperator->literalType == LITERAL_INT){
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
-                else operator->literalType = LITERAL_INT;
-                operator->node->resultType = TYPE_INT_RESULT;
+                else operator->node->resultType = TYPE_INT_RESULT;
+                operator->literalType = LITERAL_INT;
                 list_delete_two_after(listPostfix);
                 list_next(listPostfix);
                 continue;
@@ -340,8 +341,8 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
             // Result LITERAL FLOAT
             if(firstOperator->literalType == LITERAL_FLOAT && secondOperator->literalType == LITERAL_FLOAT){
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
-                else operator->literalType = LITERAL_FLOAT;
-                operator->node->resultType = TYPE_FLOAT_RESULT;
+                else operator->node->resultType = TYPE_FLOAT_RESULT;
+                operator->literalType = LITERAL_FLOAT;
                 list_delete_two_after(listPostfix);
                 list_next(listPostfix);
                 continue;
@@ -350,8 +351,8 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
             // Result NONLITERAL FLOAT after retype of INT
             if (firstOperator->literalType == LITERAL_INT && secondOperator->literalType == NLITERAL_FLOAT){
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
-                else operator->literalType = NLITERAL_FLOAT;
-                operator->node->resultType = TYPE_FLOAT_RESULT;
+                else operator->node->resultType = TYPE_FLOAT_RESULT;
+                operator->literalType = NLITERAL_FLOAT;
                 // Retype of INT to FLOAT
                 firstOperator->node->convertToFloat = true;
                 list_delete_two_after(listPostfix);
@@ -361,8 +362,8 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
 
             if (firstOperator->literalType== NLITERAL_FLOAT && secondOperator->literalType == LITERAL_INT){
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
-                else operator->literalType = NLITERAL_FLOAT;
-                operator->node->resultType = TYPE_FLOAT_RESULT;
+                else operator->node->resultType = TYPE_FLOAT_RESULT;
+                operator->literalType = NLITERAL_FLOAT;
                 // Retype of INT to FLOAT
                 secondOperator->node->convertToFloat = true;
                 list_delete_two_after(listPostfix);
@@ -373,8 +374,8 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
             // Result NONLITERAL INT after retype of FLOAT
             if (firstOperator->literalType == NLITERAL_INT && secondOperator->literalType == LITERAL_FLOAT){
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
-                else operator->literalType = NLITERAL_INT;
-                operator->node->resultType = TYPE_INT_RESULT;
+                else operator->node->resultType = TYPE_INT_RESULT;
+                operator->literalType = NLITERAL_INT;
                 // Retype of FLOAT to INT
                 if (is_float_int(firstOperator->node->token->value.floatVal)){
                     firstOperator->node->convertToInt = true;
@@ -390,8 +391,8 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
 
             if (firstOperator->literalType == LITERAL_FLOAT && secondOperator->literalType == NLITERAL_INT){
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
-                else operator->literalType = NLITERAL_INT;
-                operator->node->resultType = TYPE_INT_RESULT;
+                else operator->node->resultType = TYPE_INT_RESULT;
+                operator->literalType = NLITERAL_INT;
                 // Retype of FLOAT to INT
                 if (is_float_int(secondOperator->node->token->value.floatVal)){
                     secondOperator->node->convertToInt = true;
@@ -409,7 +410,7 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
             list_dispose(listPostfix);
             return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             
-        }
+        }else list_next(listPostfix);
 
     }
 
