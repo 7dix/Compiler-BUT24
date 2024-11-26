@@ -1231,8 +1231,8 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         }
 
         // Add the | identifier | to the symtable
-        data.var.is_const = false;
-        data.var.modified = false;
+        data.var.is_const = true; // TODO: check corectness
+        data.var.modified = true; // TODO: check corectness
         data.var.used = false;
         data.var.id = -1;
 
@@ -1521,8 +1521,8 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
         }
 
         // Add the | identifier | to the symtable
-        data.var.is_const = false;
-        data.var.modified = false;
+        data.var.is_const = true; // TODO: check corectness
+        data.var.modified = true; // TODO: check corectness
         data.var.used = false;
         data.var.id = -1;
         if (!symtable_add_symbol(ST, token->lexeme, SYM_VAR, data)) {
