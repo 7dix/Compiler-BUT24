@@ -2038,8 +2038,19 @@ bool syntax_function_arguments(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call) {
  * @retval `false` - syntax error
  */
 bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
-
     T_TOKEN *token;
+
+    // set return flag for error handling based previous token
+    bool is_return = false;
+
+    move_back(buffer);
+    next_token(buffer, &token);
+    if (token->type == RETURN) {
+        is_return = true;
+    }
+
+
+
     // we have several branches, choose here
     next_token(buffer, &token);
     
@@ -2189,8 +2200,15 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         }
 
         if (compare_var_types(&(data->var.type), &exprRes) != 0) {
-            error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
-            return false;
+            if (!is_return) {
+                error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+                return false;
+            }
+            else {
+                // Handling for return type
+                error_flag = RET_VAL_SEMANTIC_FUNCTION_ERR;
+                return false;
+            }
         }
 
         // CD: generate expression
