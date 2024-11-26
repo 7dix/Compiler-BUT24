@@ -233,14 +233,57 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
         return RET_VAL_OK;
     }
 
-    if (listPostfix->size == 3){
+    if (listPostfix->size == 3 && (listPostfix->last->node->token->type == EQUAL || listPostfix->last->node->token->type == NOT_EQUAL)){
+        T_LIST_ELEMENT_PTR operandOne = listPostfix->first;
+        T_LIST_ELEMENT_PTR operandTwo = operandOne->next;
+        
 
-        /*T_LIST_ELEMENT_PTR operator = listPostfix->active;
-        T_LIST_ELEMENT_PTR secondOperator = operator->prev;
-        T_LIST_ELEMENT_PTR firstOperator = secondOperator->prev;
-        */
+    
+        if((operandOne->literalType == LITERAL_NULL) && (operandTwo->literalType == NELITERAL_STRING || operandTwo->literalType == NELITERAL_STRING_NULL || operandTwo->literalType == NLITERAL_INT_NULL || operandTwo->literalType == NLITERAL_FLOAT_NULL || operandTwo->literalType == NELITERAL_STRING)){
+            (*tree)->resultType = TYPE_BOOL_RESULT;
+            list_dispose(listPostfix);
+            return RET_VAL_OK;
+        }
 
+        if((operandTwo->literalType == LITERAL_NULL) && (operandOne->literalType == NELITERAL_STRING || operandOne->literalType == NELITERAL_STRING_NULL || operandOne->literalType == NLITERAL_INT_NULL || operandOne->literalType == NLITERAL_FLOAT_NULL || operandOne->literalType == NELITERAL_STRING)){
+            (*tree)->resultType = TYPE_BOOL_RESULT;
+            list_dispose(listPostfix);
+            return RET_VAL_OK;
+        }
+
+        if(operandOne->literalType == operandTwo->literalType && operandOne->literalType == LITERAL_NULL){
+            (*tree)->resultType = TYPE_BOOL_RESULT;
+            list_dispose(listPostfix);
+            return RET_VAL_OK;
+        }
+
+        if(operandOne->literalType == operandTwo->literalType && operandOne->literalType == NLITERAL_INT_NULL){
+            (*tree)->resultType = TYPE_BOOL_RESULT;
+            list_dispose(listPostfix);
+            return RET_VAL_OK;
+        }
+
+        if(operandOne->literalType == operandTwo->literalType && operandOne->literalType == NLITERAL_FLOAT_NULL){
+            (*tree)->resultType = TYPE_BOOL_RESULT;
+            list_dispose(listPostfix);
+            return RET_VAL_OK;
+        }
+
+        if(operandOne->literalType == operandTwo->literalType && operandOne->literalType == NELITERAL_STRING_NULL){
+            (*tree)->resultType = TYPE_BOOL_RESULT;
+            list_dispose(listPostfix);
+            return RET_VAL_OK;
+        }
+
+        if(operandOne->literalType == operandTwo->literalType && operandOne->literalType == NELITERAL_STRING){
+            (*tree)->resultType = TYPE_BOOL_RESULT;
+            list_dispose(listPostfix);
+            return RET_VAL_OK;
+        }
+        
     }
+
+
     while(listPostfix->size != 1 && listPostfix->active != NULL){
 
         if(listPostfix->active->node->token->type == PLUS || listPostfix->active->node->token->type == MINUS || listPostfix->active->node->token->type == MULTIPLY || listPostfix->active->node->token->type == DIVIDE || listPostfix->active->node->token->type == LESS_THAN || listPostfix->active->node->token->type == GREATER_THAN || listPostfix->active->node->token->type == LESS_THAN_EQUAL || listPostfix->active->node->token->type == GREATER_THAN_EQUAL || listPostfix->active->node->token->type == EQUAL || listPostfix->active->node->token->type == NOT_EQUAL){
