@@ -20,20 +20,32 @@
  
 void handleCorrectStringFormat(char *input, char **output) {
     *output = (char *)malloc(4 * strlen(input) + 1); // Allocate enough memory for the worst case
+    *output[0] = '\0'; // Init the output string
 
     while (*input) {
         char current = *input;
         
         if (current == 35 || current == 92 || current <= 32) {
             char hex[6];
-        
-            sprintf(hex, "\\%03d", current);
-            strcat(*output, hex);
+
+            if (current == '\n') { // Special newline case
+                sprintf(hex, "\\010");
+            }
+            else if (current == '\t') { // Special tab case
+                sprintf(hex, "\\009");
+            }
+            else if (current == '\r') {// Special carriage return case
+                sprintf(hex, "\\013");
+            }
+            else {
+                sprintf(hex, "\\%03d", current); // Other cases
+                strcat(*output, hex);
+            }
         }
         else {
             size_t len = strlen(*output);
             (*output)[len] = current;
-            (*output)[len + 1] = '\0';
+            (*output)[len + 1] = '\0'; // Always null-terminate the string
         }
         input++;
     }
