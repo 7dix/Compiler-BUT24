@@ -26,9 +26,20 @@ void handleCorrectStringFormat(char *input, char **output) {
         
         if (current == 35 || current == 92 || current <= 32) {
             char hex[6];
-        
-            sprintf(hex, "\\%03d", current);
-            strcat(*output, hex);
+
+            if (current == '\n') {
+                sprintf(hex, "\\010");
+            }
+            else if (current == '\t') {
+                sprintf(hex, "\\009");
+            }
+            else if (current == '\r') {
+                sprintf(hex, "\\013");
+            }
+            else {
+                sprintf(hex, "\\%03d", current);
+                strcat(*output, hex);
+            }
         }
         else {
             size_t len = strlen(*output);
