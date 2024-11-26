@@ -6,7 +6,6 @@ pub fn build(x : []u8, y : []u8) []u8 {
 }
 pub fn main() void {
     const a = ifj.string("ahoj ");
-    const sj : i32 = i;
     var ct : []u8 = ifj.string("svete");
     ct = build(a, ct);
     ifj.write(ct);
