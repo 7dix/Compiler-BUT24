@@ -267,6 +267,9 @@ bool syntax_fn_def(T_TOKEN_BUFFER *buffer) {
 
     current_fn_name = NULL; // reset current function name
 
+    // CD: generate implicit return, needs to be changed in the future
+    createReturn();
+
     return true;
 }
 
@@ -2357,8 +2360,6 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
         if (error_flag != RET_VAL_OK) {
             return false;
         }
-
-
 
         // get expression type
         error_flag = check_expression(ST, &tree);

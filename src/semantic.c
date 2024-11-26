@@ -480,8 +480,8 @@ int put_param_to_symtable(char *name) {
         for (int i = 0; i < data.func.argc; i++) {
             SymbolData sym_data;
             sym_data.var.type = data.func.argv[i].type;
-            sym_data.var.is_const = false;
-            sym_data.var.modified = false;
+            sym_data.var.is_const = true;
+            sym_data.var.modified = true;
             sym_data.var.used = false;
             sym_data.var.id = -1;
 
