@@ -78,7 +78,7 @@ void createFnHeader(char *name) {
     generateLabel(name);
     generateCreateFrame();
     generatePushFrame();
-    for (int i = symbol->data.func.argc; i > 0; i--) {
+    for (int i = symbol->data.func.argc - 1; i >= 0; i--) { // Reverse order iteration
         char *uniq = NULL;
         generateUniqueIdentifier(symbol->data.func.argv[i].name, &uniq);
         generateDefvar("LF", uniq);
@@ -775,6 +775,7 @@ void handleIfStartNil(char *labelElse, T_TOKEN *var) {
 
     char *uniq = NULL;
     generateUniqueIdentifier(var->lexeme, &uniq);
+    generateDefvar("LF", uniq);
     generateMove("LF", uniq, "GF", "tmp1");
     free(uniq);
 }
