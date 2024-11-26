@@ -119,17 +119,17 @@ int compare_var_types(VarType *existing, VarType *new) {
         return RET_VAL_OK;
     }
 
-    if (*existing == VAR_INT_NULL && *new == VAR_INT) {
+    if (*existing == VAR_INT_NULL && (*new == VAR_INT || *new == VAR_NULL)) {
         //*existing = VAR_INT;
         return RET_VAL_OK;
     }
 
-    if (*existing == VAR_FLOAT_NULL && *new == VAR_FLOAT) {
+    if (*existing == VAR_FLOAT_NULL && (*new == VAR_FLOAT || *new == VAR_NULL)) {
         //*existing = VAR_FLOAT;
         return RET_VAL_OK;
     }
 
-    if (*existing == VAR_STRING_NULL && *new == VAR_STRING) {
+    if (*existing == VAR_STRING_NULL && (*new == VAR_STRING || *new == VAR_NULL)) {
         //*existing = VAR_STRING;
         return RET_VAL_OK;
     }
@@ -138,7 +138,7 @@ int compare_var_types(VarType *existing, VarType *new) {
         return RET_VAL_OK;
     }
 
-    if (*existing == VAR_STRING_NULL && *new == STRING_VAR_STRING) {
+    if (*existing == VAR_STRING_NULL && *new == STRING_VAR_STRING) { //TODO: correct?
         //*existing = VAR_STRING;
         return RET_VAL_OK;
     }
