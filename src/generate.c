@@ -28,19 +28,22 @@ void handleCorrectStringFormat(char *input, char **output) {
         if (current == 35 || current == 92 || current <= 32) {
             char hex[6];
 
-            if (current == '\n') { // Special newline case
+            if (current == '\\' && *(input + 1) == 'n') { // Special newline case
                 sprintf(hex, "\\010");
+                input++; // Skip the 'n'
             }
-            else if (current == '\t') { // Special tab case
+            else if (current == '\\' && *(input + 1) == 't') { // Special tab case
                 sprintf(hex, "\\009");
+                input++; // Skip the 't'
             }
-            else if (current == '\r') {// Special carriage return case
+            else if (current == '\\' && *(input + 1) == 'r') { // Special carriage return case
                 sprintf(hex, "\\013");
+                input++; // Skip the 'r'
             }
             else {
                 sprintf(hex, "\\%03d", current); // Other cases
-                strcat(*output, hex);
             }
+            strcat(*output, hex);
         }
         else {
             size_t len = strlen(*output);
