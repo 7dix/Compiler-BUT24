@@ -24,21 +24,26 @@ void handleCorrectStringFormat(char *input, char **output) {
 
     while (*input) {
         char current = *input;
+        char next = *(input + 1);
         
-        if (current == 35 || current == 92 || current <= 32) {
+        if (current == 35 || current == 92 || current <= 32) { // if the char is #, \ or a control char
             char hex[6];
 
-            if (current == '\\' && *(input + 1) == 'n') { // Special newline case
+            if (current == '\\' && next == 'n') { // Special newline case
                 sprintf(hex, "\\010");
                 input++; // Skip the 'n'
             }
-            else if (current == '\\' && *(input + 1) == 't') { // Special tab case
+            else if (current == '\\' && next == 't') { // Special tab case
                 sprintf(hex, "\\009");
                 input++; // Skip the 't'
             }
-            else if (current == '\\' && *(input + 1) == 'r') { // Special carriage return case
+            else if (current == '\\' && next == 'r') { // Special carriage return case
                 sprintf(hex, "\\013");
                 input++; // Skip the 'r'
+            }
+            else if (current == '\\' && next == '0') {
+                sprintf(hex, "\\000"); // Special null case
+                input++; // Skip the '0'
             }
             else {
                 sprintf(hex, "\\%03d", current); // Other cases

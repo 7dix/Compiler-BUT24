@@ -6,6 +6,7 @@
 //
 // YEAR: 2024
 // NOTES: Code generation handler for the IFJ24 language compiler.
+//        TODO: Global counters for labels (ord, strcmp, substr)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,6 +25,11 @@
  * for the provided functions, statements, expressions and other necessary
  * constructs.
  */
+
+// Global counter for built-in functions requiring unique labels
+int ord_counter = 0;
+int strcmp_counter = 0;
+int substr_counter = 0;
 
 /**
  * @brief Creates the program header.
@@ -434,6 +440,16 @@ void callBISubstring(T_TOKEN *var, T_TOKEN *beg, T_TOKEN *end) {
     char *uniq_beg = NULL, *uniq_end = NULL;
     size_t len = 0;
 
+    char substr_loop[20];
+    char substr_end[20];
+    char substr_err[20];
+    char substr_ret[20];
+    sprintf(substr_loop, "strcmp_loop%d", substr_counter);
+    sprintf(substr_end, "strcmp_end%d", substr_counter);
+    sprintf(substr_err, "strcmp_err%d", substr_counter);
+    sprintf(substr_ret, "strcmp_ret%d", substr_counter);
+
+
     if (beg->type == INT) {
         len = snprintf(_beg, 0, "int@%d", beg->value.intVal);
         _beg = (char *) malloc((len+1)*sizeof(char));
@@ -465,33 +481,33 @@ void callBISubstring(T_TOKEN *var, T_TOKEN *beg, T_TOKEN *end) {
 
     // beg < 0
     printf("LT GF@valid int@0 %s\n", _beg);
-    generateJumpifeq("substr_err", "GF", "valid", "bool", "true");
+    generateJumpifeq(substr_err, "GF", "valid", "bool", "true");
 
     // end < 0
     printf("LT GF@valid int@0 %s\n", _end);
-    generateJumpifeq("substr_err", "GF", "valid", "bool", "true");
+    generateJumpifeq(substr_err, "GF", "valid", "bool", "true");
 
     // beg > end
     printf("GT GF@valid %s %s\n", _beg, _end);
-    generateJumpifeq("substr_err", "GF", "valid", "bool", "true");
+    generateJumpifeq(substr_err, "GF", "valid", "bool", "true");
 
     // beg >= length(var)
     printf("GT GF@valid %s GF@tmp1\n", _beg);
     printf("EQ GF@tmp2 %s GF@tmp1\n", _beg);
     printf("OR GF@valid GF@valid GF@tmp2\n");
-    generateJumpifeq("substr_err", "GF", "valid", "bool", "true");
+    generateJumpifeq(substr_err, "GF", "valid", "bool", "true");
 
     // end > length(var)
     printf("GT GF@valid %s GF@tmp1\n", _end);
-    generateJumpifeq("substr_err", "GF", "valid", "bool", "true");
+    generateJumpifeq(substr_err, "GF", "valid", "bool", "true");
 
     // move "string@" to dest
     printf("MOVE GF@tmp2 string@\n");
 
     // Loop
-    generateLabel("substr_loop");
+    generateLabel(substr_loop);
     printf("LT GF@valid %s %s\n", _beg, _end);
-    generateJumpifeq("substr_end", "GF", "valid", "bool", "false");
+    generateJumpifeq(substr_end, "GF", "valid", "bool", "false");
 
     // get char
     printf("GETCHAR GF@char LF@%s %s\n", uniq, _beg);
@@ -499,23 +515,25 @@ void callBISubstring(T_TOKEN *var, T_TOKEN *beg, T_TOKEN *end) {
 
     // increment beg
     printf("ADD GF@beg %s int@1\n", _beg);
-    generateJump("substr_loop");
+    generateJump(substr_loop);
 
     // End of loop
-    generateLabel("substr_end");
+    generateLabel(substr_end);
     generatePushs("GF", "tmp2");
-    generateJump("substr_ret");
+    generateJump(substr_ret);
 
     // Error handling
-    generateLabel("substr_err");
+    generateLabel(substr_err);
     generateMove("GF", "tmp2", "nil", "nil");
     generatePushs("GF", "tmp2");
-    generateJump("substr_ret");
+    generateJump(substr_ret);
 
     // Return label
-    generateLabel("substr_ret");
+    generateLabel(substr_ret);
     free(uniq_beg); free(uniq_end);
     free(uniq); free(_beg); free(_end);
+
+    substr_counter++;
 } 
 
 /**
@@ -534,10 +552,23 @@ void callBIStrcmp(T_TOKEN *var, T_TOKEN *_var) {
     generateUniqueIdentifier(var->lexeme, &uniq);
     generateUniqueIdentifier(_var->lexeme, &_uniq);
 
-    generateMove("GF", "index", "int", 0); // Initialize index to 0
+    generateMove("GF", "index", "int", "0"); // Initialize index to 0
+
+    char strcmp_loop[20];
+    char strcmp_end_length[20];
+    char strcmp_end[20];
+    char strcmp_ret_lesser[20];
+    char strcmp_ret_greater[20];
+    char strcmp_ret[20];
+    sprintf(strcmp_loop, "strcmp_loop%d", strcmp_counter);
+    sprintf(strcmp_end_length, "strcmp_end%d", strcmp_counter);
+    sprintf(strcmp_end, "strcmp_end%d", strcmp_counter);
+    sprintf(strcmp_ret_lesser, "strcmp_err%d", strcmp_counter);
+    sprintf(strcmp_ret_greater, "strcmp_err%d", strcmp_counter);
+    sprintf(strcmp_ret, "strcmp_ret%d", strcmp_counter);
 
     // Loop start
-    generateLabel("strcmp_loop");
+    generateLabel(strcmp_loop);
 
     // Save the length of both strings
     generateStrlen("GF", "tmp1", "LF", uniq);
@@ -545,9 +576,9 @@ void callBIStrcmp(T_TOKEN *var, T_TOKEN *_var) {
 
     // If index is greater+1 than the length of the string, evaluate and return
     generateLt("GF", "valid", "GF", "index", "GF", "tmp1"); // index < strlen(var1)
-    generateJumpifeq("strcmp_end_length", "GF", "valid", "bool", "false");
+    generateJumpifeq(strcmp_end_length, "GF", "valid", "bool", "false");
     generateLt("GF", "valid", "GF", "index", "GF", "tmp2"); // index < strlen(var2)
-    generateJumpifeq("strcmp_end_length", "GF", "valid", "bool", "false");
+    generateJumpifeq(strcmp_end_length, "GF", "valid", "bool", "false");
 
     // Get the characters at the index
     generateGetchar("GF", "char", "LF", uniq, "GF", "index");
@@ -555,37 +586,39 @@ void callBIStrcmp(T_TOKEN *var, T_TOKEN *_var) {
 
     // Compare the characters, if not equal, return
     generateEq("GF", "valid", "GF", "char", "GF", "char2");
-    generateJumpifeq("strcmp_end", "GF", "valid", "bool", "false");
+    generateJumpifeq(strcmp_end, "GF", "valid", "bool", "false");
 
     // Increment the index and loop
     generateAdd("GF", "index", "GF", "index", "int", "1");
-    generateJump("strcmp_loop");
+    generateJump(strcmp_loop);
 
     // Handle the end of loop by length
-    generateLabel("strcmp_end_length");
+    generateLabel(strcmp_end_length);
     generateLt("GF", "valid", "GF", "tmp1", "GF", "tmp2"); // strlen(var1) < strlen(var2)
-    generateJumpifeq("strcmp_ret_lesser", "GF", "valid", "bool", "true");
+    generateJumpifeq(strcmp_ret_lesser, "GF", "valid", "bool", "true");
     generateGt("GF", "valid", "GF", "tmp1", "GF", "tmp2"); // strlen(var1) > strlen(var2)
-    generateJumpifeq("strcmp_ret_greater", "GF", "valid", "bool", "true");
+    generateJumpifeq(strcmp_ret_greater, "GF", "valid", "bool", "true");
 
     // Strings are equal
-    generateLabel("strcmp_end");
+    generateLabel(strcmp_end);
     generatePushs("int", "0");
-    generateJump("strcmp_ret");
+    generateJump(strcmp_ret);
 
     // S1 lesser
-    generateLabel("strcmp_ret_lesser");
+    generateLabel(strcmp_ret_lesser);
     generatePushs("int", "-1");
-    generateJump("strcmp_ret");
+    generateJump(strcmp_ret);
 
     // S1 greater
-    generateLabel("strcmp_ret_greater");
+    generateLabel(strcmp_ret_greater);
     generatePushs("int", "1");
-    generateJump("strcmp_ret");
+    generateJump(strcmp_ret);
 
     // Return label
-    generateLabel("strcmp_ret");
+    generateLabel(strcmp_ret);
     free(uniq); free(_uniq);
+
+    strcmp_counter++;
 }
 
 /**
@@ -599,6 +632,12 @@ void callBIStrcmp(T_TOKEN *var, T_TOKEN *_var) {
 void callBIOrd (T_TOKEN *var, T_TOKEN *index) {
     char *uniq = NULL, *_index = NULL;
     size_t len = 0;
+
+    char ord_err[20];
+    char ord_ret[20];
+
+    sprintf(ord_err, "ord_err%d", ord_counter);
+    sprintf(ord_ret, "ord_ret%d", ord_counter);
 
     if (index->type == INT) {
         len = snprintf(_index, 0, "int@%d", index->value.intVal);
@@ -617,29 +656,31 @@ void callBIOrd (T_TOKEN *var, T_TOKEN *index) {
     generateStrlen("GF", "tmp1", "LF", uniq);
 
     // strlen(var) = 0
-    generateJumpifeq("ord_err", "GF", "tmp1", "int", "0");
+    generateJumpifeq(ord_err, "GF", "tmp1", "int", "0");
 
     // index < strlen(var)
     printf("LT GF@valid %s %s\n", _index, "GF@tmp1");
-    generateJumpifeq("ord_err", "GF", "valid", "bool", "false");
+    generateJumpifeq(ord_err, "GF", "valid", "bool", "false");
 
     // index < 0
     printf("LT GF@valid %s int@0\n", _index);
-    generateJumpifeq("ord_err", "GF", "valid", "bool", "true");
+    generateJumpifeq(ord_err, "GF", "valid", "bool", "true");
 
     // Get char, push to stack and convert
     generateGetchar("GF", "char", "LF", uniq, "LF", _index);
     generatePushs("GF", "char");
     generateStrI2Ints();
-    generateJump("ord_ret");
+    generateJump(ord_ret);
 
     // Error label
-    generateLabel("ord_err");
+    generateLabel(ord_err);
     generatePushs("int", "0");
 
     // Return label
-    generateLabel("ord_ret");
+    generateLabel(ord_ret);
     free(uniq); free(_index);
+
+    ord_counter++;
 }
 
 /**
