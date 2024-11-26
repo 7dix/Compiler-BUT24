@@ -252,15 +252,15 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
         T_LIST_ELEMENT_PTR operandTwo = operandOne->next;
         
 
-        // null ( == | != ) a(type ?[]u8) | a(type ?int32) | a(type ?float64) | a(type []u)8 |
-        if((operandOne->literalType == LITERAL_NULL) && (operandTwo->literalType == NELITERAL_STRING || operandTwo->literalType == NELITERAL_STRING_NULL || operandTwo->literalType == NLITERAL_INT_NULL || operandTwo->literalType == NLITERAL_FLOAT_NULL || operandTwo->literalType == NELITERAL_STRING)){
+        // null ( == | != ) a(type ?[]u8) | a(type ?int32) | a(type ?float64) 
+        if((operandOne->literalType == LITERAL_NULL) && (operandTwo->literalType == NELITERAL_STRING_NULL || operandTwo->literalType == NLITERAL_INT_NULL || operandTwo->literalType == NLITERAL_FLOAT_NULL || operandTwo->literalType == NELITERAL_STRING)){
             (*tree)->resultType = TYPE_BOOL_RESULT;
             list_dispose(listPostfix);
             return RET_VAL_OK;
         }
 
-        // a(type ?[]u8) | a(type ?int32) | a(type ?float64) | a(type []u)8 | ( == | != ) null
-        if((operandTwo->literalType == LITERAL_NULL) && (operandOne->literalType == NELITERAL_STRING || operandOne->literalType == NELITERAL_STRING_NULL || operandOne->literalType == NLITERAL_INT_NULL || operandOne->literalType == NLITERAL_FLOAT_NULL || operandOne->literalType == NELITERAL_STRING)){
+        // a(type ?[]u8) | a(type ?int32) | a(type ?float64) ( == | != ) null
+        if((operandTwo->literalType == LITERAL_NULL) && (operandOne->literalType == NELITERAL_STRING_NULL || operandOne->literalType == NLITERAL_INT_NULL || operandOne->literalType == NLITERAL_FLOAT_NULL || operandOne->literalType == NELITERAL_STRING)){
             (*tree)->resultType = TYPE_BOOL_RESULT;
             list_dispose(listPostfix);
             return RET_VAL_OK;
@@ -280,18 +280,6 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
         }
         // a(?f64) ( == | != ) b(?f64)
         if(operandOne->literalType == operandTwo->literalType && operandOne->literalType == NLITERAL_FLOAT_NULL){
-            (*tree)->resultType = TYPE_BOOL_RESULT;
-            list_dispose(listPostfix);
-            return RET_VAL_OK;
-        }
-        // a(?[]u8) ( == | != ) b(?[]u8)
-        if(operandOne->literalType == operandTwo->literalType && operandOne->literalType == NELITERAL_STRING_NULL){
-            (*tree)->resultType = TYPE_BOOL_RESULT;
-            list_dispose(listPostfix);
-            return RET_VAL_OK;
-        }
-        // a([]u8) ( == | != ) b([]u8)
-        if(operandOne->literalType == operandTwo->literalType && operandOne->literalType == NELITERAL_STRING){
             (*tree)->resultType = TYPE_BOOL_RESULT;
             list_dispose(listPostfix);
             return RET_VAL_OK;
@@ -452,7 +440,53 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
                 }
                 
             }
-            
+
+            // a(?i32) ( == | != ) nonliteral int | literal int
+            if((operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL) && ((firstOperator->literalType == NLITERAL_INT_NULL) && (secondOperator->literalType == LITERAL_INT || secondOperator->literalType == NLITERAL_INT))){
+                // Set type of subexpression
+                operator->node->resultType = TYPE_BOOL_RESULT;
+                // Set type of literal
+                operator->literalType = NLITERAL_INT_NULL;
+                // Delete two elements after active element, and move to next element
+                list_delete_two_after(listPostfix);
+                list_next(listPostfix);
+                continue;
+            }
+
+            // nonliteral int | literal int ( == | != ) a(?i32) 
+            if((operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL) && ((secondOperator->literalType == NLITERAL_INT_NULL) && (firstOperator->literalType == LITERAL_INT || firstOperator->literalType == NLITERAL_INT))){
+                // Set type of subexpression
+                operator->node->resultType = TYPE_BOOL_RESULT;
+                // Set type of literal
+                operator->literalType = NLITERAL_INT_NULL;
+                // Delete two elements after active element, and move to next element
+                list_delete_two_after(listPostfix);
+                list_next(listPostfix);
+                continue;
+            }
+            // a(f?64) ( == | != ) nonliteral float | literal float
+            if((operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL) && ((firstOperator->literalType == NLITERAL_FLOAT_NULL) && (secondOperator->literalType == LITERAL_FLOAT || secondOperator->literalType == NLITERAL_FLOAT))){
+                // Set type of subexpression
+                operator->node->resultType = TYPE_BOOL_RESULT;
+                // Set type of literal
+                operator->literalType = NLITERAL_FLOAT_NULL;
+                // Delete two elements after active element, and move to next element
+                list_delete_two_after(listPostfix);
+                list_next(listPostfix);
+                continue;
+            }
+            // nonliteral float | literal float ( == | != ) a(f?64)
+            if((operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL) && ((secondOperator->literalType == NLITERAL_FLOAT_NULL) && (firstOperator->literalType == LITERAL_FLOAT || firstOperator->literalType == NLITERAL_FLOAT))){
+                // Set type of subexpression
+                operator->node->resultType = TYPE_BOOL_RESULT;
+                // Set type of literal
+                operator->literalType = NLITERAL_FLOAT_NULL;
+                // Delete two elements after active element, and move to next element
+                list_delete_two_after(listPostfix);
+                list_next(listPostfix);
+                continue;
+            }
+
             // Error of type compatibility
             list_dispose(listPostfix);
             return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
