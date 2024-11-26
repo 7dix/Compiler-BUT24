@@ -100,14 +100,12 @@ void hashtable_remove(Hashtable *ht, const char *key);
 
 typedef struct T_SCOPE {
     Hashtable *ht;
-    unsigned int label_cnt_1;
-    unsigned int label_cnt_2;
     struct T_SCOPE *parent;
 } T_SCOPE;
 
 typedef struct T_SYM_TABLE {
     T_SCOPE *top;
-    unsigned int label_cnt;
+    int label_cnt;
     int var_id_cnt;
 } T_SYM_TABLE;
 
@@ -128,8 +126,6 @@ int check_for_unused_vars(T_SYM_TABLE *table);
 
 extern T_SYM_TABLE *ST;
 
-void generate_fc_label_in_scope(T_SYM_TABLE *table);
-void save_fc_label_in_scope(T_SYM_TABLE *table, unsigned int *label1, unsigned int *label2);
-void load_fc_label_in_scope(T_SYM_TABLE *table, unsigned int label1, unsigned int label2);
+bool generate_labels(T_SYM_TABLE *table, char **label1, char **label2);
 
 #endif // H_SYMTABLE

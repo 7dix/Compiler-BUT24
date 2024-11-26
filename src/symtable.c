@@ -320,29 +320,29 @@ int check_for_unused_vars(T_SYM_TABLE *table) {
 }
 
 // TODO: finish
-void generate_fc_label_in_scope(T_SYM_TABLE *table) {
-    if (table == NULL || table->top == NULL) {
-        return;
-    }
-    T_SCOPE *current_scope = table->top;
-    current_scope->label_cnt_1 = table->label_cnt++;
-    current_scope->label_cnt_2 = table->label_cnt++;
-}
 
-void save_fc_label_in_scope(T_SYM_TABLE *table, unsigned int *label1, unsigned int *label2) {
+bool generate_labels(T_SYM_TABLE *table, char **label1, char **label2) {
     if (table == NULL || table->top == NULL) {
-        return;
+        return false;
     }
-    T_SCOPE *current_scope = table->top;
-    *label1 = current_scope->label_cnt_1;
-    *label2 = current_scope->label_cnt_2;
-}
 
-void load_fc_label_in_scope(T_SYM_TABLE *table, unsigned int label1, unsigned int label2) {
-    if (table == NULL || table->top == NULL) {
-        return;
+    int label_cnt_1 = table->label_cnt++;
+    int label_cnt_2 = table->label_cnt++;
+    
+    size_t len = snprintf(NULL, 0, "$%d", label_cnt_1);
+    (*label1) = (char *) malloc(len + 1);
+    if ((*label1) == NULL) {
+        return false;
     }
-    T_SCOPE *current_scope = table->top;
-    current_scope->label_cnt_1 = label1;
-    current_scope->label_cnt_2 = label2;
+    sprintf((*label1), "$%d", label_cnt_1);
+
+    len = snprintf(NULL, 0, "$%d", label_cnt_2);
+    (*label2) = (char *) malloc(len + 1);
+    if ((*label2) == NULL) {
+        free(*label1);
+        return false;
+    }
+    sprintf((*label2), "$%d", label_cnt_2);
+
+    return true;
 }

@@ -444,3 +444,22 @@ int put_param_to_symtable(char *name) {
     }
     return RET_VAL_OK;
 }
+
+bool is_result_type_nullable(RESULT_TYPE type) {
+    return type == TYPE_NULL_RESULT || type == TYPE_INT_NULL_RESULT || type == TYPE_FLOAT_NULL_RESULT || type == TYPE_STRING_NULL_RESULT;
+}
+
+VarType fc_nullable_convert_type(RESULT_TYPE type) {
+    switch (type) {
+        case TYPE_NULL_RESULT:
+            return VAR_NULL;
+        case TYPE_INT_NULL_RESULT:
+            return VAR_INT;
+        case TYPE_FLOAT_NULL_RESULT:
+            return VAR_FLOAT;
+        case TYPE_STRING_NULL_RESULT:
+            return VAR_STRING;
+        default:
+            return VAR_VOID;
+    }
+}
