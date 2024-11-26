@@ -17,7 +17,7 @@ init(autoreset=True)
 SCANNER_EXECUTABLE = '../../bin/tokenbufferdebug'  # Update this path if necessary
 
 # Path to the tests directory
-TESTS_DIRECTORY = './'  # Update this path if necessary
+TOKEN_CHECK_TESTS_DIRECTORY = './token_check'  # Update this path if necessary
 
 # Initialize a rich Console object for printing
 console = Console()
@@ -114,11 +114,11 @@ def main():
     all_passed = True
 
     # Get all test directories
-    test_dirs = [os.path.join(TESTS_DIRECTORY, d) for d in os.listdir(TESTS_DIRECTORY)
-                 if os.path.isdir(os.path.join(TESTS_DIRECTORY, d))]
+    test_dirs = [os.path.join(TOKEN_CHECK_TESTS_DIRECTORY, d) for d in os.listdir(TOKEN_CHECK_TESTS_DIRECTORY)
+                 if os.path.isdir(os.path.join(TOKEN_CHECK_TESTS_DIRECTORY, d))]
 
     if not test_dirs:
-        print(f'No tests found in directory {TESTS_DIRECTORY}')
+        print(f'No tests found in directory {TOKEN_CHECK_TESTS_DIRECTORY}')
         sys.exit(1)
 
     # Track the results of each test

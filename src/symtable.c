@@ -111,6 +111,7 @@ Symbol *hashtable_find(Hashtable *ht, const char *key) {
 
     while (ht->table[index].occupied || ht->table[index].deleted) { // Only continue if the slot is occupied or was deleted
         if (ht->table[index].occupied && strcmp(ht->table[index].name, key) == 0) {
+            //ht->table[index].data.var.used = true;
             return &ht->table[index];
         }
         if (probe_count++ >= HASHTABLE_SIZE) break; // Avoid infinite loop if table is full
@@ -156,6 +157,7 @@ T_SYM_TABLE *symtable_init()
         return NULL;
     }
     table->var_id_cnt = 0;
+    table->label_cnt = 0;
     table->top = NULL;
     return table;
 }
@@ -180,15 +182,17 @@ bool symtable_add_scope(T_SYM_TABLE *table) {
 }
 
 // Remove the top scope from the symbol table
-int symtable_remove_scope(T_SYM_TABLE *table) {
+int symtable_remove_scope(T_SYM_TABLE *table, bool check_unused_vars) {
     if (table == NULL || table->top == NULL) {
         return RET_VAL_INTERNAL_ERR;
     }
     
     // Check for unused and unmodified variables
-    int error_code = check_for_unused_vars(table);
-    if (error_code != RET_VAL_OK) {
-        return error_code;
+    if (check_unused_vars) {
+        int error_code = check_for_unused_vars(table);
+        if (error_code != RET_VAL_OK) {
+            return error_code;
+        }
     }
 
     T_SCOPE *old_scope = table->top;
@@ -232,7 +236,7 @@ void symtable_free(T_SYM_TABLE *table) {
         return;
     }
     while (table->top != NULL) {
-        symtable_remove_scope(table);
+        symtable_remove_scope(table, false);
     }
     free(table);
 }
@@ -310,10 +314,39 @@ int check_for_unused_vars(T_SYM_TABLE *table) {
     for (int i = 0; i < HASHTABLE_SIZE; i++) {
         if (ht->table[i].occupied && ht->table[i].type == SYM_VAR) {
             if (!ht->table[i].data.var.used || !ht->table[i].data.var.modified) {
+                //fprintf(stderr, "Variable '%s' was never used", ht->table[i].name);
                 return RET_VAL_SEMANTIC_UNUSED_VAR_ERR;
             }
         }
     }
 
     return RET_VAL_OK;
+}
+
+// TODO: finish
+
+bool generate_labels(T_SYM_TABLE *table, char **label1, char **label2) {
+    if (table == NULL || table->top == NULL) {
+        return false;
+    }
+
+    int label_cnt_1 = table->label_cnt++;
+    int label_cnt_2 = table->label_cnt++;
+    
+    size_t len = snprintf(NULL, 0, "$%d", label_cnt_1);
+    (*label1) = (char *) malloc(len + 1);
+    if ((*label1) == NULL) {
+        return false;
+    }
+    sprintf((*label1), "$%d", label_cnt_1);
+
+    len = snprintf(NULL, 0, "$%d", label_cnt_2);
+    (*label2) = (char *) malloc(len + 1);
+    if ((*label2) == NULL) {
+        free(*label1);
+        return false;
+    }
+    sprintf((*label2), "$%d", label_cnt_2);
+
+    return true;
 }

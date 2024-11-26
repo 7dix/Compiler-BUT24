@@ -76,7 +76,10 @@ int main() {
     }
 
     symtable_remove_scope(table);
-    symtable_add_scope(table);
+    if (!symtable_add_scope(table)) {
+        fprintf(stderr, "Error code when adding new scope\n");
+        return 1;
+    };
 
     // Fill up the hashtable
     for (int i = 0; i < HASHTABLE_SIZE; i++) {
@@ -89,13 +92,12 @@ int main() {
                  }
             };
         symbol = symtable_add_symbol(table, key, SYM_VAR, data);
+        symbol = symtable_find_symbol(table, key);
         if (symbol == NULL) {
             fprintf(stderr, "Error: Memory allocation failed in symtable_add_symbol, iteration: %d\n", i);
             return 1;
         }
     }
-
-
 
     symtable_remove_scope(table);
     symtable_remove_scope(table);

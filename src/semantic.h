@@ -36,5 +36,7 @@ int put_param_to_symtable(char *name);
 
 // compare variable types
 int compare_var_types(VarType *existing, VarType *new);
+bool is_result_type_nullable(RESULT_TYPE type);
+VarType fc_nullable_convert_type(RESULT_TYPE type);
 
 #endif // H_SEMANTIC

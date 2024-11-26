@@ -100,21 +100,19 @@ void hashtable_remove(Hashtable *ht, const char *key);
 
 typedef struct T_SCOPE {
     Hashtable *ht;
-    unsigned int label_cnt_1;
-    unsigned int label_cnt_2;
     struct T_SCOPE *parent;
 } T_SCOPE;
 
 typedef struct T_SYM_TABLE {
     T_SCOPE *top;
-    unsigned int label_cnt;
+    int label_cnt;
     int var_id_cnt;
 } T_SYM_TABLE;
 
 // Symbol table functions
 T_SYM_TABLE *symtable_init();
 bool symtable_add_scope(T_SYM_TABLE *table);
-int symtable_remove_scope(T_SYM_TABLE *table);
+int symtable_remove_scope(T_SYM_TABLE *table, bool check_unused_vars);
 Symbol *symtable_add_symbol(T_SYM_TABLE *table, const char *key, SymbolType type, SymbolData data);
 Symbol *symtable_find_symbol(T_SYM_TABLE *table, const char *key);
 void symtable_free(T_SYM_TABLE *table);
@@ -127,5 +125,7 @@ Symbol *get_var(T_SYM_TABLE *table, const char *name);
 int check_for_unused_vars(T_SYM_TABLE *table);
 
 extern T_SYM_TABLE *ST;
+
+bool generate_labels(T_SYM_TABLE *table, char **label1, char **label2);
 
 #endif // H_SYMTABLE

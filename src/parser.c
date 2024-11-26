@@ -59,7 +59,8 @@ bool is_token_in_expr(T_TOKEN *token) {
                 token->type == LESS_THAN_EQUAL || token->type == GREATER_THAN_EQUAL ||
                 token->type == PLUS || token->type == MINUS || token->type == MULTIPLY ||
                 token->type == DIVIDE || token->type == BRACKET_LEFT_SIMPLE ||
-                token->type == BRACKET_RIGHT_SIMPLE || token->type == IDENTIFIER );
+                token->type == BRACKET_RIGHT_SIMPLE || token->type == IDENTIFIER ||
+                token->type == NULL_TOKEN );
 }
 
 /**
@@ -375,7 +376,7 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
         }
 
         // SCOPE DECREASE, check for unused variables
-        error_flag = symtable_remove_scope(ST);
+        error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
             return false;
         }
@@ -416,7 +417,7 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
         }
 
         // SCOPE DECREASE, check for unused variables
-        error_flag = symtable_remove_scope(ST);
+        error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
             return false;
         }
@@ -1024,20 +1025,17 @@ bool syntax_var_def_after_id(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * @retval `false` - syntax error
  */
 bool syntax_if_statement(T_TOKEN_BUFFER *buffer) {
-    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
 
     next_token(buffer, &token); // if
     if (token->type != IF) {
-        // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     next_token(buffer, &token); // (
     if (token->type != BRACKET_LEFT_SIMPLE) {
-        // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -1050,7 +1048,7 @@ bool syntax_if_statement(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
-    // TODO: get expression type
+    // get expression type
     error_flag = check_expression(ST, &tree);
     if (error_flag != 0){
         return false;
@@ -1058,7 +1056,6 @@ bool syntax_if_statement(T_TOKEN_BUFFER *buffer) {
 
     next_token(buffer, &token); // )
     if (token->type != BRACKET_RIGHT_SIMPLE) {
-        // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -1089,7 +1086,6 @@ bool syntax_if_statement(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree) {
-    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
     // we have two branches, choose here
@@ -1097,72 +1093,95 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
     // first branch -> { CODE_BLOCK_NEXT } else { CODE_BLOCK_NEXT }
     if (token->type == BRACKET_LEFT_CURLY) { // {
         
-        if (!is_token_relation_operator((*tree)->token)) {
-            // TODO: process error
-            error_flag = RET_VAL_SYNTAX_ERR;
+        if ((*tree)->resultType != TYPE_BOOL_RESULT) {
+            error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             return false;
         }
 
-        // codegen print expression
+        // CD: generate expression
         createStackByPostorder(*tree);
 
         tree_dispose(tree);
-        
-        // SCOPE INCREASE
+
         if (!symtable_add_scope(ST)) {
             error_flag = RET_VAL_INTERNAL_ERR;
-            return false; 
-        }
-
-        // codegen print if header
-        //handleIfStartBool()
-
-        if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;
         }
 
-        // 
+        char *labelElse = NULL;
+        char *labelEnd = NULL;
 
-        // SCOPE DECREASE
-        symtable_remove_scope(ST);
+        if (!generate_labels(ST,&labelElse, &labelEnd)) {
+            error_flag = RET_VAL_INTERNAL_ERR;
+            return false;
+        }
+
+        handleIfStartBool(labelElse);
+
+        if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
+            free(labelElse);
+            free(labelEnd);
+            return false;
+        }
+
+        error_flag = symtable_remove_scope(ST, true);
+        if (error_flag != RET_VAL_OK) {
+            free(labelElse);
+            free(labelEnd);
+            return false;
+        }
+        if (!symtable_add_scope(ST)) {
+            error_flag = RET_VAL_INTERNAL_ERR;
+            free(labelElse);
+            free(labelEnd);
+            return false;
+        }
+
+        createIfElse(labelEnd, labelElse);
 
         next_token(buffer, &token); // }
         if (token->type != BRACKET_RIGHT_CURLY) {
-            // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
+            free(labelElse);
+            free(labelEnd);
             return false;
         }
 
         next_token(buffer, &token); // else
         if (token->type != ELSE) {
-            // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
+            free(labelElse);
+            free(labelEnd);
             return false;
         }
 
         next_token(buffer, &token); // {
         if (token->type != BRACKET_LEFT_CURLY) {
-            // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
+            free(labelElse);
+            free(labelEnd);
             return false;
-        }
-
-        // SCOPE INCREASE
-        if (!symtable_add_scope(ST)) {
-            error_flag = RET_VAL_INTERNAL_ERR;
-            return false; 
         }
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
+            free(labelElse);
+            free(labelEnd);
             return false;
         }
 
+        createIfEnd(labelEnd);
+
+        free(labelElse);
+        free(labelEnd);
+
         // SCOPE DECREASE
-        symtable_remove_scope(ST);
+        error_flag = symtable_remove_scope(ST, true);
+        if (error_flag != RET_VAL_OK) {
+            return false;
+        }
 
         next_token(buffer, &token); // }
         if (token->type != BRACKET_RIGHT_CURLY) {
-            // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
@@ -1173,20 +1192,27 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
     // second branch -> | identifier | { CODE_BLOCK_NEXT } else { CODE_BLOCK_NEXT }
     if (token->type == PIPE) { // |
         
-        if (is_token_relation_operator((*tree)->token)) {
-            // TODO: process error
-            error_flag = RET_VAL_SYNTAX_ERR;
+        if (!is_result_type_nullable((*tree)->resultType)) {
+            error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             return false;
         }
 
-        // codegen print expression
+        SymbolData data;
+        data.var.type = fc_nullable_convert_type((*tree)->resultType);
+        // TODO: check behaviour of VAR_NULL !!
+        if (data.var.type == VAR_VOID) {
+            error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            return false;
+        }
+
+        // CD: generate expression
+
         createStackByPostorder(*tree);
 
         tree_dispose(tree);
 
         next_token(buffer, &token); // identifier
         if (token->type != IDENTIFIER) {
-            // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
@@ -1197,77 +1223,122 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             return false; 
         }
 
-        // Add the | identifier | to the symtable
-        SymbolData data;
-        data.var.is_const = false;
-        data.var.modified = false;
-        data.var.used = false;
-        data.var.type = VAR_VOID;
-        data.var.id = -1;
-        if (!symtable_add_symbol(ST, token->lexeme, SYM_VAR, data)) {
+        char *labelElse = NULL;
+        char *labelEnd = NULL;
+        if (!generate_labels(ST,&labelElse, &labelEnd)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false;
         }
 
+        // Add the | identifier | to the symtable
+        data.var.is_const = true; // TODO: check corectness
+        data.var.modified = true; // TODO: check corectness
+        data.var.used = false;
+        data.var.id = -1;
+
+        if (symtable_find_symbol(ST, token->lexeme) != NULL) {
+            error_flag = RET_VAL_SEMANTIC_REDEF_OR_BAD_ASSIGN_ERR;
+            free(labelElse);
+            free(labelEnd);
+            return false;
+        }
+
+        if (!symtable_add_symbol(ST, token->lexeme, SYM_VAR, data)) {
+            error_flag = RET_VAL_INTERNAL_ERR;
+            free(labelElse);
+            free(labelEnd);
+            return false;
+        }
+
+        // CD: generate if nullable header
+        handleIfStartNil(labelElse, token);
 
         next_token(buffer, &token); // |
         if (token->type != PIPE) {
-            // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
+            free(labelElse);
+            free(labelEnd);
             return false;
         }
 
         next_token(buffer, &token); // {
         if (token->type != BRACKET_LEFT_CURLY) {
-            // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
+            free(labelElse);
+            free(labelEnd);
             return false;
         }
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
+            free(labelElse);
+            free(labelEnd);
             return false;
         }
 
         // SCOPE DECREASE
-        symtable_remove_scope(ST);
+        error_flag = symtable_remove_scope(ST, true);
+        if (error_flag != RET_VAL_OK) {
+            free(labelElse);
+            free(labelEnd);
+            return false;
+        }
 
         next_token(buffer, &token); // }
         if (token->type != BRACKET_RIGHT_CURLY) {
-            // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
+            free(labelElse);
+            free(labelEnd);
             return false;
         }
 
         next_token(buffer, &token); // else
         if (token->type != ELSE) {
-            // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
+            free(labelElse);
+            free(labelEnd);
             return false;
         }
 
         next_token(buffer, &token); // {
         if (token->type != BRACKET_LEFT_CURLY) {
-            // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
+            free(labelElse);
+            free(labelEnd);
             return false;
         }
 
         // SCOPE INCREASE
         if (!symtable_add_scope(ST)) {
             error_flag = RET_VAL_INTERNAL_ERR;
+            free(labelElse);
+            free(labelEnd);
             return false; 
         }
 
+        // CD: generate if nullable else
+        createIfElse(labelEnd, labelElse);
+
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
+            free(labelElse);
+            free(labelEnd);
             return false;
         }
 
         // SCOPE DECREASE
-        symtable_remove_scope(ST);
+        error_flag = symtable_remove_scope(ST, true);
+        if (error_flag != RET_VAL_OK) {
+            free(labelElse);
+            free(labelEnd);
+            return false;
+        }
+
+        // CD: generate if nullable end
+        createIfEnd(labelEnd);
+        free(labelElse);
+        free(labelEnd);
 
         next_token(buffer, &token); // }
         if (token->type != BRACKET_RIGHT_CURLY) {
-            // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
@@ -1275,7 +1346,6 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         return true;
     }
 
-    // TODO: process error
     error_flag = RET_VAL_SYNTAX_ERR;
     return false;
 }
@@ -1296,25 +1366,21 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
  * @retval `false` - syntax error
  */
 bool syntax_while_statement(T_TOKEN_BUFFER *buffer) {
-    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
 
     next_token(buffer, &token); // while
     if (token->type != WHILE) {
-        // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
     next_token(buffer, &token); // (
     if (token->type != BRACKET_LEFT_SIMPLE) {
-        // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
 
-    // TODO: change based on api of bottom-up parser
     // follows an EXPRESSION, switching to bottom-up parsing
     T_TREE_NODE_PTR tree;
     tree_init(&tree);
@@ -1323,18 +1389,14 @@ bool syntax_while_statement(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
-
-
-    // TODO: get expression type
+    // get expression type
     error_flag = check_expression(ST, &tree);
     if (error_flag != 0){
         return false;
     }
 
-
     next_token(buffer, &token); // )
     if (token->type != BRACKET_RIGHT_SIMPLE) {
-        // TODO: process error
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -1362,7 +1424,6 @@ bool syntax_while_statement(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree) {
-    // TODO: add cleaning, etc.
 
     T_TOKEN *token;
     // we have two branches, choose here
@@ -1370,29 +1431,55 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
     // first branch -> { CODE_BLOCK_NEXT }
     if (token->type == BRACKET_LEFT_CURLY) { // {
 
-         if (!is_token_relation_operator((*tree)->token)) {
-            // TODO: process error
-            error_flag = RET_VAL_SYNTAX_ERR;
+        if ((*tree)->resultType != TYPE_BOOL_RESULT) {
+            error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             return false;
         }
+
+        char *labelStart = NULL;
+        char *labelEnd = NULL;
+        if (!generate_labels(ST,&labelStart, &labelEnd)) {
+            error_flag = RET_VAL_INTERNAL_ERR;
+            return false;
+        }
+
+        // CD: generate while start
+        createWhileBoolHeader(labelStart);
+
+        // CD: generate expression
+        createStackByPostorder(*tree);
+
         tree_dispose(tree);
 
         // SCOPE INCREASE
         if (!symtable_add_scope(ST)) {
+            free(labelStart);
+            free(labelEnd);
             error_flag = RET_VAL_INTERNAL_ERR;
             return false; 
         }
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
+            free(labelStart);
+            free(labelEnd);
             return false;
         }
 
         // SCOPE DECREASE
-        symtable_remove_scope(ST);
+        error_flag = symtable_remove_scope(ST, true);
+        if (error_flag != RET_VAL_OK) {
+            free(labelStart);
+            free(labelEnd);
+            return false;
+        }
+
+        // CD: generate while end
+        createWhileEnd(labelStart, labelEnd);
+        free(labelStart);
+        free(labelEnd);
 
         next_token(buffer, &token); // }
         if (token->type != BRACKET_RIGHT_CURLY) {
-            // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
@@ -1403,17 +1490,27 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
     // second branch -> | identifier | { CODE_BLOCK_NEXT }
     if (token->type == PIPE) { // |
 
-         if (is_token_relation_operator((*tree)->token)) {
-            // TODO: process error
-            error_flag = RET_VAL_SYNTAX_ERR;
+        if (!is_result_type_nullable((*tree)->resultType)) {
+            error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             return false;
         }
-        tree_dispose(tree);
+
+        SymbolData data;
+        data.var.type = fc_nullable_convert_type((*tree)->resultType);
+        // TODO: check behaviour of VAR_NULL !!
+        if (data.var.type == VAR_VOID) {
+            error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            return false;
+        }
 
         next_token(buffer, &token); // identifier
         if (token->type != IDENTIFIER) {
-            // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
+            return false;
+        }
+
+        if (symtable_find_symbol(ST, token->lexeme) != NULL) {
+            error_flag = RET_VAL_SEMANTIC_REDEF_OR_BAD_ASSIGN_ERR;
             return false;
         }
 
@@ -1424,41 +1521,67 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
         }
 
         // Add the | identifier | to the symtable
-        SymbolData data;
-        data.var.is_const = false;
-        data.var.modified = false;
+        data.var.is_const = true; // TODO: check corectness
+        data.var.modified = true; // TODO: check corectness
         data.var.used = false;
-        data.var.type = VAR_VOID;
         data.var.id = -1;
         if (!symtable_add_symbol(ST, token->lexeme, SYM_VAR, data)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false;
         }
 
+        char *labelStart = NULL;
+        char *labelEnd = NULL;
+        if (!generate_labels(ST,&labelStart, &labelEnd)) {
+            error_flag = RET_VAL_INTERNAL_ERR;
+            return false;
+        }
+
+        // CD: generate while start
+        createWhileNilHeader(labelStart, token);
+
+        // CD: generate expression
+        createStackByPostorder(*tree);
+
+        tree_dispose(tree);
+
         next_token(buffer, &token); // |
         if (token->type != PIPE) {
-            // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
+            free(labelStart);
+            free(labelEnd);
             return false;
         }
 
         next_token(buffer, &token); // {
         if (token->type != BRACKET_LEFT_CURLY) {
-            // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
+            free(labelStart);
+            free(labelEnd);
             return false;
         }
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
+            free(labelStart);
+            free(labelEnd);
             return false;
         }
 
         // SCOPE DECREASE
-        symtable_remove_scope(ST);
+        error_flag = symtable_remove_scope(ST, true);
+        if (error_flag != RET_VAL_OK) {
+            free(labelStart);
+            free(labelEnd);
+            return false;
+        }
+
+        // CD: generate while end
+        createWhileEnd(labelStart, labelEnd);
+        free(labelStart);
+        free(labelEnd);
 
         next_token(buffer, &token); // }
         if (token->type != BRACKET_RIGHT_CURLY) {
-            // TODO: process error
             error_flag = RET_VAL_SYNTAX_ERR;
             return false;
         }
@@ -1466,7 +1589,6 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
         return true;
     }
 
-    // TODO: process error
     error_flag = RET_VAL_SYNTAX_ERR;
     return false;
 }
@@ -1641,7 +1763,10 @@ bool syntax_built_in_void_fn_call(T_TOKEN_BUFFER *buffer) {
     }
 
     // Check if the function call is correct
-    check_function_call(ST, &fn_call);
+    error_flag = check_function_call(ST, &fn_call);
+    if (error_flag != RET_VAL_OK) {
+        return false;
+    }
 
     // CD: generate built-in function call
     callBIFn(&fn_call);
@@ -1785,7 +1910,7 @@ bool syntax_id_start(T_TOKEN_BUFFER *buffer, Symbol *symbol) {
             return false;
         }
         symbol->data.var.modified = true;
-        symbol->data.var.used = true;
+        //symbol->data.var.used = true;
 
         if (!syntax_assign(buffer, &(symbol->data))) { // ASSIGN
             return false;
@@ -1821,7 +1946,10 @@ bool syntax_id_start(T_TOKEN_BUFFER *buffer, Symbol *symbol) {
         }
 
         // Check if the function call is correct
-        check_function_call(ST, &fn_call);
+        error_flag = check_function_call(ST, &fn_call);
+        if (error_flag != RET_VAL_OK) {
+            return false;
+        }
 
         // CD: generate function call
         callFunction(&fn_call);
@@ -1962,7 +2090,10 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         }
 
         // Check if the function is void
-        check_function_call(ST, &fn_call);
+        error_flag = check_function_call(ST, &fn_call);
+        if (error_flag != RET_VAL_OK) {
+            return false;
+        }
 
         // CD: generate built-in function call
         callBIFn(&fn_call);
@@ -2098,7 +2229,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
     next_token(buffer, &token);
     // first branch -> FUNCTION_ARGUMENTS
     if (token->type == BRACKET_LEFT_SIMPLE) { // (
-        
+        move_back(buffer);
         T_FN_CALL fn_call;
         fn_call.argv = NULL;
         fn_call.argc = 0;
@@ -2123,8 +2254,11 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
         }
 
         // Check if the function is void
-        check_function_call(ST, &fn_call);
-        // codegen print function call
+        error_flag = check_function_call(ST, &fn_call);
+        if (error_flag != RET_VAL_OK) {
+            return false;
+        }
+        // CD: generate function call
         callFunction(&fn_call);
 
         free_fn_call_args(&fn_call);

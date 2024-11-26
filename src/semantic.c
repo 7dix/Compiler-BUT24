@@ -39,9 +39,11 @@ int check_function_call(T_SYM_TABLE *table, T_FN_CALL *fn_call) {
                     return RET_VAL_SEMANTIC_FUNCTION_ERR; //TODO: correct return value?
                 }
                 // check if the variable is of the correct type
-                if (symbol->data.var.type != fn->data.func.argv[i].type) {
+                if (symbol->data.var.type != fn->data.func.argv[i].type &&
+                    fn->data.func.argv[i].type != VAR_ANY) {
                     return RET_VAL_SEMANTIC_FUNCTION_ERR;
                 }
+                symbol->data.var.used = true;
                 break;
             }
             case INT:
@@ -66,6 +68,15 @@ int check_function_call(T_SYM_TABLE *table, T_FN_CALL *fn_call) {
                     return RET_VAL_SEMANTIC_FUNCTION_ERR;
                 }
                 break;
+            case NULL_TOKEN:
+                if (fn->data.func.argv[i].type != VAR_INT_NULL &&
+                    fn->data.func.argv[i].type != VAR_FLOAT_NULL &&
+                    fn->data.func.argv[i].type != VAR_STRING_NULL &&
+                    fn->data.func.argv[i].type != VAR_ANY) {
+                    return RET_VAL_SEMANTIC_FUNCTION_ERR;
+                }
+                break;
+
             default:
                 // TOOD: correct return value?
                 return RET_VAL_SEMANTIC_FUNCTION_ERR;
@@ -233,14 +244,57 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
         return RET_VAL_OK;
     }
 
-    if (listPostfix->size == 3){
+    if (listPostfix->size == 3 && (listPostfix->last->node->token->type == EQUAL || listPostfix->last->node->token->type == NOT_EQUAL)){
+        T_LIST_ELEMENT_PTR operandOne = listPostfix->first;
+        T_LIST_ELEMENT_PTR operandTwo = operandOne->next;
+        
 
-        /*T_LIST_ELEMENT_PTR operator = listPostfix->active;
-        T_LIST_ELEMENT_PTR secondOperator = operator->prev;
-        T_LIST_ELEMENT_PTR firstOperator = secondOperator->prev;
-        */
+    
+        if((operandOne->literalType == LITERAL_NULL) && (operandTwo->literalType == NELITERAL_STRING || operandTwo->literalType == NELITERAL_STRING_NULL || operandTwo->literalType == NLITERAL_INT_NULL || operandTwo->literalType == NLITERAL_FLOAT_NULL || operandTwo->literalType == NELITERAL_STRING)){
+            (*tree)->resultType = TYPE_BOOL_RESULT;
+            list_dispose(listPostfix);
+            return RET_VAL_OK;
+        }
 
+        if((operandTwo->literalType == LITERAL_NULL) && (operandOne->literalType == NELITERAL_STRING || operandOne->literalType == NELITERAL_STRING_NULL || operandOne->literalType == NLITERAL_INT_NULL || operandOne->literalType == NLITERAL_FLOAT_NULL || operandOne->literalType == NELITERAL_STRING)){
+            (*tree)->resultType = TYPE_BOOL_RESULT;
+            list_dispose(listPostfix);
+            return RET_VAL_OK;
+        }
+
+        if(operandOne->literalType == operandTwo->literalType && operandOne->literalType == LITERAL_NULL){
+            (*tree)->resultType = TYPE_BOOL_RESULT;
+            list_dispose(listPostfix);
+            return RET_VAL_OK;
+        }
+
+        if(operandOne->literalType == operandTwo->literalType && operandOne->literalType == NLITERAL_INT_NULL){
+            (*tree)->resultType = TYPE_BOOL_RESULT;
+            list_dispose(listPostfix);
+            return RET_VAL_OK;
+        }
+
+        if(operandOne->literalType == operandTwo->literalType && operandOne->literalType == NLITERAL_FLOAT_NULL){
+            (*tree)->resultType = TYPE_BOOL_RESULT;
+            list_dispose(listPostfix);
+            return RET_VAL_OK;
+        }
+
+        if(operandOne->literalType == operandTwo->literalType && operandOne->literalType == NELITERAL_STRING_NULL){
+            (*tree)->resultType = TYPE_BOOL_RESULT;
+            list_dispose(listPostfix);
+            return RET_VAL_OK;
+        }
+
+        if(operandOne->literalType == operandTwo->literalType && operandOne->literalType == NELITERAL_STRING){
+            (*tree)->resultType = TYPE_BOOL_RESULT;
+            list_dispose(listPostfix);
+            return RET_VAL_OK;
+        }
+        
     }
+
+
     while(listPostfix->size != 1 && listPostfix->active != NULL){
 
         if(listPostfix->active->node->token->type == PLUS || listPostfix->active->node->token->type == MINUS || listPostfix->active->node->token->type == MULTIPLY || listPostfix->active->node->token->type == DIVIDE || listPostfix->active->node->token->type == LESS_THAN || listPostfix->active->node->token->type == GREATER_THAN || listPostfix->active->node->token->type == LESS_THAN_EQUAL || listPostfix->active->node->token->type == GREATER_THAN_EQUAL || listPostfix->active->node->token->type == EQUAL || listPostfix->active->node->token->type == NOT_EQUAL){
@@ -265,10 +319,11 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
             }
 
             // Result NONLITERAL FLOAT
-            if((firstOperator->literalType == NLITERAL_FLOAT && secondOperator->literalType != NLITERAL_FLOAT) || (firstOperator->literalType == NLITERAL_FLOAT && secondOperator->literalType == LITERAL_FLOAT) || (firstOperator->literalType == LITERAL_FLOAT && secondOperator->literalType == NLITERAL_FLOAT)){
+            if((firstOperator->literalType == NLITERAL_FLOAT && secondOperator->literalType == NLITERAL_FLOAT) || (firstOperator->literalType == NLITERAL_FLOAT && secondOperator->literalType == LITERAL_FLOAT) || (firstOperator->literalType == LITERAL_FLOAT && secondOperator->literalType == NLITERAL_FLOAT)){
                 operator->literalType = NLITERAL_FLOAT;
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
                 else operator->node->resultType = TYPE_FLOAT_RESULT;
+                operator->literalType = NLITERAL_FLOAT;
                 list_delete_two_after(listPostfix);
                 list_next(listPostfix);
                 continue;
@@ -277,8 +332,8 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
             // Result NONLITERAL INT
             if((firstOperator->literalType == NLITERAL_INT && secondOperator->literalType != NLITERAL_INT) || (firstOperator->literalType == NLITERAL_INT && secondOperator->literalType == LITERAL_INT) || (firstOperator->literalType == LITERAL_INT && secondOperator->literalType == NLITERAL_INT)){
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
-                else operator->literalType = NLITERAL_INT;
-                operator->node->resultType = TYPE_INT_RESULT;
+                else operator->node->resultType = TYPE_INT_RESULT;
+                operator->literalType = NLITERAL_INT;
                 list_delete_two_after(listPostfix);
                 list_next(listPostfix);
                 continue;
@@ -287,8 +342,8 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
             // Result LITERAL INT
             if(firstOperator->literalType == LITERAL_INT && secondOperator->literalType == LITERAL_INT){
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
-                else operator->literalType = LITERAL_INT;
-                operator->node->resultType = TYPE_INT_RESULT;
+                else operator->node->resultType = TYPE_INT_RESULT;
+                operator->literalType = LITERAL_INT;
                 list_delete_two_after(listPostfix);
                 list_next(listPostfix);
                 continue;
@@ -297,8 +352,8 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
             // Result LITERAL FLOAT
             if(firstOperator->literalType == LITERAL_FLOAT && secondOperator->literalType == LITERAL_FLOAT){
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
-                else operator->literalType = LITERAL_FLOAT;
-                operator->node->resultType = TYPE_FLOAT_RESULT;
+                else operator->node->resultType = TYPE_FLOAT_RESULT;
+                operator->literalType = LITERAL_FLOAT;
                 list_delete_two_after(listPostfix);
                 list_next(listPostfix);
                 continue;
@@ -307,8 +362,8 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
             // Result NONLITERAL FLOAT after retype of INT
             if (firstOperator->literalType == LITERAL_INT && secondOperator->literalType == NLITERAL_FLOAT){
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
-                else operator->literalType = NLITERAL_FLOAT;
-                operator->node->resultType = TYPE_FLOAT_RESULT;
+                else operator->node->resultType = TYPE_FLOAT_RESULT;
+                operator->literalType = NLITERAL_FLOAT;
                 // Retype of INT to FLOAT
                 firstOperator->node->convertToFloat = true;
                 list_delete_two_after(listPostfix);
@@ -318,8 +373,8 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
 
             if (firstOperator->literalType== NLITERAL_FLOAT && secondOperator->literalType == LITERAL_INT){
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
-                else operator->literalType = NLITERAL_FLOAT;
-                operator->node->resultType = TYPE_FLOAT_RESULT;
+                else operator->node->resultType = TYPE_FLOAT_RESULT;
+                operator->literalType = NLITERAL_FLOAT;
                 // Retype of INT to FLOAT
                 secondOperator->node->convertToFloat = true;
                 list_delete_two_after(listPostfix);
@@ -330,8 +385,8 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
             // Result NONLITERAL INT after retype of FLOAT
             if (firstOperator->literalType == NLITERAL_INT && secondOperator->literalType == LITERAL_FLOAT){
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
-                else operator->literalType = NLITERAL_INT;
-                operator->node->resultType = TYPE_INT_RESULT;
+                else operator->node->resultType = TYPE_INT_RESULT;
+                operator->literalType = NLITERAL_INT;
                 // Retype of FLOAT to INT
                 if (is_float_int(firstOperator->node->token->value.floatVal)){
                     firstOperator->node->convertToInt = true;
@@ -347,8 +402,8 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
 
             if (firstOperator->literalType == LITERAL_FLOAT && secondOperator->literalType == NLITERAL_INT){
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
-                else operator->literalType = NLITERAL_INT;
-                operator->node->resultType = TYPE_INT_RESULT;
+                else operator->node->resultType = TYPE_INT_RESULT;
+                operator->literalType = NLITERAL_INT;
                 // Retype of FLOAT to INT
                 if (is_float_int(secondOperator->node->token->value.floatVal)){
                     secondOperator->node->convertToInt = true;
@@ -366,7 +421,7 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
             list_dispose(listPostfix);
             return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             
-        }
+        }else list_next(listPostfix);
 
     }
 
@@ -400,4 +455,23 @@ int put_param_to_symtable(char *name) {
         }
     }
     return RET_VAL_OK;
+}
+
+bool is_result_type_nullable(RESULT_TYPE type) {
+    return type == TYPE_NULL_RESULT || type == TYPE_INT_NULL_RESULT || type == TYPE_FLOAT_NULL_RESULT || type == TYPE_STRING_NULL_RESULT;
+}
+
+VarType fc_nullable_convert_type(RESULT_TYPE type) {
+    switch (type) {
+        case TYPE_NULL_RESULT:
+            return VAR_NULL;
+        case TYPE_INT_NULL_RESULT:
+            return VAR_INT;
+        case TYPE_FLOAT_NULL_RESULT:
+            return VAR_FLOAT;
+        case TYPE_STRING_NULL_RESULT:
+            return VAR_STRING;
+        default:
+            return VAR_VOID;
+    }
 }

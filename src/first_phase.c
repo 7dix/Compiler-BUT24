@@ -87,8 +87,8 @@ bool add_built_in_functions() {
     data.func.argv = NULL;
 
     // ifj.string(term: str_u8) []u8
-    data.func.return_type = STRING_VAR_STRING;
-    error_flag_fp = add_param_to_symbol_data(&data, (Param){"term", VAR_STRING});
+    data.func.return_type = VAR_STRING;
+    error_flag_fp = add_param_to_symbol_data(&data, (Param){"term", STRING_VAR_STRING});
     if (error_flag_fp != RET_VAL_OK)
         return false;
     if ((symbol = symtable_add_symbol(ST, "ifj.string", SYM_FUNC, data)) == NULL) {

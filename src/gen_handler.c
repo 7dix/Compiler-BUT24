@@ -679,8 +679,9 @@ void callBIWrite(T_TOKEN *var) {
     }
     else if (var->type == STRING) {
         char *out = NULL;
-        handleCorrectStringFormat(var->value.stringVal, out);
-        generateWrite("string", var->value.stringVal);
+        handleCorrectStringFormat(var->value.stringVal, &out);
+        generateWrite("string", out);
+        free(out);
     }
 }
 

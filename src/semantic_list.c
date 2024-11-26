@@ -37,21 +37,25 @@ RetVal list_insert_last(T_LIST_PTR list, T_TREE_NODE_PTR node){
     // Check if malloc was successful
     if(element == NULL) return RET_VAL_INTERNAL_ERR;
 
-   
+    // Initialize element
+    element->prev = NULL;
     element->next = NULL;
     element->node = node;
     element->literalType = LITERAL_NOT_SET;
 
-    // Check if list is empty
+    // Check if list is empty, and insert element
     if(list->size == 0){
         list->first = element;
         list->last = element;
         list->active = element;
     }else{
         list->last->next = element;
+        element->prev = list->last;
         list->last = element;
     }
 
+    
+    // Incrementing size
     list->size++;
     return RET_VAL_OK;
 }
@@ -202,9 +206,24 @@ void list_delete_two_after(T_LIST_PTR list){
     T_LIST_ELEMENT_PTR deleteOne = list->active->prev;
     T_LIST_ELEMENT_PTR deleteTwo = deleteOne->prev;
 
+    // If deleteTwo is first element, set active like first item
+    if(list->first == deleteTwo) list->first = list->active;
+    
+
     // Linked list depending on the position of the active element
-    if(deleteTwo->prev == NULL) list->active->prev = NULL;
-    else list->active->prev = deleteTwo->prev;
+    if(deleteTwo->prev == NULL){ 
+         list->active->prev = NULL;
+    }
+    else{  
+        list->active->prev = deleteTwo->prev;
+        deleteTwo->prev->next = list->active;
+    }
+
+    // Destroy links
+    deleteOne->prev = NULL;
+    deleteOne->next = NULL;
+    deleteTwo->prev = NULL;
+    deleteTwo->next = NULL;
 
     // Delete elements
     free(deleteOne);
@@ -213,6 +232,8 @@ void list_delete_two_after(T_LIST_PTR list){
     // Decrement size
     list->size = list->size - 2;
 
+    if(list->size == 1) list->last = list->active;
+    
     return;
 }
 
@@ -239,7 +260,7 @@ void list_dispose(T_LIST_PTR list){
 
 
     // Free all elements in list
-    while(list->size > 0 && element != NULL){
+    while(list->size != 0){
         // Save next element
         nextElement = element->next;
         // Free current element
