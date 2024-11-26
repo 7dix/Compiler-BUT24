@@ -1,0 +1,25 @@
+.IFJcode24
+DEFVAR GF@tmp1
+DEFVAR GF@tmp2
+DEFVAR GF@char
+DEFVAR GF@char2
+DEFVAR GF@valid
+DEFVAR GF@trash
+DEFVAR GF@beg
+DEFVAR GF@index
+CALL main
+EXIT int@0
+LABEL main
+CREATEFRAME
+PUSHFRAME
+READ GF@tmp1 int
+PUSHS GF@tmp1
+DEFVAR LF@y$0
+POPS LF@y$0
+PUSHS LF@y$0
+POPS GF@tmp1
+TYPE GF@tmp2 GF@tmp1
+JUMPIFEQ $0 GF@tmp2 nil@nil
+MOVE LF@b$1 GF@tmp1
+WRITE LF@y$0
+WRITE string@\092n

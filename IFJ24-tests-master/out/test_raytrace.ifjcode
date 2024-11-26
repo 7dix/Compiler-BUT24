@@ -1,0 +1,44 @@
+.IFJcode24
+DEFVAR GF@tmp1
+DEFVAR GF@tmp2
+DEFVAR GF@char
+DEFVAR GF@char2
+DEFVAR GF@valid
+DEFVAR GF@trash
+DEFVAR GF@beg
+DEFVAR GF@index
+CALL main
+EXIT int@0
+LABEL main
+CREATEFRAME
+PUSHFRAME
+PUSHS float@0x1.4p+4
+DEFVAR LF@viewportWidth$0
+POPS LF@viewportWidth$0
+PUSHS float@0x1.4p+3
+DEFVAR LF@viewportHeight$1
+POPS LF@viewportHeight$1
+PUSHS float@0x0p+0
+DEFVAR LF@sphereX$2
+POPS LF@sphereX$2
+PUSHS float@0x0p+0
+DEFVAR LF@sphereY$3
+POPS LF@sphereY$3
+PUSHS float@0x1.4p+2
+DEFVAR LF@sphereRadius$4
+POPS LF@sphereRadius$4
+PUSHS float@0x1.4p+3
+DEFVAR LF@lightX$5
+POPS LF@lightX$5
+PUSHS float@0x1.4p+3
+DEFVAR LF@lightY$6
+POPS LF@lightY$6
+PUSHS float@0x0p+0
+PUSHS float@0x1p+0
+SUBS
+PUSHS LF@viewportHeight$1
+MULS
+PUSHS float@0x1p+1
+DIVS
+DEFVAR LF@y$7
+POPS LF@y$7

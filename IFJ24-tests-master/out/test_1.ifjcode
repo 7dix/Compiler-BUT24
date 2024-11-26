@@ -1,0 +1,45 @@
+.IFJcode24
+DEFVAR GF@tmp1
+DEFVAR GF@tmp2
+DEFVAR GF@char
+DEFVAR GF@char2
+DEFVAR GF@valid
+DEFVAR GF@trash
+DEFVAR GF@beg
+DEFVAR GF@index
+CALL main
+EXIT int@0
+LABEL main
+CREATEFRAME
+PUSHFRAME
+WRITE string@Zadejte\032cislo\032pro\032vypocet\032faktorialu\092n
+READ GF@tmp1 int
+PUSHS GF@tmp1
+DEFVAR LF@a$0
+POPS LF@a$0
+PUSHS LF@a$0
+POPS GF@tmp1
+TYPE GF@tmp2 GF@tmp1
+JUMPIFEQ $0 GF@tmp2 nil@nil
+MOVE LF@val$1 GF@tmp1
+PUSHS LF@val$1
+PUSHS int@0
+LTS
+POPS GF@tmp1
+JUMPIFNEQ $2 GF@tmp1 bool@true
+WRITE string@Faktorial\032
+WRITE LF@val$1
+WRITE string@\032nelze\032spocitat\092n
+JUMP $2
+LABEL $3
+PUSHS LF@val$1
+INT2FLOATS
+DEFVAR LF@d$2
+POPS LF@d$2
+PUSHS float@0x1p+0
+DEFVAR LF@vysl$3
+POPS LF@vysl$3
+LABEL $4
+PUSHS LF@d$2
+PUSHS int@0
+GTS
