@@ -101,11 +101,19 @@ void print_token_json(T_TOKEN *token, int is_first) {
     free(lexeme_str);
 }
 
-int main()
+int main(int argc, char *argv[])
 {
     int err_code = 0;
     T_TOKEN currentToken;
     int is_first_token = 1;
+
+    if (argc == 2) {
+        // Load file into stdin
+        if (freopen(argv[1], "r", stdin) == NULL) {
+            fprintf(stderr, "Error: Could not open input file %s\n", argv[1]);
+            return 1;
+        }
+    }
 
     printf("[\n"); // Start of JSON array
 
