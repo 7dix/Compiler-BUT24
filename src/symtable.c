@@ -111,6 +111,7 @@ Symbol *hashtable_find(Hashtable *ht, const char *key) {
 
     while (ht->table[index].occupied || ht->table[index].deleted) { // Only continue if the slot is occupied or was deleted
         if (ht->table[index].occupied && strcmp(ht->table[index].name, key) == 0) {
+            ht->table[index].data.var.used = true;
             return &ht->table[index];
         }
         if (probe_count++ >= HASHTABLE_SIZE) break; // Avoid infinite loop if table is full
@@ -310,7 +311,8 @@ int check_for_unused_vars(T_SYM_TABLE *table) {
     Hashtable *ht = table->top->ht;
     for (int i = 0; i < HASHTABLE_SIZE; i++) {
         if (ht->table[i].occupied && ht->table[i].type == SYM_VAR) {
-            if (!ht->table[i].data.var.used || !ht->table[i].data.var.modified) {
+            if (!ht->table[i].data.var.used && !ht->table[i].data.var.modified) {
+                fprintf(stderr, "Variable '%s' was never used", ht->table[i].name);
                 return RET_VAL_SEMANTIC_UNUSED_VAR_ERR;
             }
         }
