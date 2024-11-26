@@ -75,7 +75,7 @@ int main() {
         return 1;
     }
 
-    symtable_remove_scope(table);
+    symtable_remove_scope(table, false);
     if (!symtable_add_scope(table)) {
         fprintf(stderr, "Error code when adding new scope\n");
         return 1;
@@ -99,8 +99,8 @@ int main() {
         }
     }
 
-    symtable_remove_scope(table);
-    symtable_remove_scope(table);
+    symtable_remove_scope(table, false);
+    symtable_remove_scope(table, false);
 
     symtable_free(table);
     return 0;

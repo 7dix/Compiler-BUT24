@@ -298,7 +298,7 @@ int get_token(T_TOKEN *token) {
             line_number = 29;
         }
 
-        if (c == EOF) {
+        if (c == EOF || c == '\0') {
             // End of file
             free(lexeme);
             // Set EOF token
@@ -634,12 +634,20 @@ int get_token(T_TOKEN *token) {
                 } else if (c == '.') {
                     // Transition to decimal point
                     lexeme[lexeme_length++] = c;
-                    state = 11;  // Transition to float_node
+                    state = 23;  // Transition to float_node
                 } else if (c == 'e' || c == 'E') {
                     // Transition to exponent
                     lexeme[lexeme_length++] = c;
                     state = 14;  // Transition to exponent state
                 } else {
+                    // Check for invalid ending characters
+                    if (isalpha(c) || c == '_') {
+                        // Invalid character in integer
+                        fprintf(stderr, "Lexical error at line %d: Invalid character '%c' in integer\n", line_number, c);
+                        free(lexeme);
+                        return RET_VAL_LEXICAL_ERR;
+                    }
+
                     // End of integer
                     unget_char(c);
                     lexeme[lexeme_length] = '\0';
@@ -656,7 +664,7 @@ int get_token(T_TOKEN *token) {
                 if (c == '.') {
                     // Transition to decimal point
                     lexeme[lexeme_length++] = c;
-                    state = 11;  // Transition to float_node
+                    state = 23;  // Transition to float_node
                 } else if (c == 'e' || c == 'E') {
                     // Transition to exponent
                     lexeme[lexeme_length++] = c;
@@ -733,7 +741,7 @@ int get_token(T_TOKEN *token) {
                 break;
 
             case 13:  // State escape sequence in string
-                if (c == 'n' || c == 'r' || c == 't' || c == '\\' || c == '"' || c == '\'') {
+                if (c == 'n' || c == 'r' || c == 't' || c == '\\' || c == '"' || c == '\'' || isspace(c)) {
                     // Valid escape sequence
                     lexeme[lexeme_length++] = c;
                     state = 7;  // Return to string state
@@ -753,7 +761,7 @@ int get_token(T_TOKEN *token) {
                 if (c == '+' || c == '-') {
                     // Exponent sign
                     lexeme[lexeme_length++] = c;
-                    state = 15;  // Transition to exponent digits
+                    state = 22;  // Transition to must-be exponent digit
                 } else if (isdigit(c)) {
                     // Exponent digit
                     lexeme[lexeme_length++] = c;
@@ -923,6 +931,48 @@ int get_token(T_TOKEN *token) {
                     if (lexeme == NULL) {
                         return RET_VAL_INTERNAL_ERR;
                     }
+                }
+                break;
+            case 22: // must-be exponent digit
+                if (isdigit(c)) {
+                    // Continue exponent digits
+                    lexeme[lexeme_length++] = c;
+                    if (lexeme_length >= lexeme_size) {
+                        lexeme_size *= 2;
+                        lexeme = realloc(lexeme, lexeme_size);
+                        if (lexeme == NULL) {
+                            return RET_VAL_INTERNAL_ERR;
+                        }
+                    }
+                    state = 15;
+                } else {
+                    // Invalid exponent
+                    fprintf(stderr, "Lexical error at line %d: Invalid exponent in number\n", line_number);
+                    free(lexeme);
+                    return RET_VAL_LEXICAL_ERR;
+                }
+                break;
+            case 23: // must-be float digit
+                if (isdigit(c)) {
+                    // Continue building float
+                    lexeme[lexeme_length++] = c;
+                    if (lexeme_length >= lexeme_size) {
+                        lexeme_size *= 2;
+                        lexeme = realloc(lexeme, lexeme_size);
+                        if (lexeme == NULL) {
+                            return RET_VAL_INTERNAL_ERR;
+                        }
+                    }
+                    state = 11;
+                } else if (c == 'e' || c == 'E') {
+                    // Transition to exponent
+                    lexeme[lexeme_length++] = c;
+                    state = 14;  // Transition to exponent state
+                } else {
+                    // Invalid float
+                    fprintf(stderr, "Lexical error at line %d: Invalid float number\n", line_number);
+                    free(lexeme);
+                    return RET_VAL_LEXICAL_ERR;
                 }
                 break;
             case 24: // '\' 2
