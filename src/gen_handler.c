@@ -234,6 +234,44 @@ void createStackByPostorder(T_TREE_NODE *tree) {
             generateFloat2Ints();
         }
     }
+    else if (tree->token->type == NULL_TOKEN) {
+        generatePushs("nil", "nil");
+    }
+    else if (tree->token->type == LESS_THAN) { // <
+        generateLts();
+    }
+    else if (tree->token->type == GREATER_THAN) { // >
+        generateGts();
+    }
+    else if (tree->token->type == EQUAL) { // =
+        generateEqs();
+    }
+    else if (tree->token->type == NOT_EQUAL) { // !=
+        generateEqs();
+        generateNots();
+    }
+    else if (tree->token->type == LESS_THAN_EQUAL) { // <=
+        generatePops("GF", "tmp1");
+        generatePops("GF", "tmp2");
+        generatePushs("GF", "tmp2");
+        generatePushs("GF", "tmp1");
+        generateLts();
+        generatePushs("GF", "tmp2");
+        generatePushs("GF", "tmp1");
+        generateEqs();
+        generateOrs();
+    }
+    else if (tree->token->type == GREATER_THAN_EQUAL) { // >=
+        generatePops("GF", "tmp1");
+        generatePops("GF", "tmp2");
+        generatePushs("GF", "tmp2");
+        generatePushs("GF", "tmp1");
+        generateGts();
+        generatePushs("GF", "tmp2");
+        generatePushs("GF", "tmp1");
+        generateEqs();
+        generateOrs();
+    }
     else if (tree->token->type == LESS_THAN) { // <
         generateLts();
     }
