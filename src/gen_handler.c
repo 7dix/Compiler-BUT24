@@ -6,7 +6,6 @@
 //
 // YEAR: 2024
 // NOTES: Code generation handler for the IFJ24 language compiler.
-//      : TODO: add guards for mallocs
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,7 +17,6 @@
 #include "symtable.h"
 #include "semantic.h"
 
-// Function to create program header
 /***********************************************************************
  *                  FUNCTION HANDLERS & GENERATORS
  ***********************************************************************
@@ -195,10 +193,6 @@ void createStackByPostorder(T_TREE_NODE *tree) {
         }
 
     }
-    // NOTE: Is needed?
-    // else if (tree->token->type == STRING) {
-    //     generatePushsString(tree->token->value.stringVal);
-    // }
     else if (tree->token->type == PLUS) { // +
         generateAdds();
         if (tree->convertToFloat) {
@@ -272,6 +266,14 @@ void createStackByPostorder(T_TREE_NODE *tree) {
     }
 }
 
+/**
+ * @brief Assigns the current top of the stack to a unique variable.
+ * 
+ * This function calculates the unique variable ID and assigns the value that is present at the top
+ * of the interpreter stack.
+ * 
+ * @param var The variable to be converted into an unique variable & assigned the value to.
+ */
 void handleAssign(char *var) {
     char *uniq = NULL;
     generateUniqueIdentifier(var, &uniq);
@@ -403,14 +405,12 @@ void callBILength(T_TOKEN *var) {
  * @param _var The second variable.
  */
 void callBIConcat(T_TOKEN *var, T_TOKEN *_var) {
-    char *uniq = NULL;
+    char *uniq = NULL, *_uniq = NULL;
     generateUniqueIdentifier(var->lexeme, &uniq);
-    char *_uniq = NULL;
     generateUniqueIdentifier(_var->lexeme, &_uniq);
     generateConcat("GF", "tmp1", "LF", uniq, "LF", _uniq);
     generatePushs("GF", "tmp1");
-    free(uniq);
-    free(_uniq);
+    free(uniq); free(_uniq);
 }
 
 /**
@@ -514,11 +514,8 @@ void callBISubstring(T_TOKEN *var, T_TOKEN *beg, T_TOKEN *end) {
 
     // Return label
     generateLabel("substr_ret");
-    free(uniq_beg);
-    free(uniq_end);
-    free(uniq);
-    free(_beg);
-    free(_end);
+    free(uniq_beg); free(uniq_end);
+    free(uniq); free(_beg); free(_end);
 } 
 
 /**
@@ -588,8 +585,7 @@ void callBIStrcmp(T_TOKEN *var, T_TOKEN *_var) {
 
     // Return label
     generateLabel("strcmp_ret");
-    free(uniq);
-    free(_uniq);
+    free(uniq); free(_uniq);
 }
 
 /**
@@ -601,8 +597,7 @@ void callBIStrcmp(T_TOKEN *var, T_TOKEN *_var) {
  * @param index The index of the character to convert.
  */
 void callBIOrd (T_TOKEN *var, T_TOKEN *index) {
-    char *uniq = NULL;
-    char *_index = NULL;
+    char *uniq = NULL, *_index = NULL;
     size_t len = 0;
 
     if (index->type == INT) {
@@ -644,8 +639,7 @@ void callBIOrd (T_TOKEN *var, T_TOKEN *index) {
 
     // Return label
     generateLabel("ord_ret");
-    free(uniq);
-    free(_index);
+    free(uniq); free(_index);
 }
 
 /**
@@ -684,8 +678,8 @@ void callBIWrite(T_TOKEN *var) {
         printf("WRITE float@%lf\n", var->value.floatVal);
     }
     else if (var->type == STRING) {
-        //char *out = NULL;
-        //handleCorrectStringFormat(var->value.stringVal, out);
+        char *out = NULL;
+        handleCorrectStringFormat(var->value.stringVal, out);
         generateWrite("string", var->value.stringVal);
     }
 }
