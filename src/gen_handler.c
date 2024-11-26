@@ -560,7 +560,7 @@ void callBIStrcmp(T_TOKEN *var, T_TOKEN *_var) {
     char strcmp_ret_greater[20];
     char strcmp_ret[20];
     sprintf(strcmp_loop, "strcmp_loop%d", strcmp_counter);
-    sprintf(strcmp_end_length, "strcmp_end%d", strcmp_counter);
+    sprintf(strcmp_end_length, "strcmp_end_length%d", strcmp_counter);
     sprintf(strcmp_end, "strcmp_end%d", strcmp_counter);
     sprintf(strcmp_ret_lesser, "strcmp_err%d", strcmp_counter);
     sprintf(strcmp_ret_greater, "strcmp_err%d", strcmp_counter);
