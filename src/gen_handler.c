@@ -6,7 +6,6 @@
 //
 // YEAR: 2024
 // NOTES: Code generation handler for the IFJ24 language compiler.
-//        TODO: Global counters for labels (ord, strcmp, substr)
 
 #include <stdio.h>
 #include <stdlib.h>

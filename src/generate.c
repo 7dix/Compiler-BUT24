@@ -1,6 +1,6 @@
 // FILE: generator.c
 // PROJECT: IFJ24 - Compiler for the IFJ24 language @ FIT BUT 2BIT
-// TEAM: Martin Zůbek (253206)s
+// TEAM: Martin Zůbek (253206)
 // AUTHORS:
 //  <Kryštof Valenta> (xvalenk00)
 //
