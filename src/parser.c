@@ -59,7 +59,8 @@ bool is_token_in_expr(T_TOKEN *token) {
                 token->type == LESS_THAN_EQUAL || token->type == GREATER_THAN_EQUAL ||
                 token->type == PLUS || token->type == MINUS || token->type == MULTIPLY ||
                 token->type == DIVIDE || token->type == BRACKET_LEFT_SIMPLE ||
-                token->type == BRACKET_RIGHT_SIMPLE || token->type == IDENTIFIER );
+                token->type == BRACKET_RIGHT_SIMPLE || token->type == IDENTIFIER ||
+                token->type == NULL_TOKEN );
 }
 
 /**
@@ -1136,7 +1137,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             return false;
         }
 
-        createIfElse(labelElse, labelEnd);
+        createIfElse(labelEnd, labelElse);
 
         next_token(buffer, &token); // }
         if (token->type != BRACKET_RIGHT_CURLY) {
@@ -1315,7 +1316,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         }
 
         // CD: generate if nullable else
-        createIfElse(labelElse, labelEnd);
+        createIfElse(labelEnd, labelElse);
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             free(labelElse);
@@ -2228,7 +2229,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
     next_token(buffer, &token);
     // first branch -> FUNCTION_ARGUMENTS
     if (token->type == BRACKET_LEFT_SIMPLE) { // (
-        
+        move_back(buffer);
         T_FN_CALL fn_call;
         fn_call.argv = NULL;
         fn_call.argc = 0;
