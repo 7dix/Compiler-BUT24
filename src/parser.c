@@ -1449,6 +1449,9 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
         // CD: generate expression
         createStackByPostorder(*tree);
 
+        // CD: generate while condition
+        handleWhileBool(labelEnd);
+
         tree_dispose(tree);
 
         // SCOPE INCREASE
@@ -1542,6 +1545,9 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
 
         // CD: generate expression
         createStackByPostorder(*tree);
+
+        // CD: generate while condition
+        handleWhileNil(labelEnd, token);
 
         tree_dispose(tree);
 
@@ -1667,16 +1673,17 @@ bool syntax_return_remaining(T_TOKEN_BUFFER *buffer) {
 
         // Dummy for return type
         SymbolData data;
-        data.var.type = VAR_VOID;
 
-        // handling of expression
-        if (!syntax_assign(buffer, &data)) { // ASSIGN
+        Symbol *symbol = symtable_find_symbol(ST, current_fn_name);
+        if (symbol == NULL) {
+            error_flag = RET_VAL_INTERNAL_ERR;
             return false;
         }
 
-        // Check if the return type of the function is the same as the return type of the expression
-        if (symtable_find_symbol(ST, current_fn_name)->data.func.return_type != data.var.type) {
-            error_flag = RET_VAL_SEMANTIC_FUNC_RETURN_ERR;
+        data.var.type = symbol->data.func.return_type;
+
+        // handling of expression
+        if (!syntax_assign(buffer, &data)) { // ASSIGN
             return false;
         }
 
@@ -2350,6 +2357,8 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
         if (error_flag != RET_VAL_OK) {
             return false;
         }
+
+
 
         // get expression type
         error_flag = check_expression(ST, &tree);
