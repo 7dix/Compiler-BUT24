@@ -1205,6 +1205,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         }
 
         // CD: generate expression
+
         createStackByPostorder(*tree);
 
         tree_dispose(tree);
@@ -1761,7 +1762,10 @@ bool syntax_built_in_void_fn_call(T_TOKEN_BUFFER *buffer) {
     }
 
     // Check if the function call is correct
-    check_function_call(ST, &fn_call);
+    error_flag = check_function_call(ST, &fn_call);
+    if (error_flag != RET_VAL_OK) {
+        return false;
+    }
 
     // CD: generate built-in function call
     callBIFn(&fn_call);
@@ -1905,7 +1909,7 @@ bool syntax_id_start(T_TOKEN_BUFFER *buffer, Symbol *symbol) {
             return false;
         }
         symbol->data.var.modified = true;
-        symbol->data.var.used = true;
+        //symbol->data.var.used = true;
 
         if (!syntax_assign(buffer, &(symbol->data))) { // ASSIGN
             return false;
@@ -1941,7 +1945,10 @@ bool syntax_id_start(T_TOKEN_BUFFER *buffer, Symbol *symbol) {
         }
 
         // Check if the function call is correct
-        check_function_call(ST, &fn_call);
+        error_flag = check_function_call(ST, &fn_call);
+        if (error_flag != RET_VAL_OK) {
+            return false;
+        }
 
         // CD: generate function call
         callFunction(&fn_call);
@@ -2082,7 +2089,10 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         }
 
         // Check if the function is void
-        check_function_call(ST, &fn_call);
+        error_flag = check_function_call(ST, &fn_call);
+        if (error_flag != RET_VAL_OK) {
+            return false;
+        }
 
         // CD: generate built-in function call
         callBIFn(&fn_call);
@@ -2243,8 +2253,11 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
         }
 
         // Check if the function is void
-        check_function_call(ST, &fn_call);
-        // codegen print function call
+        error_flag = check_function_call(ST, &fn_call);
+        if (error_flag != RET_VAL_OK) {
+            return false;
+        }
+        // CD: generate function call
         callFunction(&fn_call);
 
         free_fn_call_args(&fn_call);

@@ -39,9 +39,11 @@ int check_function_call(T_SYM_TABLE *table, T_FN_CALL *fn_call) {
                     return RET_VAL_SEMANTIC_FUNCTION_ERR; //TODO: correct return value?
                 }
                 // check if the variable is of the correct type
-                if (symbol->data.var.type != fn->data.func.argv[i].type) {
+                if (symbol->data.var.type != fn->data.func.argv[i].type &&
+                    fn->data.func.argv[i].type != VAR_ANY) {
                     return RET_VAL_SEMANTIC_FUNCTION_ERR;
                 }
+                symbol->data.var.used = true;
                 break;
             }
             case INT:
@@ -66,6 +68,15 @@ int check_function_call(T_SYM_TABLE *table, T_FN_CALL *fn_call) {
                     return RET_VAL_SEMANTIC_FUNCTION_ERR;
                 }
                 break;
+            case NULL_TOKEN:
+                if (fn->data.func.argv[i].type != VAR_INT_NULL &&
+                    fn->data.func.argv[i].type != VAR_FLOAT_NULL &&
+                    fn->data.func.argv[i].type != VAR_STRING_NULL &&
+                    fn->data.func.argv[i].type != VAR_ANY) {
+                    return RET_VAL_SEMANTIC_FUNCTION_ERR;
+                }
+                break;
+
             default:
                 // TOOD: correct return value?
                 return RET_VAL_SEMANTIC_FUNCTION_ERR;
