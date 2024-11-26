@@ -195,6 +195,7 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
     // Set first element as active
     list_first(listPostfix);
    
+   // Set result type of expression with one operand
     if(listPostfix->size == 1){
         switch (listPostfix->active->literalType){
             case LITERAL_INT:{ 
@@ -239,53 +240,57 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
                 return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             }
         }
-
+        // Dispose list
         list_dispose(listPostfix);
+        // Return OK
         return RET_VAL_OK;
     }
 
+    // Special case of comparison of NULL or with nullable types
     if (listPostfix->size == 3 && (listPostfix->last->node->token->type == EQUAL || listPostfix->last->node->token->type == NOT_EQUAL)){
         T_LIST_ELEMENT_PTR operandOne = listPostfix->first;
         T_LIST_ELEMENT_PTR operandTwo = operandOne->next;
         
 
-    
+        // null ( == | != ) a(type ?[]u8) | a(type ?int32) | a(type ?float64) | a(type []u)8 |
         if((operandOne->literalType == LITERAL_NULL) && (operandTwo->literalType == NELITERAL_STRING || operandTwo->literalType == NELITERAL_STRING_NULL || operandTwo->literalType == NLITERAL_INT_NULL || operandTwo->literalType == NLITERAL_FLOAT_NULL || operandTwo->literalType == NELITERAL_STRING)){
             (*tree)->resultType = TYPE_BOOL_RESULT;
             list_dispose(listPostfix);
             return RET_VAL_OK;
         }
 
+        // a(type ?[]u8) | a(type ?int32) | a(type ?float64) | a(type []u)8 | ( == | != ) null
         if((operandTwo->literalType == LITERAL_NULL) && (operandOne->literalType == NELITERAL_STRING || operandOne->literalType == NELITERAL_STRING_NULL || operandOne->literalType == NLITERAL_INT_NULL || operandOne->literalType == NLITERAL_FLOAT_NULL || operandOne->literalType == NELITERAL_STRING)){
             (*tree)->resultType = TYPE_BOOL_RESULT;
             list_dispose(listPostfix);
             return RET_VAL_OK;
         }
 
+        // null ( == | != ) null
         if(operandOne->literalType == operandTwo->literalType && operandOne->literalType == LITERAL_NULL){
             (*tree)->resultType = TYPE_BOOL_RESULT;
             list_dispose(listPostfix);
             return RET_VAL_OK;
         }
-
+        // a(?i32) ( == | != ) b(?i32) 
         if(operandOne->literalType == operandTwo->literalType && operandOne->literalType == NLITERAL_INT_NULL){
             (*tree)->resultType = TYPE_BOOL_RESULT;
             list_dispose(listPostfix);
             return RET_VAL_OK;
         }
-
+        // a(?f64) ( == | != ) b(?f64)
         if(operandOne->literalType == operandTwo->literalType && operandOne->literalType == NLITERAL_FLOAT_NULL){
             (*tree)->resultType = TYPE_BOOL_RESULT;
             list_dispose(listPostfix);
             return RET_VAL_OK;
         }
-
+        // a(?[]u8) ( == | != ) b(?[]u8)
         if(operandOne->literalType == operandTwo->literalType && operandOne->literalType == NELITERAL_STRING_NULL){
             (*tree)->resultType = TYPE_BOOL_RESULT;
             list_dispose(listPostfix);
             return RET_VAL_OK;
         }
-
+        // a([]u8) ( == | != ) b([]u8)
         if(operandOne->literalType == operandTwo->literalType && operandOne->literalType == NELITERAL_STRING){
             (*tree)->resultType = TYPE_BOOL_RESULT;
             list_dispose(listPostfix);
@@ -294,11 +299,13 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
         
     }
 
-
+    // Check if the expression is valid, in the end should be only one element in the list, that will be roor of the tree
     while(listPostfix->size != 1 && listPostfix->active != NULL){
 
+        // Reduce the expression only if the active element is operator
         if(listPostfix->active->node->token->type == PLUS || listPostfix->active->node->token->type == MINUS || listPostfix->active->node->token->type == MULTIPLY || listPostfix->active->node->token->type == DIVIDE || listPostfix->active->node->token->type == LESS_THAN || listPostfix->active->node->token->type == GREATER_THAN || listPostfix->active->node->token->type == LESS_THAN_EQUAL || listPostfix->active->node->token->type == GREATER_THAN_EQUAL || listPostfix->active->node->token->type == EQUAL || listPostfix->active->node->token->type == NOT_EQUAL){
-
+            
+            // Get the last three elements in the list
             T_LIST_ELEMENT_PTR operator = listPostfix->active;
             T_LIST_ELEMENT_PTR secondOperator = operator->prev;
             T_LIST_ELEMENT_PTR firstOperator = secondOperator->prev;
@@ -318,99 +325,128 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
                 return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             }
 
-            // Result NONLITERAL FLOAT
+            // Nonliteral float + nonliteral int = nonliteral float + literal float = literal float + nonliteral float = NONLITERAL FLOAT
             if((firstOperator->literalType == NLITERAL_FLOAT && secondOperator->literalType == NLITERAL_FLOAT) || (firstOperator->literalType == NLITERAL_FLOAT && secondOperator->literalType == LITERAL_FLOAT) || (firstOperator->literalType == LITERAL_FLOAT && secondOperator->literalType == NLITERAL_FLOAT)){
-                operator->literalType = NLITERAL_FLOAT;
+                // Set type of subexpression
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
                 else operator->node->resultType = TYPE_FLOAT_RESULT;
+                // Set type of literal
                 operator->literalType = NLITERAL_FLOAT;
+                // Delete two elements after active element, and move to next element
                 list_delete_two_after(listPostfix);
                 list_next(listPostfix);
                 continue;
             }
             
-            // Result NONLITERAL INT
-            if((firstOperator->literalType == NLITERAL_INT && secondOperator->literalType != NLITERAL_INT) || (firstOperator->literalType == NLITERAL_INT && secondOperator->literalType == LITERAL_INT) || (firstOperator->literalType == LITERAL_INT && secondOperator->literalType == NLITERAL_INT)){
+            // Nonliteral int + nonliteral int = nonliteral int + literal int = literal int + nonliteral int = NONLITERAL INT
+            if((firstOperator->literalType == NLITERAL_INT && secondOperator->literalType == NLITERAL_INT) || (firstOperator->literalType == NLITERAL_INT && secondOperator->literalType == LITERAL_INT) || (firstOperator->literalType == LITERAL_INT && secondOperator->literalType == NLITERAL_INT)){
+                // Set type of subexpression
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
                 else operator->node->resultType = TYPE_INT_RESULT;
+                // Set type of literal
                 operator->literalType = NLITERAL_INT;
+                // Delete two elements after active element, and move to next element
                 list_delete_two_after(listPostfix);
                 list_next(listPostfix);
                 continue;
             }
 
-            // Result LITERAL INT
+            // Literal int + literal int = LITERAL INT
             if(firstOperator->literalType == LITERAL_INT && secondOperator->literalType == LITERAL_INT){
+                // Set type of subexpression
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
                 else operator->node->resultType = TYPE_INT_RESULT;
+                // Set type of literal
                 operator->literalType = LITERAL_INT;
+                // Delete two elements after active element, and move to next element
                 list_delete_two_after(listPostfix);
                 list_next(listPostfix);
                 continue;
             }
 
-            // Result LITERAL FLOAT
+            // Literal float + literal float = LITERAL FLOAT
             if(firstOperator->literalType == LITERAL_FLOAT && secondOperator->literalType == LITERAL_FLOAT){
+                // Set type of subexpression
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
                 else operator->node->resultType = TYPE_FLOAT_RESULT;
+                // Set type of literal
                 operator->literalType = LITERAL_FLOAT;
+                // Delete two elements after active element, and move to next element
                 list_delete_two_after(listPostfix);
                 list_next(listPostfix);
                 continue;
             }
 
-            // Result NONLITERAL FLOAT after retype of INT
+            // Rytape(nonliteral int) + literal float = nonliteral float
             if (firstOperator->literalType == LITERAL_INT && secondOperator->literalType == NLITERAL_FLOAT){
+                // Set type of subexpression
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
                 else operator->node->resultType = TYPE_FLOAT_RESULT;
+                // Set type of literal
                 operator->literalType = NLITERAL_FLOAT;
                 // Retype of INT to FLOAT
                 firstOperator->node->convertToFloat = true;
+                // Delete two elements after active element, and move to next element
                 list_delete_two_after(listPostfix);
                 list_next(listPostfix);
                 continue;
             }
 
+            // Nonliteral float + rytape(literal int) = nonliteral float
             if (firstOperator->literalType== NLITERAL_FLOAT && secondOperator->literalType == LITERAL_INT){
+                // Set type of subexpression
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
                 else operator->node->resultType = TYPE_FLOAT_RESULT;
+                // Set type of literal
                 operator->literalType = NLITERAL_FLOAT;
                 // Retype of INT to FLOAT
                 secondOperator->node->convertToFloat = true;
+                // Delete two elements after active element, and move to next element
                 list_delete_two_after(listPostfix);
                 list_next(listPostfix);
                 continue;
             } 
             
-            // Result NONLITERAL INT after retype of FLOAT
+            // Nonliteral int + rytape(literal float) = nonliteral int
             if (firstOperator->literalType == NLITERAL_INT && secondOperator->literalType == LITERAL_FLOAT){
+                // Set type of subexpression
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
                 else operator->node->resultType = TYPE_INT_RESULT;
+                // Set type of literal
                 operator->literalType = NLITERAL_INT;
-                // Retype of FLOAT to INT
+                // Retype of FLOAT to INT, if it is possible(.00000)
                 if (is_float_int(firstOperator->node->token->value.floatVal)){
+                    // Retype of FLOAT to INT
                     firstOperator->node->convertToInt = true;
+                    // Delete two elements after active element, and move to next element
                     list_delete_two_after(listPostfix);
                     list_next(listPostfix);
                     continue;
                 }else{
+                    // Error of type compatibility
                     list_dispose(listPostfix);
                     return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
                 }
                 
             }
 
+            // Rytape(literal int) + nonliteral int = nonliteral int
             if (firstOperator->literalType == LITERAL_FLOAT && secondOperator->literalType == NLITERAL_INT){
+                // Set type of subexpression
                 if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL || operator->node->token->type == LESS_THAN || operator->node->token->type == GREATER_THAN || operator->node->token->type == LESS_THAN_EQUAL || operator->node->token->type == GREATER_THAN_EQUAL) operator->node->resultType = TYPE_BOOL_RESULT;
                 else operator->node->resultType = TYPE_INT_RESULT;
+                // Set type of literal
                 operator->literalType = NLITERAL_INT;
-                // Retype of FLOAT to INT
+                // Retype of FLOAT to INT, if it is possible(.00000)
                 if (is_float_int(secondOperator->node->token->value.floatVal)){
+                    // Retype of FLOAT to INT
                     secondOperator->node->convertToInt = true;
+                    // Delete two elements after active element, and move to next element
                     list_delete_two_after(listPostfix);
                     list_next(listPostfix);
                     continue;
                 }else{
+                    // Error of type compatibility
                     list_dispose(listPostfix);
                     return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
                 }
@@ -421,10 +457,10 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
             list_dispose(listPostfix);
             return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             
-        }else list_next(listPostfix);
+        }else list_next(listPostfix); // Move to next element
 
     }
-
+    // Rrtun OK
     list_dispose(listPostfix);
     return RET_VAL_OK;
 }
