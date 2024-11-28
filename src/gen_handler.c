@@ -859,7 +859,7 @@ void handleIfStartBool(char *labelElse) {
 void handleIfStartNil(char *labelElse, T_TOKEN *var) {
     generatePops("GF", "tmp1");
     generateType("GF", "tmp2", "GF", "tmp1");
-    generateJumpifeq(labelElse, "GF", "tmp2", "nil", "nil");
+    generateJumpifeq(labelElse, "GF", "tmp2", "string", "nil");
 
     char *uniq = NULL;
     generateUniqueIdentifier(var->lexeme, &uniq);
@@ -966,7 +966,7 @@ void handleWhileBool(char *labelEnd) {
 void handleWhileNil(char *labelEnd, T_TOKEN *var) {
     generatePops("GF", "tmp1");
     generateType("GF", "tmp2", "GF", "tmp1");
-    generateJumpifeq(labelEnd, "GF", "tmp2", "nil", "nil");
+    generateJumpifeq(labelEnd, "GF", "tmp2", "string", "nil");
 
     char *uniq = NULL;
     generateUniqueIdentifier(var->lexeme, &uniq);
