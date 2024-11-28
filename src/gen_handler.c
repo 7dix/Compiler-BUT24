@@ -923,11 +923,6 @@ void createWhileBoolHeader(char *labelStart, int upper, int current) { // Upper 
  * @param var The variable to store the expression result.
  */
 void createWhileNilHeader(char *labelStart, T_TOKEN *var, int upper, int current) {
-    char *uniq = NULL;
-    generateUniqueIdentifier(var->lexeme, &uniq);
-    generateDefvar("LF", uniq);
-    free(uniq);
-
     if (upper >= 0) {
         printf("JUMPIFEQ skipDefvar$%d LF@whileIsDefined$%d bool@true\n", labelCounter, upper);
         printf("DEFVAR LF@whileIsDefined$%d\n", current);
@@ -939,6 +934,11 @@ void createWhileNilHeader(char *labelStart, T_TOKEN *var, int upper, int current
         printf("DEFVAR LF@whileIsDefined$%d\n", current);
         printf("MOVE LF@whileIsDefined$%d bool@false\n", current);
     }
+
+    char *uniq = NULL;
+    generateUniqueIdentifier(var->lexeme, &uniq);
+    generateDefvar("LF", uniq);
+    free(uniq);
 
     generateLabel(labelStart);
 }
