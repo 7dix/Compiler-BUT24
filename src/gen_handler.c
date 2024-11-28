@@ -30,6 +30,16 @@ int ord_counter = 0;
 int strcmp_counter = 0;
 int substr_counter = 0;
 
+// While loop uniq counter
+int while_counter = 0;
+void whileAppendUniq(char *input, char *output) {
+    int len = snprintf(NULL, 0, "%s$%d", input, while_counter);
+    output = (char *) malloc((len + 1) * sizeof(char));
+    if (output != NULL) {
+        sprintf(output, "%s$%d", input, while_counter);
+    }
+}
+
 /**
  * @brief Creates the program header.
  * 
@@ -889,7 +899,18 @@ void createIfEnd(char *labelEnd) {
  * 
  * @param labelStart The start label to jump to.
  */
-void createWhileBoolHeader(char *labelStart) {
+void createWhileBoolHeader(char *labelStart, int upper, int current) { // Upper > -1, not inside of while, >= 0 inside of while (ID OF TOP WHILE)
+    if (upper >= 0) {
+        printf("JUMPIFEQ skipDefvar$%d LF@whileIsDefined$%d bool@true\n", labelCounter, upper);
+        printf("DEFVAR LF@whileIsDefined$%d", current);
+        printf("MOVE LF@whileIsDefined$%d bool@false", current);
+        printf("LABEL skipDefvar$%d", labelCounter);
+        labelCounter++;
+    }
+    else {
+        printf("DEFVAR LF@whileIsDefined$%d", current);
+        printf("MOVE LF@whileIsDefined$%d bool@false", current);
+    }
     generateLabel(labelStart);
 }
 
@@ -901,11 +922,23 @@ void createWhileBoolHeader(char *labelStart) {
  * @param labelStart The start label to jump to.
  * @param var The variable to store the expression result.
  */
-void createWhileNilHeader(char *labelStart, T_TOKEN *var) {
+void createWhileNilHeader(char *labelStart, T_TOKEN *var, int upper, int current) {
     char *uniq = NULL;
     generateUniqueIdentifier(var->lexeme, &uniq);
     generateDefvar("LF", uniq);
     free(uniq);
+
+    if (upper >= 0) {
+        printf("JUMPIFEQ skipDefvar$%d LF@whileIsDefined$%d bool@true\n", labelCounter, upper);
+        printf("DEFVAR LF@whileIsDefined$%d", current);
+        printf("MOVE LF@whileIsDefined$%d bool@false", current);
+        printf("LABEL skipDefvar$%d", labelCounter);
+        labelCounter++;
+    }
+    else {
+        printf("DEFVAR LF@whileIsDefined$%d", current);
+        printf("MOVE LF@whileIsDefined$%d bool@false", current);
+    }
 
     generateLabel(labelStart);
 }
@@ -949,7 +982,8 @@ void handleWhileNil(char *labelEnd, T_TOKEN *var) {
  * @param labelStart The start label to jump to.
  * @param labelEnd The end label to jump to.
  */
-void createWhileEnd(char *labelStart, char *labelEnd) {
+void createWhileEnd(char *labelStart, char *labelEnd, int whileDefCounter) {
+    printf("MOV LF@whileIsDefined$%d bool@true\n", whileDefCounter);
     generateJump(labelStart);
     generateLabel(labelEnd);
 }

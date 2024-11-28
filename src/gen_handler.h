@@ -47,11 +47,11 @@ void handleIfStartBool(char *labelElse);
 void handleIfStartNil(char *labelElse, T_TOKEN *var);
 void createIfElse(char *labelEnd, char *labelElse);
 void createIfEnd(char *labelEnd);
-void createWhileBoolHeader(char *labelStart);
-void createWhileNilHeader(char *labelStart, T_TOKEN *var);
+void createWhileBoolHeader(char *labelStart, int upper, int current);
+void createWhileNilHeader(char *labelStart, T_TOKEN *var, int upper, int current);
 void handleWhileBool(char *labelEnd);
 void handleWhileNil(char *labelEnd, T_TOKEN *var);
-void createWhileEnd(char *labelStart, char *labelEnd);
+void createWhileEnd(char *labelStart, char *labelEnd, int whileDefCounter);
 
 #endif // GEN_HANDLER_H
 
