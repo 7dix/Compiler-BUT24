@@ -362,7 +362,7 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
         }
 
         // SCOPE INCREASE
-        if (!symtable_add_scope(ST)) {
+        if (!symtable_add_scope(ST, false)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false; 
         }
@@ -403,7 +403,7 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
         }
 
         // SCOPE INCREASE
-        if (!symtable_add_scope(ST)) {
+        if (!symtable_add_scope(ST, false)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false;
         }
@@ -1106,7 +1106,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
 
         tree_dispose(tree);
 
-        if (!symtable_add_scope(ST)) {
+        if (!symtable_add_scope(ST, false)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false;
         }
@@ -1133,7 +1133,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             free(labelEnd);
             return false;
         }
-        if (!symtable_add_scope(ST)) {
+        if (!symtable_add_scope(ST, false)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             free(labelElse);
             free(labelEnd);
@@ -1221,7 +1221,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         }
 
         // SCOPE INCREASE
-        if (!symtable_add_scope(ST)) {
+        if (!symtable_add_scope(ST, false)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false; 
         }
@@ -1311,7 +1311,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         }
 
         // SCOPE INCREASE
-        if (!symtable_add_scope(ST)) {
+        if (!symtable_add_scope(ST, false)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             free(labelElse);
             free(labelEnd);
@@ -1446,8 +1446,21 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
             return false;
         }
 
+
+        int while_defined_upper = is_in_while(ST);
+
+        // SCOPE INCREASE
+        if (!symtable_add_scope(ST, true)) {
+            free(labelStart);
+            free(labelEnd);
+            error_flag = RET_VAL_INTERNAL_ERR;
+            return false; 
+        }
+
+        int while_defined_current = is_in_while(ST);
+
         // CD: generate while start
-        createWhileBoolHeader(labelStart);
+        createWhileBoolHeader(labelStart, while_defined_upper, while_defined_current);
 
         // CD: generate expression
         createStackByPostorder(*tree);
@@ -1457,19 +1470,16 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
 
         tree_dispose(tree);
 
-        // SCOPE INCREASE
-        if (!symtable_add_scope(ST)) {
-            free(labelStart);
-            free(labelEnd);
-            error_flag = RET_VAL_INTERNAL_ERR;
-            return false; 
-        }
-
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             free(labelStart);
             free(labelEnd);
             return false;
         }
+
+        // CD: generate while end
+        createWhileEnd(labelStart, labelEnd, while_defined_current);
+        free(labelStart);
+        free(labelEnd);
 
         // SCOPE DECREASE
         error_flag = symtable_remove_scope(ST, true);
@@ -1478,11 +1488,6 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
             free(labelEnd);
             return false;
         }
-
-        // CD: generate while end
-        createWhileEnd(labelStart, labelEnd);
-        free(labelStart);
-        free(labelEnd);
 
         next_token(buffer, &token); // }
         if (token->type != BRACKET_RIGHT_CURLY) {
@@ -1520,11 +1525,15 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
             return false;
         }
 
+        int while_defined_upper = is_in_while(ST);
+
         // SCOPE INCREASE
-        if (!symtable_add_scope(ST)) {
+        if (!symtable_add_scope(ST, true)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false; 
         }
+
+        int while_defined_current = is_in_while(ST);
 
         // Add the | identifier | to the symtable
         data.var.is_const = true; // TODO: check corectness
@@ -1544,7 +1553,7 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
         }
 
         // CD: generate while start
-        createWhileNilHeader(labelStart, token);
+        createWhileNilHeader(labelStart, token, while_defined_upper, while_defined_current);
 
         // CD: generate expression
         createStackByPostorder(*tree);
@@ -1576,6 +1585,11 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
             return false;
         }
 
+        // CD: generate while end
+        createWhileEnd(labelStart, labelEnd, while_defined_current);
+        free(labelStart);
+        free(labelEnd);
+
         // SCOPE DECREASE
         error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
@@ -1583,11 +1597,6 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
             free(labelEnd);
             return false;
         }
-
-        // CD: generate while end
-        createWhileEnd(labelStart, labelEnd);
-        free(labelStart);
-        free(labelEnd);
 
         next_token(buffer, &token); // }
         if (token->type != BRACKET_RIGHT_CURLY) {

@@ -158,12 +158,13 @@ T_SYM_TABLE *symtable_init()
     }
     table->var_id_cnt = 0;
     table->label_cnt = 0;
+    table->while_def_cnt = 0;
     table->top = NULL;
     return table;
 }
 
 // Add a new scope to the symbol table
-bool symtable_add_scope(T_SYM_TABLE *table) {
+bool symtable_add_scope(T_SYM_TABLE *table, bool is_while) {
     if (table == NULL) {
         return false;
     }
@@ -175,6 +176,11 @@ bool symtable_add_scope(T_SYM_TABLE *table) {
     if (new_scope->ht == NULL) {
         free(new_scope);
         return false;
+    }
+    if (is_while) {
+        new_scope->while_defined_id = table->while_def_cnt++;
+    } else {
+        new_scope->while_defined_id = -1;
     }
     new_scope->parent = table->top;
     table->top = new_scope;
@@ -349,4 +355,20 @@ bool generate_labels(T_SYM_TABLE *table, char **label1, char **label2) {
     sprintf((*label2), "$%d", label_cnt_2);
 
     return true;
+}
+
+// Returns the id of the while loop that is closest to the top of the stack (current scope)
+// or -1 if there is none
+int is_in_while(T_SYM_TABLE *table) {
+    if (table == NULL || table->top == NULL) {
+        return -1;
+    }
+    T_SCOPE *current_scope = table->top;
+    while (current_scope != NULL) {
+        if (current_scope->while_defined_id != -1) {
+            return current_scope->while_defined_id;
+        }
+        current_scope = current_scope->parent;
+    }
+    return -1;
 }

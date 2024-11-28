@@ -101,17 +101,19 @@ void hashtable_remove(Hashtable *ht, const char *key);
 typedef struct T_SCOPE {
     Hashtable *ht;
     struct T_SCOPE *parent;
+    int while_defined_id;
 } T_SCOPE;
 
 typedef struct T_SYM_TABLE {
     T_SCOPE *top;
     int label_cnt;
     int var_id_cnt;
+    int while_def_cnt;
 } T_SYM_TABLE;
 
 // Symbol table functions
 T_SYM_TABLE *symtable_init();
-bool symtable_add_scope(T_SYM_TABLE *table);
+bool symtable_add_scope(T_SYM_TABLE *table, bool is_while);
 int symtable_remove_scope(T_SYM_TABLE *table, bool check_unused_vars);
 Symbol *symtable_add_symbol(T_SYM_TABLE *table, const char *key, SymbolType type, SymbolData data);
 Symbol *symtable_find_symbol(T_SYM_TABLE *table, const char *key);
@@ -127,5 +129,6 @@ int check_for_unused_vars(T_SYM_TABLE *table);
 extern T_SYM_TABLE *ST;
 
 bool generate_labels(T_SYM_TABLE *table, char **label1, char **label2);
+int is_in_while(T_SYM_TABLE *table);
 
 #endif // H_SYMTABLE

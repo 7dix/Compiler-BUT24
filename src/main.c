@@ -39,7 +39,7 @@ int main() {
     }
 
     // Add global scope
-    if (!symtable_add_scope(ST)) {
+    if (!symtable_add_scope(ST, false)) {
         free_token_buffer(&token_buffer);
         symtable_free(ST);
         fprintf(stderr, "Error: Memory allocation failed in symtable_add_scope\n");
