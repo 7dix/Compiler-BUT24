@@ -16,6 +16,8 @@
 #include <stdbool.h>
 #include "symtable.h"
 
+extern int labelCounter;
+
 void handleCorrectStringFormat(char *input, char **output);
 void generateHeader();
 void generateMove(char *frame, char *var, char *_frame, char *_var);
