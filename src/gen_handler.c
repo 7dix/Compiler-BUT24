@@ -534,11 +534,11 @@ void callBISubstring(T_TOKEN *var, T_TOKEN *beg, T_TOKEN *end) {
 
     // end < 0
     printf("GT GF@valid int@0 %s\n", _end);
-    generateJumpifeq(substr_err, "GF", "valid", "bool", "true");
+    generateJumpifeq(substr_err, "GF", "valid", "bool", "false");
 
     // beg > end
     printf("GT GF@valid %s %s\n", _beg, _end);
-    generateJumpifeq(substr_err, "GF", "valid", "bool", "true");
+    generateJumpifeq(substr_err, "GF", "valid", "bool", "false");
 
     // beg >= length(var)
     printf("GT GF@valid %s GF@tmp1\n", _beg);
