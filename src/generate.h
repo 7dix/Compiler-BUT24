@@ -14,6 +14,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include "symtable.h"
+
+extern int labelCounter;
 
 void handleCorrectStringFormat(char *input, char **output);
 void generateHeader();

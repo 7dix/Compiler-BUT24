@@ -13,10 +13,6 @@
 // TYPE DEFINITIONS
 
 typedef enum TOKEN_TYPE{
-    /*
-    trochu detailneji jsem prepsal typy tokenu podle automatu,
-    dal by to chtelo jeste probrat (aspon call) 
-    */
     IMPORT,
     NOT_EQUAL,
     STRING, // MULTILINE_STRING by spadal pod string

@@ -6,18 +6,61 @@
 //
 // YEAR: 2024
 // NOTES: Syntax-driven compilation for the IFJ24 language.
-// TODO: maybe remove matching of prolog and other such stuff, as this is already checked in the first phase
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
 #include "parser.h"
+#include "return_values.h"
+#include "token_buffer.h"
+#include "symtable.h"
+#include "semantic.h"
+#include "precedence.h"
+#include "precedence_tree.h"
+#include "gen_handler.h"
 
-// Global variables
+//--------------------------- GLOBAL VARIABLES ----------------------------//
 
-// Stores error defined in  `shared.h`
-int error_flag = RET_VAL_OK;
+// Stores any error generated during this phase, see `return_values.h`
+T_RET_VAL error_flag = RET_VAL_OK;
 
-// Current function name
-char *current_fn_name = NULL;
 
+//------------------ PRIVATE FUNCTION PROTOTYPES --------------------------//
+
+bool is_token_in_expr(T_TOKEN *token);
+bool syntax_start(T_TOKEN_BUFFER *token_buffer);
+bool syntax_prolog(T_TOKEN_BUFFER *buffer);
+bool syntax_fn_defs(T_TOKEN_BUFFER *buffer);
+bool syntax_fn_def(T_TOKEN_BUFFER *buffer);
+bool syntax_fn_def_next(T_TOKEN_BUFFER *buffer);
+bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer);
+bool syntax_params(T_TOKEN_BUFFER *buffer);
+bool syntax_param(T_TOKEN_BUFFER *buffer);
+bool syntax_type(T_TOKEN_BUFFER *buffer, VarType *type);
+bool syntax_param_next(T_TOKEN_BUFFER *buffer);
+bool syntax_param_after_comma(T_TOKEN_BUFFER *buffer);
+bool syntax_end(T_TOKEN_BUFFER *buffer);
+bool syntax_code_block_next(T_TOKEN_BUFFER *buffer);
+bool syntax_code_block(T_TOKEN_BUFFER *buffer);
+bool syntax_var_def(T_TOKEN_BUFFER *buffer);
+bool syntax_var_def_after_id(T_TOKEN_BUFFER *buffer, SymbolData *data);
+bool syntax_if_statement(T_TOKEN_BUFFER *buffer);
+bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree);
+bool syntax_while_statement(T_TOKEN_BUFFER *buffer);
+bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree);
+bool syntax_return(T_TOKEN_BUFFER *buffer);
+bool syntax_return_remaining(T_TOKEN_BUFFER *buffer);
+bool syntax_built_in_void_fn_call(T_TOKEN_BUFFER *buffer);
+bool syntax_assign_expr_or_fn_call(T_TOKEN_BUFFER *buffer);
+bool syntax_assign_discard_expr_or_fn_call(T_TOKEN_BUFFER *buffer);
+bool syntax_id_start(T_TOKEN_BUFFER *buffer, Symbol *symbol);
+bool syntax_function_arguments(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call);
+bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data);
+bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name);
+bool syntax_arguments(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call);
+bool syntax_argument_next(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call);
+bool syntax_argument_after_comma(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call);
+bool syntax_argument(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call);
 
 /**
  * @brief Entry point of the parser.
@@ -28,7 +71,6 @@ char *current_fn_name = NULL;
  * 
  * - `int error_flag`
  * @note TODO: add semantic checks, cleaning, etc.
- * @note TODO: change signature to work properly with future symtable
  * @note TODO: improve comments on return values
  * @param *token_buffer pointer to token buffer
  * @return `int`
@@ -242,7 +284,7 @@ bool syntax_fn_def(T_TOKEN_BUFFER *buffer) {
     }
 
     // save current function name
-    current_fn_name = token->lexeme;
+    set_fn_name(ST, token->lexeme);
 
 
     next_token(buffer, &token); // (
@@ -265,7 +307,8 @@ bool syntax_fn_def(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
-    current_fn_name = NULL; // reset current function name
+    // reset current function name
+    set_fn_name(ST, NULL);
 
     // CD: generate implicit return, needs to be changed in the future
     createReturn();
@@ -362,17 +405,17 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
         }
 
         // SCOPE INCREASE
-        if (!symtable_add_scope(ST)) {
+        if (!symtable_add_scope(ST, false)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false; 
         }
-        error_flag = put_param_to_symtable(current_fn_name);
+        error_flag = put_param_to_symtable(get_fn_name(ST));
         if (error_flag != RET_VAL_OK) {
             return false;
         }
 
         // CD: generate function header
-        createFnHeader(current_fn_name);
+        createFnHeader(get_fn_name(ST));
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;
@@ -403,17 +446,17 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
         }
 
         // SCOPE INCREASE
-        if (!symtable_add_scope(ST)) {
+        if (!symtable_add_scope(ST, false)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false;
         }
-        error_flag = put_param_to_symtable(current_fn_name);
+        error_flag = put_param_to_symtable(get_fn_name(ST));
         if (error_flag != RET_VAL_OK) {
             return false;
         }
 
         // CD: generate function header
-        createFnHeader(current_fn_name);
+        createFnHeader(get_fn_name(ST));
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;
@@ -855,6 +898,7 @@ bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
     data.var.used = false;
     data.var.type = VAR_VOID;
     data.var.id = -1;
+    data.var.float_value = 0.0;
 
     // we have two branches, choose here
     next_token(buffer, &token);
@@ -1106,7 +1150,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
 
         tree_dispose(tree);
 
-        if (!symtable_add_scope(ST)) {
+        if (!symtable_add_scope(ST, false)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false;
         }
@@ -1133,7 +1177,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             free(labelEnd);
             return false;
         }
-        if (!symtable_add_scope(ST)) {
+        if (!symtable_add_scope(ST, false)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             free(labelElse);
             free(labelEnd);
@@ -1221,7 +1265,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         }
 
         // SCOPE INCREASE
-        if (!symtable_add_scope(ST)) {
+        if (!symtable_add_scope(ST, false)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false; 
         }
@@ -1311,7 +1355,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         }
 
         // SCOPE INCREASE
-        if (!symtable_add_scope(ST)) {
+        if (!symtable_add_scope(ST, false)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             free(labelElse);
             free(labelEnd);
@@ -1446,8 +1490,21 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
             return false;
         }
 
+
+        int while_defined_upper = is_in_while(ST);
+
+        // SCOPE INCREASE
+        if (!symtable_add_scope(ST, true)) {
+            free(labelStart);
+            free(labelEnd);
+            error_flag = RET_VAL_INTERNAL_ERR;
+            return false; 
+        }
+
+        int while_defined_current = is_in_while(ST);
+
         // CD: generate while start
-        createWhileBoolHeader(labelStart);
+        createWhileBoolHeader(labelStart, while_defined_upper, while_defined_current);
 
         // CD: generate expression
         createStackByPostorder(*tree);
@@ -1457,19 +1514,16 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
 
         tree_dispose(tree);
 
-        // SCOPE INCREASE
-        if (!symtable_add_scope(ST)) {
-            free(labelStart);
-            free(labelEnd);
-            error_flag = RET_VAL_INTERNAL_ERR;
-            return false; 
-        }
-
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             free(labelStart);
             free(labelEnd);
             return false;
         }
+
+        // CD: generate while end
+        createWhileEnd(labelStart, labelEnd, while_defined_current);
+        free(labelStart);
+        free(labelEnd);
 
         // SCOPE DECREASE
         error_flag = symtable_remove_scope(ST, true);
@@ -1478,11 +1532,6 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
             free(labelEnd);
             return false;
         }
-
-        // CD: generate while end
-        createWhileEnd(labelStart, labelEnd);
-        free(labelStart);
-        free(labelEnd);
 
         next_token(buffer, &token); // }
         if (token->type != BRACKET_RIGHT_CURLY) {
@@ -1520,11 +1569,15 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
             return false;
         }
 
+        int while_defined_upper = is_in_while(ST);
+
         // SCOPE INCREASE
-        if (!symtable_add_scope(ST)) {
+        if (!symtable_add_scope(ST, true)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false; 
         }
+
+        int while_defined_current = is_in_while(ST);
 
         // Add the | identifier | to the symtable
         data.var.is_const = true; // TODO: check corectness
@@ -1544,7 +1597,7 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
         }
 
         // CD: generate while start
-        createWhileNilHeader(labelStart, token);
+        createWhileNilHeader(labelStart, token, while_defined_upper, while_defined_current);
 
         // CD: generate expression
         createStackByPostorder(*tree);
@@ -1576,6 +1629,11 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
             return false;
         }
 
+        // CD: generate while end
+        createWhileEnd(labelStart, labelEnd, while_defined_current);
+        free(labelStart);
+        free(labelEnd);
+
         // SCOPE DECREASE
         error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
@@ -1583,11 +1641,6 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
             free(labelEnd);
             return false;
         }
-
-        // CD: generate while end
-        createWhileEnd(labelStart, labelEnd);
-        free(labelStart);
-        free(labelEnd);
 
         next_token(buffer, &token); // }
         if (token->type != BRACKET_RIGHT_CURLY) {
@@ -1662,7 +1715,7 @@ bool syntax_return_remaining(T_TOKEN_BUFFER *buffer) {
     // first branch -> ;
     if (token->type == SEMICOLON) { // ;
         // Check if the function is void
-        if (symtable_find_symbol(ST, current_fn_name)->data.func.return_type != VAR_VOID) {
+        if (symtable_find_symbol(ST, get_fn_name(ST))->data.func.return_type != VAR_VOID) {
             error_flag = RET_VAL_SEMANTIC_FUNC_RETURN_ERR;
             return false;
         }
@@ -1677,7 +1730,7 @@ bool syntax_return_remaining(T_TOKEN_BUFFER *buffer) {
         // Dummy for return type
         SymbolData data;
 
-        Symbol *symbol = symtable_find_symbol(ST, current_fn_name);
+        Symbol *symbol = symtable_find_symbol(ST, get_fn_name(ST));
         if (symbol == NULL) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false;
@@ -2038,8 +2091,19 @@ bool syntax_function_arguments(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call) {
  * @retval `false` - syntax error
  */
 bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
-
     T_TOKEN *token;
+
+    // set return flag for error handling based previous token
+    bool is_return = false;
+
+    move_back(buffer);
+    next_token(buffer, &token);
+    if (token->type == RETURN) {
+        is_return = true;
+    }
+
+
+
     // we have several branches, choose here
     next_token(buffer, &token);
     
@@ -2168,6 +2232,7 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
                 break;
             case TYPE_FLOAT_RESULT:
                 exprRes = VAR_FLOAT;
+                data->var.float_value = tree->token->value.floatVal;
                 break;
             case TYPE_INT_NULL_RESULT:
                 exprRes = VAR_INT_NULL;
@@ -2189,8 +2254,15 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         }
 
         if (compare_var_types(&(data->var.type), &exprRes) != 0) {
-            error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
-            return false;
+            if (!is_return) {
+                error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+                return false;
+            }
+            else {
+                // Handling for return type
+                error_flag = RET_VAL_SEMANTIC_FUNCTION_ERR;
+                return false;
+            }
         }
 
         // CD: generate expression
@@ -2308,6 +2380,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
                 break;
             case TYPE_FLOAT_RESULT:
                 exprRes = VAR_FLOAT;
+                data->var.float_value = tree->token->value.floatVal;
                 break;
             case TYPE_INT_NULL_RESULT:
                 exprRes = VAR_INT_NULL;
@@ -2381,6 +2454,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
                 break;
             case TYPE_FLOAT_RESULT:
                 exprRes = VAR_FLOAT;
+                data->var.float_value = tree->token->value.floatVal;
                 break;
             case TYPE_INT_NULL_RESULT:
                 exprRes = VAR_INT_NULL;

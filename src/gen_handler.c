@@ -31,6 +31,16 @@ int ord_counter = 0;
 int strcmp_counter = 0;
 int substr_counter = 0;
 
+// While loop uniq counter
+int while_counter = 0;
+void whileAppendUniq(char *input, char *output) {
+    int len = snprintf(NULL, 0, "%s$%d", input, while_counter);
+    output = (char *) malloc((len + 1) * sizeof(char));
+    if (output != NULL) {
+        sprintf(output, "%s$%d", input, while_counter);
+    }
+}
+
 /**
  * @brief Creates the program header.
  * 
@@ -80,6 +90,8 @@ void generateUniqueIdentifier(char *name, char **uniq_name) {
  * @param argCount The total number of arguments.
  */
 void createFnHeader(char *name) {
+    if (name == NULL)
+        return;
     Symbol *symbol = symtable_find_symbol(ST, name);
     generateLabel(name);
     generateCreateFrame();
@@ -234,6 +246,44 @@ void createStackByPostorder(T_TREE_NODE *tree) {
         else if (tree->convertToInt) {
             generateFloat2Ints();
         }
+    }
+    else if (tree->token->type == NULL_TOKEN) {
+        generatePushs("nil", "nil");
+    }
+    else if (tree->token->type == LESS_THAN) { // <
+        generateLts();
+    }
+    else if (tree->token->type == GREATER_THAN) { // >
+        generateGts();
+    }
+    else if (tree->token->type == EQUAL) { // =
+        generateEqs();
+    }
+    else if (tree->token->type == NOT_EQUAL) { // !=
+        generateEqs();
+        generateNots();
+    }
+    else if (tree->token->type == LESS_THAN_EQUAL) { // <=
+        generatePops("GF", "tmp1");
+        generatePops("GF", "tmp2");
+        generatePushs("GF", "tmp2");
+        generatePushs("GF", "tmp1");
+        generateLts();
+        generatePushs("GF", "tmp2");
+        generatePushs("GF", "tmp1");
+        generateEqs();
+        generateOrs();
+    }
+    else if (tree->token->type == GREATER_THAN_EQUAL) { // >=
+        generatePops("GF", "tmp1");
+        generatePops("GF", "tmp2");
+        generatePushs("GF", "tmp2");
+        generatePushs("GF", "tmp1");
+        generateGts();
+        generatePushs("GF", "tmp2");
+        generatePushs("GF", "tmp1");
+        generateEqs();
+        generateOrs();
     }
     else if (tree->token->type == LESS_THAN) { // <
         generateLts();
@@ -812,7 +862,7 @@ void handleIfStartBool(char *labelElse) {
 void handleIfStartNil(char *labelElse, T_TOKEN *var) {
     generatePops("GF", "tmp1");
     generateType("GF", "tmp2", "GF", "tmp1");
-    generateJumpifeq(labelElse, "GF", "tmp2", "nil", "nil");
+    generateJumpifeq(labelElse, "GF", "tmp2", "string", "nil");
 
     char *uniq = NULL;
     generateUniqueIdentifier(var->lexeme, &uniq);
@@ -852,7 +902,18 @@ void createIfEnd(char *labelEnd) {
  * 
  * @param labelStart The start label to jump to.
  */
-void createWhileBoolHeader(char *labelStart) {
+void createWhileBoolHeader(char *labelStart, int upper, int current) { // Upper > -1, not inside of while, >= 0 inside of while (ID OF TOP WHILE)
+    if (upper >= 0) {
+        printf("JUMPIFEQ skipDefvar$%d LF@whileIsDefined$%d bool@true\n", labelCounter, upper);
+        printf("DEFVAR LF@whileIsDefined$%d\n", current);
+        printf("MOVE LF@whileIsDefined$%d bool@false\n", current);
+        printf("LABEL skipDefvar$%d\n", labelCounter);
+        labelCounter++;
+    }
+    else {
+        printf("DEFVAR LF@whileIsDefined$%d\n", current);
+        printf("MOVE LF@whileIsDefined$%d bool@false\n", current);
+    }
     generateLabel(labelStart);
 }
 
@@ -864,7 +925,19 @@ void createWhileBoolHeader(char *labelStart) {
  * @param labelStart The start label to jump to.
  * @param var The variable to store the expression result.
  */
-void createWhileNilHeader(char *labelStart, T_TOKEN *var) {
+void createWhileNilHeader(char *labelStart, T_TOKEN *var, int upper, int current) {
+    if (upper >= 0) {
+        printf("JUMPIFEQ skipDefvar$%d LF@whileIsDefined$%d bool@true\n", labelCounter, upper);
+        printf("DEFVAR LF@whileIsDefined$%d\n", current);
+        printf("MOVE LF@whileIsDefined$%d bool@false\n", current);
+        printf("LABEL skipDefvar$%d\n", labelCounter);
+        labelCounter++;
+    }
+    else {
+        printf("DEFVAR LF@whileIsDefined$%d\n", current);
+        printf("MOVE LF@whileIsDefined$%d bool@false\n", current);
+    }
+
     char *uniq = NULL;
     generateUniqueIdentifier(var->lexeme, &uniq);
     generateDefvar("LF", uniq);
@@ -896,7 +969,7 @@ void handleWhileBool(char *labelEnd) {
 void handleWhileNil(char *labelEnd, T_TOKEN *var) {
     generatePops("GF", "tmp1");
     generateType("GF", "tmp2", "GF", "tmp1");
-    generateJumpifeq(labelEnd, "GF", "tmp2", "nil", "nil");
+    generateJumpifeq(labelEnd, "GF", "tmp2", "string", "nil");
 
     char *uniq = NULL;
     generateUniqueIdentifier(var->lexeme, &uniq);
@@ -912,7 +985,8 @@ void handleWhileNil(char *labelEnd, T_TOKEN *var) {
  * @param labelStart The start label to jump to.
  * @param labelEnd The end label to jump to.
  */
-void createWhileEnd(char *labelStart, char *labelEnd) {
+void createWhileEnd(char *labelStart, char *labelEnd, int whileDefCounter) {
+    printf("MOVE LF@whileIsDefined$%d bool@true\n", whileDefCounter);
     generateJump(labelStart);
     generateLabel(labelEnd);
 }

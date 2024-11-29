@@ -28,7 +28,7 @@ T_LIST_PTR list_init(){
  * @param data Pointer to the data
  * @return 0=RET_VAL_OK if the element was inserted, else return 99=RET_VAL_INTERNAL_ERR if malloc fails
  */
-RetVal list_insert_last(T_LIST_PTR list, T_TREE_NODE_PTR node){
+T_RET_VAL list_insert_last(T_LIST_PTR list, T_TREE_NODE_PTR node){
     // Check if list is empty
     if(list == NULL) return RET_VAL_INTERNAL_ERR;
 
@@ -66,7 +66,7 @@ RetVal list_insert_last(T_LIST_PTR list, T_TREE_NODE_PTR node){
  * @param list Pointer to the list, where be stored nodes
  * @return 0=RET_VAL_OK if the tree was traversed, else return 99=RET_VAL_INTERNAL_ERR if malloc fails
  */
-RetVal postorder(T_TREE_NODE_PTR *tree, T_LIST_PTR list){
+T_RET_VAL postorder(T_TREE_NODE_PTR *tree, T_LIST_PTR list){
     
     if(*tree == NULL) return RET_VAL_OK;
 
@@ -106,7 +106,7 @@ void list_next(T_LIST_PTR list){
  * @param table Pointer to the symbol table
  * @return 0=RET_VAL_OK if the types was set, else return 99=RET_VAL_INTERNAL_ERR if malloc fails
  */
-RetVal set_types(T_LIST_PTR list, T_SYM_TABLE *table){
+T_RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table){
 
     list_first(list);
     while(list->active != NULL){

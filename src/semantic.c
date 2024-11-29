@@ -168,7 +168,7 @@ int compare_var_types(VarType *existing, VarType *new) {
  * @param tree Pointer to the root of the tree
  * @return 0=RET_VAL_OK if the expression is valid, otherwise return one of semnatic errors
  */
-RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
+T_RET_VAL check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
 
     // Create and initialize list for postfix notation
     T_LIST_PTR listPostfix = list_init();
@@ -176,7 +176,7 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
     // Check if list was created
     if(listPostfix == NULL) return RET_VAL_INTERNAL_ERR;
     // Postorder traversal, get list of nodes in postfix notation
-    RetVal errExpr = postorder(tree, listPostfix);
+    T_RET_VAL errExpr = postorder(tree, listPostfix);
 
     // Check if postorder traversal and creating list was successful
     if(errExpr){
@@ -501,6 +501,10 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
 
 // put parameter to symbol table
 int put_param_to_symtable(char *name) {
+    if (name == NULL) {
+        return RET_VAL_INTERNAL_ERR;
+    }
+    
     Symbol *symbol = symtable_find_symbol(ST, name);
     if (symbol == NULL) {
         return RET_VAL_INTERNAL_ERR;

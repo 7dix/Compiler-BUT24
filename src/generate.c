@@ -11,7 +11,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include "symtable.h"
 
+// Label counter definition
+int labelCounter = 0;
 
 /***********************************************************************
  *                  CONVERSION TO PRINTABLE STRING
@@ -87,7 +90,18 @@ void generatePopFrame() {
 }
 
 void generateDefvar(char *frame, char *var) {
-    printf("DEFVAR %s@%s\n", frame, var);
+    int whileDefId;
+    whileDefId = is_in_while(ST);
+
+    if (whileDefId >= 0) {
+        printf("JUMPIFEQ skipDefvar$%d LF@whileIsDefined$%d bool@true\n", labelCounter, whileDefId);
+        printf("DEFVAR LF@%s\n", var);
+        printf("LABEL skipDefvar$%d\n", labelCounter);
+        labelCounter++;
+    }
+    else {
+        printf("DEFVAR %s@%s\n", frame, var);
+    }
 }
 
 void generateCall(char *label) {

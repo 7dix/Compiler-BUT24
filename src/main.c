@@ -11,15 +11,17 @@
 //              store all read tokens into a buffer
 //          2. Use the buffer to run full syntax-based compilation
 
+
 #include <stdio.h>
 #include <stdlib.h>
-#include "shared.h"
+#include "return_values.h"
 #include "first_phase.h"
 #include "parser.h"
 #include "token_buffer.h"
 #include "symtable.h"
 #include "gen_handler.h"
 
+// Symtable global variable
 T_SYM_TABLE *ST;
 
 int main() {
@@ -39,7 +41,7 @@ int main() {
     }
 
     // Add global scope
-    if (!symtable_add_scope(ST)) {
+    if (!symtable_add_scope(ST, false)) {
         free_token_buffer(&token_buffer);
         symtable_free(ST);
         fprintf(stderr, "Error: Memory allocation failed in symtable_add_scope\n");
@@ -75,6 +77,7 @@ int main() {
         return error_code;
     }
 
+    // free all resources
     free_token_buffer(&token_buffer);
     symtable_free(ST);
 

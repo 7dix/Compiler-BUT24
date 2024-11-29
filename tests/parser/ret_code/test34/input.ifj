@@ -1,0 +1,25 @@
+const ifj = @import("ifj24.zig");
+
+pub fn main() void  {
+    var a = 1;
+    while (a >= 0) {
+        ifj.write("First loop: ");
+        ifj.write(a);
+        ifj.write("\n");
+        var b = 2;
+        while (b >= 0) {
+            ifj.write("Second loop: ");
+            ifj.write(b);
+            ifj.write("\n");
+            var c = 2;
+            while (c >= 0) {
+                ifj.write("Third loop: ");
+                ifj.write(c);
+                ifj.write("\n");
+                c = c - 1;
+            }
+            b = b - 1;
+        }
+        a = a - 1;
+    }
+}

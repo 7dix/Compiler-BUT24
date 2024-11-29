@@ -28,7 +28,7 @@ DEBUG_PRECEDENCE_OUTPUT = bin/precedencedebug
 DEBUG_SYMTABLE_OUTPUT = bin/symtabledebug
 DEBUG_FIRST_PHASE_OUTPUT = bin/firstphasedebug
 
-LOGIN = xvalenk00
+LOGIN = x253206
 
 # Default target
 all: $(OUTPUT)

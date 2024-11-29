@@ -13,7 +13,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "../../src/shared.h"
+#include "../../src/return_values.h"
 #include "../../src/first_phase.h"
 #include "../../src/parser.h"
 #include "../../src/token_buffer.h"

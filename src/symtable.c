@@ -8,6 +8,10 @@
 // Kryštof Valenta (xvalenk00)
 //
 // YEAR: 2024
+// NOTES:   Implementation of Symtable with hash table and stack of scopes.
+//          Also contains helper functions for easier manipulation with the symtable
+//          from other parts of the compiler.
+
 #include "symtable.h"
 #include "semantic.h"
 
@@ -158,12 +162,14 @@ T_SYM_TABLE *symtable_init()
     }
     table->var_id_cnt = 0;
     table->label_cnt = 0;
+    table->while_def_cnt = 0;
+    table->current_fn_name = NULL;
     table->top = NULL;
     return table;
 }
 
 // Add a new scope to the symbol table
-bool symtable_add_scope(T_SYM_TABLE *table) {
+bool symtable_add_scope(T_SYM_TABLE *table, bool is_while) {
     if (table == NULL) {
         return false;
     }
@@ -175,6 +181,11 @@ bool symtable_add_scope(T_SYM_TABLE *table) {
     if (new_scope->ht == NULL) {
         free(new_scope);
         return false;
+    }
+    if (is_while) {
+        new_scope->while_defined_id = table->while_def_cnt++;
+    } else {
+        new_scope->while_defined_id = -1;
     }
     new_scope->parent = table->top;
     table->top = new_scope;
@@ -262,27 +273,6 @@ int add_param_to_symbol_data(SymbolData *data, Param param) {
     return RET_VAL_OK;
 }
 
-
-// Set the variable as modified
-void set_var_modified(Symbol *symbol) {
-    if (symbol == NULL) {
-        return;
-    }
-    if (symbol->type == SYM_VAR) {
-        symbol->data.var.modified = true;
-    }
-}
-
-// Set the variable as used
-void set_var_used(Symbol *symbol) {
-    if (symbol == NULL) {
-        return;
-    }
-    if (symbol->type == SYM_VAR) {
-        symbol->data.var.used = true;
-    }
-}
-
 // Get the var id
 int get_var_id(T_SYM_TABLE *table, const char *key) {
     Symbol *symbol = symtable_find_symbol(table, key);
@@ -349,4 +339,36 @@ bool generate_labels(T_SYM_TABLE *table, char **label1, char **label2) {
     sprintf((*label2), "$%d", label_cnt_2);
 
     return true;
+}
+
+// Returns the id of the while loop that is closest to the top of the stack (current scope)
+// or -1 if there is none
+int is_in_while(T_SYM_TABLE *table) {
+    if (table == NULL || table->top == NULL) {
+        return -1;
+    }
+    T_SCOPE *current_scope = table->top;
+    while (current_scope != NULL) {
+        if (current_scope->while_defined_id != -1) {
+            return current_scope->while_defined_id;
+        }
+        current_scope = current_scope->parent;
+    }
+    return -1;
+}
+
+// Saves pointer to provided fn name into symtable pointer
+void set_fn_name(T_SYM_TABLE *table, char *name) {
+    if (table == NULL) {
+        return;
+    }
+    table->current_fn_name = name;
+}
+
+// Returns pointer to the current function name
+char *get_fn_name(T_SYM_TABLE *table) {
+    if (table == NULL) {
+        return NULL;
+    }
+    return table->current_fn_name;
 }
