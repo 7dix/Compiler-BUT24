@@ -688,7 +688,8 @@ void callBIOrd (T_TOKEN *var, T_TOKEN *index) {
 
     // Get char, push to stack and convert
     generatePushs("LF", uniq);
-    generateStrI2Ints(_index);
+    printf("PUSHS %s\n", _index);
+    generateStrI2Ints();
     // printf("GETCHAR GF@char LF@%s %s\n", uniq, _index);
     // generatePushs("GF", "char");
     // generateStrI2Ints(0);
