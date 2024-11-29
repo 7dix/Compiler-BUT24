@@ -1529,8 +1529,6 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
         // SCOPE DECREASE
         error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
-            free(labelStart);
-            free(labelEnd);
             return false;
         }
 
@@ -1638,8 +1636,6 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
         // SCOPE DECREASE
         error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
-            free(labelStart);
-            free(labelEnd);
             return false;
         }
 
