@@ -36,7 +36,7 @@ IFJ24 is a project for the course IFJ at FIT. This project aims to develop a com
 
 To install the project, clone the repository and compile the source code:
 ```sh
-git clone https://github.com/yourusername/IFJ24.git
+git clone https://github.com/7dix/IFJ24.git
 cd IFJ24
 make
 ```
