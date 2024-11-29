@@ -609,8 +609,8 @@ void callBIStrcmp(T_TOKEN *var, T_TOKEN *_var) {
     sprintf(strcmp_ret, "strcmp_ret%d", strcmp_counter);
 
     // Push strings to stack
-    generatePushs("LF", "uniq");
-    generatePushs("LF", "_uniq");
+    generatePushs("LF", uniq);
+    generatePushs("LF", _uniq);
 
     // IF S1 != S2
     generateJumpifneqs(strcmp_end_length);
@@ -621,8 +621,8 @@ void callBIStrcmp(T_TOKEN *var, T_TOKEN *_var) {
 
     // S1 != S2
     generateLabel(strcmp_end_length);
-    generatePushs("LF", "uniq");
-    generatePushs("LF", "_uniq");
+    generatePushs("LF", uniq);
+    generatePushs("LF", _uniq);
     generateLts(); // S1 < S2
     generatePushs("bool", "true");
     generateJumpifeqs(strcmp_ret_lesser); // JMP IF: S1 < S2
