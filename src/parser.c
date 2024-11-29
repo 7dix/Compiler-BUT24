@@ -896,6 +896,7 @@ bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
     data.var.is_const = false;
     data.var.modified = false;
     data.var.used = false;
+    data.var.const_expr = false;
     data.var.type = VAR_VOID;
     data.var.id = -1;
     data.var.float_value = 0.0;
@@ -2232,7 +2233,10 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
                 break;
             case TYPE_FLOAT_RESULT:
                 exprRes = VAR_FLOAT;
-                data->var.float_value = tree->token->value.floatVal;
+                if (data->var.is_const) {
+                    data->var.const_expr = true;
+                    data->var.float_value = tree->token->value.floatVal;
+                }
                 break;
             case TYPE_INT_NULL_RESULT:
                 exprRes = VAR_INT_NULL;
@@ -2380,7 +2384,10 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
                 break;
             case TYPE_FLOAT_RESULT:
                 exprRes = VAR_FLOAT;
-                data->var.float_value = tree->token->value.floatVal;
+                if (data->var.is_const) {
+                    data->var.const_expr = true;
+                    data->var.float_value = tree->token->value.floatVal;
+                }
                 break;
             case TYPE_INT_NULL_RESULT:
                 exprRes = VAR_INT_NULL;
@@ -2454,7 +2461,10 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
                 break;
             case TYPE_FLOAT_RESULT:
                 exprRes = VAR_FLOAT;
-                data->var.float_value = tree->token->value.floatVal;
+                if (data->var.is_const) {
+                    data->var.const_expr = true;
+                    data->var.float_value = tree->token->value.floatVal;
+                }
                 break;
             case TYPE_INT_NULL_RESULT:
                 exprRes = VAR_INT_NULL;

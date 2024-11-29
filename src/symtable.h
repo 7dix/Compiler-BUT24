@@ -54,6 +54,7 @@ typedef union
         bool is_const;
         bool modified;
         bool used;
+        bool const_expr;
         float float_value;
         VarType type;
         int id;
