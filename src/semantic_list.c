@@ -23,6 +23,22 @@ T_LIST_PTR list_init(){
 }
 
 /**
+ * @brief Function for set witch retyping depending on the operator can be used
+ * @param operator List element with operator
+ * @return Number of "group" of operators
+ */
+OPERATOR_TYPE_OF_RULE get_operator_type(T_LIST_ELEMENT_PTR operator){
+    // +, -, *
+    if (operator->node->token->type == PLUS || operator->node->token->type == MINUS || operator->node->token->type == MULTIPLY) return ARITMETIC;
+    // /
+    if (operator->node->token->type == DIVIDE) return DIVISION;
+    // <, >, <=, >=
+    if (operator->node->token->type == EQUAL || operator->node->token->type == NOT_EQUAL) return EQUALITY;
+    return RELATIONAL;
+    
+}
+
+/**
  * @brief Function to insert element to the list
  * @param list Pointer to the list
  * @param data Pointer to the data
@@ -41,6 +57,7 @@ T_RET_VAL list_insert_last(T_LIST_PTR list, T_TREE_NODE_PTR node){
     element->prev = NULL;
     element->next = NULL;
     element->node = node;
+    element->value = 0.0;
     element->literalType = LITERAL_NOT_SET;
 
     // Check if list is empty, and insert element
@@ -108,6 +125,7 @@ void list_next(T_LIST_PTR list){
  */
 T_RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table){
 
+    
     list_first(list);
     while(list->active != NULL){
 
@@ -120,44 +138,55 @@ T_RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table){
             if(symbol == NULL) return RET_VAL_SEMANTIC_UNDEFINED_ERR;
             // If identifer is in the symbol table, set used flag
             else symbol->data.var.used = true;
-
-            // Search fot the type of identifier
-            switch (symbol->data.var.type){
+            
+            // For constant variables
+            if(symbol->data.var.is_const){
+                switch (symbol->data.var.type){ // const :i32
                 case VAR_INT:{
-                    list->active->literalType = NLITERAL_INT;
+                    list->active->literalType = LITERAL_INT;
                     break;
                 }
-                case VAR_INT_NULL:{
-                    list->active->literalType = NLITERAL_INT_NULL;
+                case VAR_FLOAT:{ // const :f64
+                    list->active->literalType = LITERAL_FLOAT;
+                    list->active->value = symbol->data.var.float_value;
                     break;
                 }
-                case VAR_FLOAT:{
-                    list->active->literalType = NLITERAL_FLOAT;
-                    break;
-                }
-                case VAR_FLOAT_NULL:{
-                    list->active->literalType = NLITERAL_FLOAT_NULL;
-                    break;
-                }
-                case VAR_VOID:{
-                    // TODO: NEEDS CHECK IF IT IS OK
-                    return RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
-                    
-                }
-                case VAR_STRING_NULL:{
-                    list->active->literalType = NELITERAL_STRING_NULL;
-                    break;
-                }
-                case VAR_STRING:{
-                    list->active->literalType = NELITERAL_STRING;
-                    break;
-                }
-                
                 default:{
-                    // If type is not of the above, return error of semantic type compatibility 
-                    return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+                    break;
                 }
             }
+            //For var varialbes
+            }else{
+                switch (symbol->data.var.type){
+                    case VAR_INT:{ // var :i32
+                        list->active->literalType = NLITERAL_INT;
+                        break;
+                    }
+                    case VAR_FLOAT:{ // var :f64
+                        list->active->literalType = NLITERAL_FLOAT;
+                        break;
+                    }
+                    default:{
+                        break;
+                    }
+                }
+            }
+
+            // var :?i32 | const :?i32
+            if(symbol->data.var.type == VAR_INT_NULL) list->active->literalType = NLITERAL_INT_NULL;
+            
+            // var :?f64 | const :?f64
+            if(symbol->data.var.type == VAR_FLOAT_NULL) list->active->literalType = NLITERAL_FLOAT_NULL;
+
+            // var :?[]u8 | const :[]u8          
+            if(symbol->data.var.type == VAR_STRING_NULL) list->active->literalType = NLITERAL_STRING_NULL;
+            
+            // var :[]u8 | const :[]u8
+            if (symbol->data.var.type == VAR_STRING) list->active->literalType = NLITERAL_STRING;
+            
+            // Error of not set type
+            if(symbol->data.var.type == VAR_VOID) return RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
+
             list_next(list);
             continue;
 
@@ -185,7 +214,7 @@ T_RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table){
 
         // OPERATOR
         if(list->active->node->token->type == PLUS || list->active->node->token->type == MINUS || list->active->node->token->type == MULTIPLY || list->active->node->token->type == DIVIDE || list->active->node->token->type == LESS_THAN || list->active->node->token->type == GREATER_THAN || list->active->node->token->type == LESS_THAN_EQUAL || list->active->node->token->type == GREATER_THAN_EQUAL || list->active->node->token->type == EQUAL || list->active->node->token->type == NOT_EQUAL){
-            list->active->literalType = LITERAL_NOT_SET;
+            list->active->literalType = OPERATOR_OF_EXPR;
             list_next(list);
             continue;
         }
@@ -195,6 +224,7 @@ T_RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table){
     }
 
     return RET_VAL_OK;
+    
 }
 /**
  * @brief Function for delete two items after active element

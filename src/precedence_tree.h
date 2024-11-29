@@ -7,16 +7,16 @@
 // YEAR: 2024
 // NOTES: Header file for trees for precedence syntax analysis of expressions
 
-#include "return_values.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include "token_buffer.h"
-
 
 #ifndef H_TREE
 #define H_TREE
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include "token_buffer.h"
+
 
 // Declaration of result type for semantic analysis
 typedef enum RESULT_TYPE{

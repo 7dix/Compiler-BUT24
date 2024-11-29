@@ -31,13 +31,19 @@ typedef enum LITERAL_TYPE{
     NLITERAL_FLOAT,
     NLITERAL_INT_NULL,
     NLITERAL_FLOAT_NULL,
-    NELITERAL_STRING,
-    NELITERAL_STRING_NULL,
-    NLITERAL_VOID,
+    NLITERAL_STRING,
+    NLITERAL_STRING_NULL,
+    NLITERAL_NULL,
+    OPERATOR_OF_EXPR,
 } LITERAL_TYPE;
 
-
-
+// Declaration of type of operator for set witch types can be used
+typedef enum OPERATOR_TYPE_OF_RULE{
+    ARITMETIC,    // +, -, *
+    DIVISION,     // /
+    RELATIONAL,   // <, >, <=, >=
+    EQUALITY,     // ==, !=
+}OPERATOR_TYPE_OF_RULE; 
 
 // Declaration of struct for list element
 typedef struct T_LIST_ELEMENT {
@@ -45,6 +51,7 @@ typedef struct T_LIST_ELEMENT {
     struct T_LIST_ELEMENT *prev;    
     T_TREE_NODE_PTR node;
     LITERAL_TYPE literalType;
+    float value;
 } T_LIST_ELEMENT, *T_LIST_ELEMENT_PTR;
 
 // Declaration of struct for list
@@ -58,6 +65,9 @@ typedef struct T_LIST {
 
 // Function declaration for init list
 T_LIST_PTR list_init();
+
+// Function declaration for get type of operator, ofr get what type of rytape can be used
+OPERATOR_TYPE_OF_RULE get_operator_type(T_LIST_ELEMENT_PTR operator);
 
 // Function declaration for insert element to end of list
 T_RET_VAL list_insert_last(T_LIST_PTR list, T_TREE_NODE_PTR node);
@@ -82,6 +92,5 @@ bool is_float_int(float num);
 
 // Function declaration for delete list and free memory
 void list_dispose(T_LIST_PTR list);
-
 
 #endif // SEMANTIC_LIST_H

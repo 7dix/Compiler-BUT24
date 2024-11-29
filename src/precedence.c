@@ -471,14 +471,16 @@ T_RET_VAL precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TY
         }
     
     }
-
+    
+    
     // Dispose stack (for peace of my soul)
     stack_dispose(&stack);
 
     // Retrun end of expression to buffer
     move_back(buffer);
-
+    
+    if ((*tree) == NULL) return RET_VAL_SYNTAX_ERR;
     // Return success
-    return RET_VAL_OK;
+    else return RET_VAL_OK;
 }
 

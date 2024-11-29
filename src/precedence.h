@@ -7,13 +7,11 @@
 // YEAR: 2024
 // NOTES: Header file for precedence syntax analysis of expressions
 
-#include "precedence_stack.h"
-
-
 
 #ifndef H_PRECEDENCE
 #define H_PRECEDENCE
 
+#include "precedence_stack.h"
 
 // Declaration of precedences of precedence table
 typedef enum PRECEDENCE{

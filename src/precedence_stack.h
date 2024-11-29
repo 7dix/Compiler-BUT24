@@ -7,11 +7,12 @@
 // YEAR: 2024
 // NOTES: Header file for stack for precedence syntax analysis of expressions
 
-#include "precedence_tree.h"
-
 
 #ifndef H_STACK
 #define H_STACK
+
+#include "precedence_tree.h"
+#include "return_values.h"
 
 // Declaration of stack item type
 typedef enum STACK_ITEM_TYPE{
