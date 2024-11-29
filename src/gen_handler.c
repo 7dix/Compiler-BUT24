@@ -55,6 +55,7 @@ void createProgramHeader() {
     generateDefvar("GF", "valid");
     generateDefvar("GF", "trash");
     generateDefvar("GF", "index");
+    generateDefvar("GF", "beg");
     generateCall("main");
     generateExit(0);
 }
@@ -525,6 +526,8 @@ void callBISubstring(T_TOKEN *var, T_TOKEN *beg, T_TOKEN *end) {
     char *uniq = NULL;
     generateUniqueIdentifier(var->lexeme, &uniq);
 
+    // Move global var value for iterating
+    printf("MOVE GF@beg %s\n", _beg);
     generateStrlen("GF", "tmp1", "LF", uniq);
 
     // beg < 0
@@ -554,18 +557,16 @@ void callBISubstring(T_TOKEN *var, T_TOKEN *beg, T_TOKEN *end) {
 
     // Loop
     generateLabel(substr_loop);
-    printf("LT GF@valid %s %s\n", _beg, _end);
-    generateJumpifeq(substr_end, "GF", "valid", "bool", "false");
 
     // get char
-    printf("GETCHAR GF@char LF@%s %s\n", uniq, _beg);
+    printf("GETCHAR GF@char LF@%s GF@beg\n", uniq);
     generateConcat("GF", "tmp2", "GF", "tmp2", "GF", "char");
 
     // increment beg
-    printf("ADD %s %s int@1\n", _beg, _beg);
+    printf("ADD GF@beg GF@beg int@1\n");
 
     // check if end is reached (beg == end)
-    printf("EQ GF@valid %s %s\n", _beg, _end);
+    printf("EQ GF@valid GF@beg %s\n", _end);
     generateJumpifeq(substr_end, "GF", "valid", "bool", "true");
 
     generateJump(substr_loop);
