@@ -687,7 +687,7 @@ void callBIOrd (T_TOKEN *var, T_TOKEN *index) {
     generateJumpifeq(ord_err, "GF", "valid", "bool", "true");
 
     // Get char, push to stack and convert
-    generateGetchar("GF", "char", "LF", uniq, "LF", _index);
+    printf("GETCHAR GF@char LF@%s %s\n", uniq, _index);
     generatePushs("GF", "char");
     generateStrI2Ints();
     generateJump(ord_ret);
