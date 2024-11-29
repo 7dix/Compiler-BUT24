@@ -8,6 +8,10 @@
 // Kryštof Valenta (xvalenk00)
 //
 // YEAR: 2024
+// NOTES:   Implementation of Symtable with hash table and stack of scopes.
+//          Also contains helper functions for easier manipulation with the symtable
+//          from other parts of the compiler.
+
 #include "symtable.h"
 #include "semantic.h"
 
@@ -266,27 +270,6 @@ int add_param_to_symbol_data(SymbolData *data, Param param) {
     }
     data->func.argv[data->func.argc++] = param;
     return RET_VAL_OK;
-}
-
-
-// Set the variable as modified
-void set_var_modified(Symbol *symbol) {
-    if (symbol == NULL) {
-        return;
-    }
-    if (symbol->type == SYM_VAR) {
-        symbol->data.var.modified = true;
-    }
-}
-
-// Set the variable as used
-void set_var_used(Symbol *symbol) {
-    if (symbol == NULL) {
-        return;
-    }
-    if (symbol->type == SYM_VAR) {
-        symbol->data.var.used = true;
-    }
 }
 
 // Get the var id

@@ -3,11 +3,12 @@
 // TEAM: Martin Zůbek (253206)
 // AUTHORS:
 //  <Marek Tenora> (xtenor02)
-// <Otakar Kočí> (xkocio00)
-// Martin Zůbek (253206)
-// Kryštof Valenta (xvalenk00)
+//  <Otakar Kočí> (xkocio00)
+//  <Martin Zůbek> (253206)
+//  <Kryštof Valenta> (xvalenk00)
 //
 // YEAR: 2024
+// NOTES:   Header file for symtable. Contains structure declarations and function prototypes.
 
 #ifndef H_SYMTABLE
 #define H_SYMTABLE
@@ -98,12 +99,14 @@ void hashtable_remove(Hashtable *ht, const char *key);
 
 //-----------------------------------SYMBOL TABLE-----------------------------------//
 
+// Scope structure for symtable stack
 typedef struct T_SCOPE {
     Hashtable *ht;
     struct T_SCOPE *parent;
     int while_defined_id;
 } T_SCOPE;
 
+// Symtable encapsulation structure
 typedef struct T_SYM_TABLE {
     T_SCOPE *top;
     int label_cnt;
@@ -111,24 +114,27 @@ typedef struct T_SYM_TABLE {
     int while_def_cnt;
 } T_SYM_TABLE;
 
-// Symbol table functions
+
+// Symtable main functions
+
 T_SYM_TABLE *symtable_init();
 bool symtable_add_scope(T_SYM_TABLE *table, bool is_while);
 int symtable_remove_scope(T_SYM_TABLE *table, bool check_unused_vars);
 Symbol *symtable_add_symbol(T_SYM_TABLE *table, const char *key, SymbolType type, SymbolData data);
 Symbol *symtable_find_symbol(T_SYM_TABLE *table, const char *key);
 void symtable_free(T_SYM_TABLE *table);
-void set_var_modified(Symbol *symbol);
-void set_var_used(Symbol *symbol);
+
+
+// Secondary symtable functions
+
 int get_var_id(T_SYM_TABLE *table, const char *key);
 Symbol *get_var(T_SYM_TABLE *table, const char *name);
-
-// helper functions
 int check_for_unused_vars(T_SYM_TABLE *table);
-
-extern T_SYM_TABLE *ST;
-
 bool generate_labels(T_SYM_TABLE *table, char **label1, char **label2);
 int is_in_while(T_SYM_TABLE *table);
+
+
+
+extern T_SYM_TABLE *ST;
 
 #endif // H_SYMTABLE
