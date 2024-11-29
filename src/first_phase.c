@@ -169,7 +169,7 @@ bool add_built_in_functions() {
     error_flag_fp = add_param_to_symbol_data(&data, (Param){"j", VAR_INT});
     if (error_flag_fp != RET_VAL_OK)
         return false;
-    if ((symbol = symtable_add_symbol(ST, "ifj.substr", SYM_FUNC, data)) == NULL) {
+    if ((symbol = symtable_add_symbol(ST, "ifj.substring", SYM_FUNC, data)) == NULL) {
         error_flag_fp = RET_VAL_INTERNAL_ERR;
         return false;
     }
