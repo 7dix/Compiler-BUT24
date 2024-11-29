@@ -687,9 +687,11 @@ void callBIOrd (T_TOKEN *var, T_TOKEN *index) {
     generateJumpifeq(ord_err, "GF", "valid", "bool", "true");
 
     // Get char, push to stack and convert
-    printf("GETCHAR GF@char LF@%s %s\n", uniq, _index);
-    generatePushs("GF", "char");
-    generateStrI2Ints();
+    generatePushs("LF", uniq);
+    generateStrI2Ints(_index);
+    // printf("GETCHAR GF@char LF@%s %s\n", uniq, _index);
+    // generatePushs("GF", "char");
+    // generateStrI2Ints(0);
     generateJump(ord_ret);
 
     // Error label
