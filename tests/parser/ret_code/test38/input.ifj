@@ -29,4 +29,73 @@ pub fn main() void {
     ifj.write(sub);
     ifj.write("\n");
 
+    s = ifj.string("marek tenora je");
+    i = 6;
+    j = 11;
+    sub = ifj.substring(s, i, j);
+    ifj.write("Testujeme substr |");
+    ifj.write(s);
+    ifj.write("| od ");
+    ifj.write(i);
+    ifj.write(" do ");
+    ifj.write(j);
+    ifj.write(" -> ");
+    ifj.write(sub);
+    ifj.write("\n");
+
+    s = ifj.string("otasek nataci best letsplayos");
+    i = 24;
+    j = 29;
+    sub = ifj.substring(s, i, j);
+    ifj.write("Testujeme substr |");
+    ifj.write(s);
+    ifj.write("| od ");
+    ifj.write(i);
+    ifj.write(" do ");
+    ifj.write(j);
+    ifj.write(" -> ");
+    ifj.write(sub);
+    ifj.write("\n");
+
+    s = ifj.string("matin santona zubkos zubuje");
+    i = 14;
+    j = 26;
+    sub = ifj.substring(s, i, j);
+    ifj.write("Testujeme substr |");
+    ifj.write(s);
+    ifj.write("| od ");
+    ifj.write(i);
+    ifj.write(" do ");
+    ifj.write(j);
+    ifj.write(" -> ");
+    ifj.write(sub);
+    ifj.write("\n");
+
+    s = ifj.string("ikea masove kulicky s brusinkou best mmmmmmmm");
+    i = 5;
+    j = 18;
+    sub = ifj.substring(s, i, j);
+    ifj.write("Testujeme substr |");
+    ifj.write(s);
+    ifj.write("| od ");
+    ifj.write(i);
+    ifj.write(" do ");
+    ifj.write(j);
+    ifj.write(" -> ");
+    ifj.write(sub);
+    ifj.write("\n");
+
+    s = ifj.string("otasek02czlp");
+    i = 0;
+    j = 5;
+    sub = ifj.substring(s, i, j);
+    ifj.write("Testujeme substr |");
+    ifj.write(s);
+    ifj.write("| od ");
+    ifj.write(i);
+    ifj.write(" do ");
+    ifj.write(j);
+    ifj.write(" -> ");
+    ifj.write(sub);
+    ifj.write("\n");
 } 
