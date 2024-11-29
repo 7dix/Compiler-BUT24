@@ -2,7 +2,7 @@
 //PROJEKT: IFJ24 - Compiler for the IFJ24 lang @ FIT BUT 2BIT
 //TEAM: Martin Zůbek (253206)
 //AUTHORS:
-// Otakar Kočí (xkocio00, 247555)
+//  Otakar Kočí (xkocio00, 247555)
 //
 //YEAR: 2024
 //NOTES: Implementation of the token buffer. Works as Double Linked List for tokens.
@@ -10,12 +10,18 @@
 //       When attempting to get a token, before the first one or after the last one
 //       user gets either the first or the last token respectively.
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include "scanner.h"
 #include "token_buffer.h"
 
 /**
  * @brief Initializes the token buffer.
  * 
- * @return T_TOKEN_BUFFER* The initialized token buffer.
+ * @return T_TOKEN_BUFFER*
+ * @retval NULL - memory allocation error
+ * @retval T_TOKEN_BUFFER* - pointer to the initialized token buffer
  */
 T_TOKEN_BUFFER *init_token_buffer() {
     // Allocate memory and check for errors
@@ -84,7 +90,9 @@ void free_token_buffer(T_TOKEN_BUFFER **buffer) {
  * 
  * @param  buffer The token buffer.
  * @param *token The token to add.
- * @return bool True if successful, false otherwise.
+ * @return bool
+ * @retval true - success
+ * @retval false - memory allocation error
  */
 bool add_token_as_last(T_TOKEN_BUFFER *buffer, T_TOKEN *token) {
     // Allocate memory for the new node

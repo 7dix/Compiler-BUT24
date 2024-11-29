@@ -1,11 +1,11 @@
-//FILE: shared.h
+//FILE: return_values.h
 //PROJEKT: IFJ24 - Compiler for the IFJ24 lang @ FIT BUT 2BIT
 //TEAM: Martin Zůbek (253206)
 //AUTHORS:
 // Otakar Kočí (xkocio00, 247555)
 //
 //YEAR: 2024
-//NOTES: 
+//NOTES: Return values definitions for the IFJ24 language compiler
 
 
 #ifndef H_DEFINITIONS
@@ -34,8 +34,7 @@ typedef enum {
     RET_VAL_SEMANTIC_OTHER_ERR = 10,
     // Internal errors of the compiler -> insufficient memory, etc.
     RET_VAL_INTERNAL_ERR = 99
-} RetVal;
-
+} T_RET_VAL;
 
 
 

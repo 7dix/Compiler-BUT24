@@ -14,7 +14,7 @@
 #define H_SYMTABLE
 
 #include <stdbool.h>
-#include "shared.h"
+#include "return_values.h"
 #include "scanner.h"
 #include <stdlib.h>
 #include <string.h>

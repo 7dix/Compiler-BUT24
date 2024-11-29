@@ -6,14 +6,12 @@
 //
 // YEAR: 2024
 // NOTES: Syntax-driven compilation for the IFJ24 language.
-// TODO: maybe remove matching of prolog and other such stuff, as this is already checked in the first phase
-
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include "parser.h"
-#include "shared.h"
+#include "return_values.h"
 #include "token_buffer.h"
 #include "symtable.h"
 #include "semantic.h"
@@ -23,8 +21,8 @@
 
 //--------------------------- GLOBAL VARIABLES ----------------------------//
 
-// Stores any error generated during this phase, see `shared.h`
-int error_flag = RET_VAL_OK;
+// Stores any error generated during this phase, see `return_values.h`
+T_RET_VAL error_flag = RET_VAL_OK;
 
 
 //------------------ PRIVATE FUNCTION PROTOTYPES --------------------------//

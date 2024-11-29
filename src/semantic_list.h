@@ -8,7 +8,7 @@
 // NOTES: Header file for list of semantic functions
 
 
-#include "shared.h"
+#include "return_values.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -60,13 +60,13 @@ typedef struct T_LIST {
 T_LIST_PTR list_init();
 
 // Function declaration for insert element to end of list
-RetVal list_insert_last(T_LIST_PTR list, T_TREE_NODE_PTR node);
+T_RET_VAL list_insert_last(T_LIST_PTR list, T_TREE_NODE_PTR node);
 
 // Function declaration for postorder tree traversal
-RetVal postorder( T_TREE_NODE_PTR *tree, T_LIST_PTR list);
+T_RET_VAL postorder( T_TREE_NODE_PTR *tree, T_LIST_PTR list);
 
 // Function declaration for set types of operands
-RetVal set_types(T_LIST_PTR list, T_SYM_TABLE *table);
+T_RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table);
 
 // Function declaration for set first element as active
 void list_first(T_LIST_PTR list);

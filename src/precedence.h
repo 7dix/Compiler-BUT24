@@ -57,7 +57,7 @@ OPERATOR_INDEX priorityIndexTable(TOKEN_TYPE type);
 PRECEDENCE getPrecedence(OPERATOR_INDEX row, OPERATOR_INDEX coll);
 
 // Function declarations for main function of precedence syntax analysis
-RetVal precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_END typeEnd);
+T_RET_VAL precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_END typeEnd);
 
 
 // Function declaration for search reuce rule

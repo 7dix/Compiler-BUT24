@@ -356,6 +356,7 @@ int is_in_while(T_SYM_TABLE *table) {
     }
     return -1;
 }
+
 // Saves pointer to provided fn name into symtable pointer
 void set_fn_name(T_SYM_TABLE *table, char *name) {
     if (table == NULL) {
@@ -363,6 +364,8 @@ void set_fn_name(T_SYM_TABLE *table, char *name) {
     }
     table->current_fn_name = name;
 }
+
+// Returns pointer to the current function name
 char *get_fn_name(T_SYM_TABLE *table) {
     if (table == NULL) {
         return NULL;

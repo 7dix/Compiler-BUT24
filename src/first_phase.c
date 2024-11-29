@@ -9,12 +9,45 @@
 // NOTES: First phase of the IFJ24 compiler for scanning and parsing function headers.
 //        This phase quickly scans the input file to extract function signatures into symtable.
 //        All tokens are stored in the token buffer for further processing during the main phase.
-// TODO: improve comments
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+#include "token_buffer.h"
+#include "symtable.h"
+#include "scanner.h"
+#include "return_values.h"
 #include "first_phase.h"
 
-int error_flag_fp = RET_VAL_OK;
+
+//--------------------------- GLOBAL VARIABLES ----------------------------//
+
+// Stores any error generated during this phase, see `return_values.h`
+T_RET_VAL error_flag_fp = RET_VAL_OK;
+
+// Flag indicating whether get_save_token() should return the last token
+// that is already in the buffer, or ask lexer for a new one and return that one 
 bool needs_last_token = false;
+
+
+//------------------ PRIVATE FUNCTION PROTOTYPES --------------------------//
+
+bool get_save_token(T_TOKEN_BUFFER *token_buffer, T_TOKEN **token);
+bool syntax_fp_start(T_TOKEN_BUFFER *buffer);
+bool syntax_fp_prolog(T_TOKEN_BUFFER *buffer);
+bool syntax_fp_fn_defs(T_TOKEN_BUFFER *buffer);
+bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer);
+bool syntax_fp_fn_def_next(T_TOKEN_BUFFER *buffer);
+bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer, SymbolData *data);
+bool syntax_fp_type(T_TOKEN_BUFFER *buffer, VarType *type);
+bool syntax_fp_params(T_TOKEN_BUFFER *buffer, SymbolData *data);
+bool syntax_fp_param(T_TOKEN_BUFFER *buffer, SymbolData *data);
+bool syntax_fp_param_next(T_TOKEN_BUFFER *buffe, SymbolData *data);
+bool syntax_fp_param_after_comma(T_TOKEN_BUFFER *buffer, SymbolData *data);
+bool syntax_fp_end(T_TOKEN_BUFFER *buffer);
+bool simulate_fn_body(T_TOKEN_BUFFER *buffer);
+
 
 /**
  * @brief Fills symtable with built-in functions
@@ -187,7 +220,7 @@ bool add_built_in_functions() {
 }
 
 /**
- * @brief Checks if main function exists
+ * @brief Checks if main function exists and is correctly defined
  * 
  * @return `bool`
  * @retval `true` - main function exists
@@ -216,6 +249,16 @@ bool check_main_exists() {
  * 
  * @param *token_buffer pointer to the token buffer
  * @param **token pointer to the token
+ * 
+ * Asks the lexer for a new token, that is saved into token buffer
+ * and returned to the caller. If needs_last_token flag is set, last token
+ * from the buffer is returned instead.
+ * 
+ * This function uses following global variables:
+ * 
+ * - `int error_flag_fp`
+ * - `bool needs_last_token`
+ * 
  * @return `bool`
  * @retval `true` - success
  * @retval `false` - internal error occurred
@@ -252,6 +295,10 @@ bool get_save_token(T_TOKEN_BUFFER *token_buffer, T_TOKEN **token) {
  * Scans the input file to extract function signatures. Saves them into the symtable.
  * All tokens are stored into the token buffer.
  * 
+ * This function uses following global variables:
+ * 
+ * - `int error_flag_fp`
+ * 
  * @param *token_buffer pointer to the token buffer
  * @return int
  * @retval RET_VAL_OK - success
@@ -259,7 +306,7 @@ bool get_save_token(T_TOKEN_BUFFER *token_buffer, T_TOKEN **token) {
  * @retval RET_VAL_SYNTAX_ERR - syntax error
  * @retval RET_VAL_INTERNAL_ERR - internal error
  */
-int first_phase(T_TOKEN_BUFFER *token_buffer) {
+T_RET_VAL first_phase(T_TOKEN_BUFFER *token_buffer) {
 
     // Run simplified parser to obtain function signatures
     if (!syntax_fp_start(token_buffer)) {
@@ -371,7 +418,6 @@ bool syntax_fp_prolog(T_TOKEN_BUFFER *buffer) {
 
     // check that string is equal to "ifj24.zig"
     if (strcmp(token->value.stringVal, "ifj24.zig") != 0) {
-        // TODO: is this syntax or semantic error?
         error_flag_fp = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -402,9 +448,6 @@ bool syntax_fp_prolog(T_TOKEN_BUFFER *buffer) {
  * 
  * `FN_DEFS -> FN_DEF FN_DEF_NEXT`
  * 
- * This function uses following global variables:
- * 
- * - `int error_flag_fp`
  * @param *token_buffer pointer to token buffer
  * @return `bool`
  * @retval `true` - correct syntax
@@ -517,6 +560,8 @@ bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer) {
  * 
  * This function uses following global variables:
  * - `int error_flag_fp`
+ * 
+ * - `bool needs_last_token`
  * @param *token_buffer pointer to token buffer
  * @return `bool`
  * @retval `true` - correct syntax
@@ -565,13 +610,14 @@ bool syntax_fp_fn_def_next(T_TOKEN_BUFFER *buffer) {
  * This function uses following global variables:
  * 
  * - `int error_flag_fp`
+ * 
+ * - `bool needs_last_token`
  * @param *token_buffer pointer to token buffer
  * @return `bool`
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
 bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer, SymbolData *data) {
-    // TODO: possible simplification by checking only void type
 
     T_TOKEN *token;
     // we have two branches, choose here
@@ -638,6 +684,8 @@ bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * This function uses following global variables:
  * 
  * - `int error_flag_fp`
+ * 
+ * - `bool needs_last_token`
  * @param *token_buffer pointer to token buffer
  * @param *data pointer to symbol data
  * @return `bool`
@@ -696,7 +744,6 @@ bool syntax_fp_param(T_TOKEN_BUFFER *buffer, SymbolData *data) {
     if (!get_save_token(buffer, &token)) 
         return false; // identifier
     if (token->type != IDENTIFIER) {
-        // TODO: process error
         error_flag_fp = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -802,6 +849,8 @@ bool syntax_fp_type(T_TOKEN_BUFFER *buffer, VarType *type) {
  * This function uses following global variables:
  * 
  * - `int error_flag_fp`
+ * 
+ * - `bool needs_last_token`
  * @param *token_buffer pointer to token buffer
  * @return `bool`
  * @retval `true` - correct syntax
@@ -845,6 +894,8 @@ bool syntax_fp_param_next(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * This function uses following global variables:
  * 
  * - `int error_flag_fp`
+ * 
+ * - `bool needs_last_token`
  * @param *token_buffer pointer to token buffer
  * @return `bool`
  * @retval `true` - correct syntax
