@@ -493,10 +493,10 @@ void callBISubstring(T_TOKEN *var, T_TOKEN *beg, T_TOKEN *end) {
     char substr_end[20];
     char substr_err[20];
     char substr_ret[20];
-    sprintf(substr_loop, "strcmp_loop%d", substr_counter);
-    sprintf(substr_end, "strcmp_end%d", substr_counter);
-    sprintf(substr_err, "strcmp_err%d", substr_counter);
-    sprintf(substr_ret, "strcmp_ret%d", substr_counter);
+    sprintf(substr_loop, "substr_loop%d", substr_counter);
+    sprintf(substr_end, "substr_end%d", substr_counter);
+    sprintf(substr_err, "substr_err%d", substr_counter);
+    sprintf(substr_ret, "substr_ret%d", substr_counter);
 
 
     if (beg->type == INT) {
@@ -530,7 +530,7 @@ void callBISubstring(T_TOKEN *var, T_TOKEN *beg, T_TOKEN *end) {
 
     // beg < 0
     printf("LT GF@valid %s int@0\n", _beg);
-    generateJumpifeq("substr_err", "GF", "valid", "bool", "true");
+    generateJumpifeq(substr_err, "GF", "valid", "bool", "true");
 
     // end < 0
     printf("LT GF@valid %s int@0\n", _end);
