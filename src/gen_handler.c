@@ -195,6 +195,12 @@ void createStackByPostorder(T_TREE_NODE *tree) {
         generatePushs("LF", uniq);
         free(uniq);
 
+        if (tree->convertToFloat) {
+            generateInt2Floats();
+        }
+        else if (tree->convertToInt) {
+            generateFloat2Ints();
+        }
     }
     else if (tree->token->type == INT) {
         generatePushsInt(tree->token->value.intVal);
@@ -238,7 +244,13 @@ void createStackByPostorder(T_TREE_NODE *tree) {
         }
     }
     else if (tree->token->type == DIVIDE) { // /
-        generateDivs();
+        if (tree->resultType == TYPE_INT_RESULT) {
+            generateIdivs();
+        }
+        else {
+            generateDivs();
+        }
+        // Re-type
         if (tree->convertToFloat) {
             generateInt2Floats();
         }
