@@ -263,7 +263,7 @@ T_RET_VAL check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
         OPERATOR_TYPE_OF_RULE operatorType = get_operator_type(operator);
 
         // Result is NONLITERAL INT or BOOL
-        if((firstOperand->literalType == LITERAL_INT && secondOperand->literalType == LITERAL_INT) || (firstOperand->literalType == NLITERAL_INT && secondOperand->literalType == LITERAL_INT) || (firstOperand->literalType == LITERAL_INT && secondOperand->literalType == NLITERAL_INT)){
+        if((firstOperand->literalType == LITERAL_INT && secondOperand->literalType == LITERAL_INT) || (firstOperand->literalType == NLITERAL_INT && secondOperand->literalType == LITERAL_INT) || (firstOperand->literalType == LITERAL_INT && secondOperand->literalType == NLITERAL_INT) || (firstOperand->literalType == NLITERAL_INT && secondOperand->literalType == NLITERAL_INT)){
             // Set type of subexpression
             switch (operatorType){
                 case ARITMETIC:{ 
@@ -292,7 +292,7 @@ T_RET_VAL check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
         }
 
         // Result is NONLITERAL FLOAT or BOOL
-        if((firstOperand->literalType == LITERAL_FLOAT && secondOperand->literalType == LITERAL_FLOAT) || (firstOperand->literalType == NLITERAL_FLOAT && secondOperand->literalType == LITERAL_FLOAT) || (firstOperand->literalType == LITERAL_FLOAT && secondOperand->literalType == NLITERAL_FLOAT)){
+        if((firstOperand->literalType == LITERAL_FLOAT && secondOperand->literalType == LITERAL_FLOAT) || (firstOperand->literalType == NLITERAL_FLOAT && secondOperand->literalType == LITERAL_FLOAT) || (firstOperand->literalType == LITERAL_FLOAT && secondOperand->literalType == NLITERAL_FLOAT) || (firstOperand->literalType == NLITERAL_FLOAT && secondOperand->literalType == NLITERAL_FLOAT)){
             // Set type of subexpression
             switch (operatorType){
                 case ARITMETIC:{ 
