@@ -1,0 +1,32 @@
+const ifj = @import("ifj24.zig");
+
+pub fn main() void {
+    var s = ifj.string("ahoj");
+    var i = 0;
+    var j = 1;
+    var sub = ifj.substring(s, i, j);
+    ifj.write("Testujeme substr |");
+    ifj.write(s);
+    ifj.write("| od ");
+    ifj.write(i);
+    ifj.write(" do ");
+    ifj.write(j);
+    ifj.write(" -> ");
+    ifj.write(sub);
+    ifj.write("\n");
+
+    s = ifj.string("ahoj");
+    i = 0;
+    j = 3;
+    sub = ifj.substring(s, i, j);
+    ifj.write("Testujeme substr |");
+    ifj.write(s);
+    ifj.write("| od ");
+    ifj.write(i);
+    ifj.write(" do ");
+    ifj.write(j);
+    ifj.write(" -> ");
+    ifj.write(sub);
+    ifj.write("\n");
+
+} 
