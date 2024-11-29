@@ -48,9 +48,10 @@ To run the project, use the following command:
 ```
 
 ## Authors
-- [Author 1](https://github.com/author1)
-- [Author 2](https://github.com/author2)
-- [Author 3](https://github.com/author3)
+- [Marek Tenora](https://github.com/7dix)
+- [Otasek Kočí](https://github.com/Otas02CZ)
+- [Kryštof Valenta](https://github.com/chadmee)
+- [Martin Zůbek](https://github.com/MiroSantona)
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
