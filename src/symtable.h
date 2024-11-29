@@ -54,8 +54,8 @@ typedef union
         bool is_const;
         bool modified;
         bool used;
+        float float_value;
         VarType type;
-        // void *value;
         int id;
     } var;
     struct {
