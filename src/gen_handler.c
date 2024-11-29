@@ -564,6 +564,11 @@ void callBISubstring(T_TOKEN *var, T_TOKEN *beg, T_TOKEN *end) {
 
     // increment beg
     printf("ADD GF@beg %s int@1\n", _beg);
+
+    // check if end is reached (beg == end)
+    printf("EQ GF@valid %s %s\n", _beg, _end);
+    generateJumpifeq(substr_end, "GF", "valid", "bool", "true");
+
     generateJump(substr_loop);
 
     // End of loop
