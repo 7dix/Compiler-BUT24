@@ -1,0 +1,8 @@
+
+const ifj = @import("ifj24.zig");
+
+pub fn main() void {
+    const string = ifj.string("testovaci retezec!123456789");
+    const ord = ifj.ord(string, 0);
+    ifj.write(ord);
+}
