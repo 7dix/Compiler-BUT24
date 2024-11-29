@@ -1,0 +1,60 @@
+const ifj = @import("ifj24.zig");
+
+pub fn main() void {
+    var s1 = ifj.string("ahoj");
+    var s2 = ifj.string("ahoj");
+    var cmp = ifj.strcmp(s1, s2);
+    ifj.write("Testujeme ");
+    ifj.write(s1);
+    ifj.write(" == ");
+    ifj.write(s2);
+    ifj.write(" -> ");
+    ifj.write(cmp);
+    ifj.write("\n");
+
+
+    s1 = ifj.string("ahoj");
+    s2 = ifj.string("ahox");
+    cmp = ifj.strcmp(s1, s2);
+    ifj.write("Testujeme ");
+    ifj.write(s1);
+    ifj.write(" == ");
+    ifj.write(s2);
+    ifj.write(" -> ");
+    ifj.write(cmp);
+    ifj.write("\n");
+
+
+    s1 = ifj.string("bhoj");
+    s2 = ifj.string("ahoj");
+    cmp = ifj.strcmp(s1, s2);
+    ifj.write("Testujeme ");
+    ifj.write(s1);
+    ifj.write(" == ");
+    ifj.write(s2);
+    ifj.write(" -> ");
+    ifj.write(cmp);
+    ifj.write("\n");
+
+    s1 = ifj.string("ahoj");
+    s2 = ifj.string("ahojklkj");
+    cmp = ifj.strcmp(s1, s2);
+    ifj.write("Testujeme ");
+    ifj.write(s1);
+    ifj.write(" == ");
+    ifj.write(s2);
+    ifj.write(" -> ");
+    ifj.write(cmp);
+    ifj.write("\n");
+
+    s1 = ifj.string("ahojkjlklk");
+    s2 = ifj.string("ahoj");
+    cmp = ifj.strcmp(s1, s2);
+    ifj.write("Testujeme ");
+    ifj.write(s1);
+    ifj.write(" == ");
+    ifj.write(s2);
+    ifj.write(" -> ");
+    ifj.write(cmp);
+    ifj.write("\n");
+} 
