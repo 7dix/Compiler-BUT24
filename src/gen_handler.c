@@ -54,7 +54,6 @@ void createProgramHeader() {
     generateDefvar("GF", "char2");
     generateDefvar("GF", "valid");
     generateDefvar("GF", "trash");
-    generateDefvar("GF", "beg");
     generateDefvar("GF", "index");
     generateCall("main");
     generateExit(0);
@@ -563,7 +562,7 @@ void callBISubstring(T_TOKEN *var, T_TOKEN *beg, T_TOKEN *end) {
     generateConcat("GF", "tmp2", "GF", "tmp2", "GF", "char");
 
     // increment beg
-    printf("ADD GF@beg %s int@1\n", _beg);
+    printf("ADD %s %s int@1\n", _beg, _beg);
 
     // check if end is reached (beg == end)
     printf("EQ GF@valid %s %s\n", _beg, _end);
