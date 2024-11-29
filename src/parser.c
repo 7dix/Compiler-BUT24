@@ -29,7 +29,6 @@ int error_flag = RET_VAL_OK;
 char *current_fn_name = NULL;
 
 
-
 //------------------ PRIVATE FUNCTION PROTOTYPES --------------------------//
 
 bool is_token_in_expr(T_TOKEN *token);
@@ -76,7 +75,6 @@ bool syntax_argument(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call);
  * 
  * - `int error_flag`
  * @note TODO: add semantic checks, cleaning, etc.
- * @note TODO: change signature to work properly with future symtable
  * @note TODO: improve comments on return values
  * @param *token_buffer pointer to token buffer
  * @return `int`
