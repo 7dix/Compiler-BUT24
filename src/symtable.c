@@ -163,6 +163,7 @@ T_SYM_TABLE *symtable_init()
     table->var_id_cnt = 0;
     table->label_cnt = 0;
     table->while_def_cnt = 0;
+    table->current_fn_name = NULL;
     table->top = NULL;
     return table;
 }
@@ -354,4 +355,17 @@ int is_in_while(T_SYM_TABLE *table) {
         current_scope = current_scope->parent;
     }
     return -1;
+}
+// Saves pointer to provided fn name into symtable pointer
+void set_fn_name(T_SYM_TABLE *table, char *name) {
+    if (table == NULL) {
+        return;
+    }
+    table->current_fn_name = name;
+}
+char *get_fn_name(T_SYM_TABLE *table) {
+    if (table == NULL) {
+        return NULL;
+    }
+    return table->current_fn_name;
 }

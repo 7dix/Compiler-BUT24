@@ -89,6 +89,8 @@ void generateUniqueIdentifier(char *name, char **uniq_name) {
  * @param argCount The total number of arguments.
  */
 void createFnHeader(char *name) {
+    if (name == NULL)
+        return;
     Symbol *symbol = symtable_find_symbol(ST, name);
     generateLabel(name);
     generateCreateFrame();

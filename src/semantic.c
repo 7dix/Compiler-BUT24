@@ -501,6 +501,10 @@ RetVal check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
 
 // put parameter to symbol table
 int put_param_to_symtable(char *name) {
+    if (name == NULL) {
+        return RET_VAL_INTERNAL_ERR;
+    }
+    
     Symbol *symbol = symtable_find_symbol(ST, name);
     if (symbol == NULL) {
         return RET_VAL_INTERNAL_ERR;

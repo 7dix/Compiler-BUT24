@@ -25,8 +25,6 @@
 
 // Stores any error generated during this phase, see `shared.h`
 int error_flag = RET_VAL_OK;
-// Current function name
-char *current_fn_name = NULL;
 
 
 //------------------ PRIVATE FUNCTION PROTOTYPES --------------------------//
@@ -288,7 +286,7 @@ bool syntax_fn_def(T_TOKEN_BUFFER *buffer) {
     }
 
     // save current function name
-    current_fn_name = token->lexeme;
+    set_fn_name(ST, token->lexeme);
 
 
     next_token(buffer, &token); // (
@@ -311,7 +309,8 @@ bool syntax_fn_def(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
-    current_fn_name = NULL; // reset current function name
+    // reset current function name
+    set_fn_name(ST, NULL);
 
     // CD: generate implicit return, needs to be changed in the future
     createReturn();
@@ -412,13 +411,13 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false; 
         }
-        error_flag = put_param_to_symtable(current_fn_name);
+        error_flag = put_param_to_symtable(get_fn_name(ST));
         if (error_flag != RET_VAL_OK) {
             return false;
         }
 
         // CD: generate function header
-        createFnHeader(current_fn_name);
+        createFnHeader(get_fn_name(ST));
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;
@@ -453,13 +452,13 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false;
         }
-        error_flag = put_param_to_symtable(current_fn_name);
+        error_flag = put_param_to_symtable(get_fn_name(ST));
         if (error_flag != RET_VAL_OK) {
             return false;
         }
 
         // CD: generate function header
-        createFnHeader(current_fn_name);
+        createFnHeader(get_fn_name(ST));
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;
@@ -1717,7 +1716,7 @@ bool syntax_return_remaining(T_TOKEN_BUFFER *buffer) {
     // first branch -> ;
     if (token->type == SEMICOLON) { // ;
         // Check if the function is void
-        if (symtable_find_symbol(ST, current_fn_name)->data.func.return_type != VAR_VOID) {
+        if (symtable_find_symbol(ST, get_fn_name(ST))->data.func.return_type != VAR_VOID) {
             error_flag = RET_VAL_SEMANTIC_FUNC_RETURN_ERR;
             return false;
         }
@@ -1732,7 +1731,7 @@ bool syntax_return_remaining(T_TOKEN_BUFFER *buffer) {
         // Dummy for return type
         SymbolData data;
 
-        Symbol *symbol = symtable_find_symbol(ST, current_fn_name);
+        Symbol *symbol = symtable_find_symbol(ST, get_fn_name(ST));
         if (symbol == NULL) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false;

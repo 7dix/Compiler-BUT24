@@ -112,6 +112,7 @@ typedef struct T_SYM_TABLE {
     int label_cnt;
     int var_id_cnt;
     int while_def_cnt;
+    char *current_fn_name;
 } T_SYM_TABLE;
 
 
@@ -132,6 +133,8 @@ Symbol *get_var(T_SYM_TABLE *table, const char *name);
 int check_for_unused_vars(T_SYM_TABLE *table);
 bool generate_labels(T_SYM_TABLE *table, char **label1, char **label2);
 int is_in_while(T_SYM_TABLE *table);
+void set_fn_name(T_SYM_TABLE *table, char *name);
+char *get_fn_name(T_SYM_TABLE *table);
 
 
 
