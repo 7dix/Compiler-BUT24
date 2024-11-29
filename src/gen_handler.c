@@ -601,69 +601,40 @@ void callBIStrcmp(T_TOKEN *var, T_TOKEN *_var) {
     generateUniqueIdentifier(var->lexeme, &uniq);
     generateUniqueIdentifier(_var->lexeme, &_uniq);
 
-    generateMove("GF", "index", "int", "0"); // Initialize index to 0
-
-    char strcmp_loop[20];
     char strcmp_end_length[20];
-    char strcmp_end[20];
     char strcmp_ret_lesser[20];
-    char strcmp_ret_greater[20];
     char strcmp_ret[20];
-    sprintf(strcmp_loop, "strcmp_loop%d", strcmp_counter);
     sprintf(strcmp_end_length, "strcmp_end_length%d", strcmp_counter);
-    sprintf(strcmp_end, "strcmp_end%d", strcmp_counter);
     sprintf(strcmp_ret_lesser, "strcmp_ret_lesser%d", strcmp_counter);
-    sprintf(strcmp_ret_greater, "strcmp_ret_greater%d", strcmp_counter);
     sprintf(strcmp_ret, "strcmp_ret%d", strcmp_counter);
 
-    // Loop start
-    generateLabel(strcmp_loop);
+    // Push strings to stack
+    generatePushs("LF", "uniq");
+    generatePushs("LF", "_uniq");
 
-    // Save the length of both strings
-    generateStrlen("GF", "tmp1", "LF", uniq);
-    generateStrlen("GF", "tmp2", "LF", _uniq);
+    // IF S1 != S2
+    generateJumpifneqs(strcmp_end_length);
 
-    // If index is greater+1 than the length of the string, evaluate and return
-    generateLt("GF", "valid", "GF", "index", "GF", "tmp1"); // index < strlen(var1)
-    generateJumpifeq(strcmp_end_length, "GF", "valid", "bool", "false");
-    generateLt("GF", "valid", "GF", "index", "GF", "tmp2"); // index < strlen(var2)
-    generateJumpifeq(strcmp_end_length, "GF", "valid", "bool", "false");
-
-    // Get the characters at the index
-    generateGetchar("GF", "char", "LF", uniq, "GF", "index");
-    generateGetchar("GF", "char2", "LF", _uniq, "GF", "index");
-
-    // Compare the characters, if not equal, return
-    generateEq("GF", "valid", "GF", "char", "GF", "char2");
-    generateJumpifeq(strcmp_end, "GF", "valid", "bool", "false");
-
-    // Increment the index and loop
-    generateAdd("GF", "index", "GF", "index", "int", "1");
-    generateJump(strcmp_loop);
-
-    // Handle the end of loop by length
-    generateLabel(strcmp_end_length);
-    generateLt("GF", "valid", "GF", "tmp1", "GF", "tmp2"); // strlen(var1) < strlen(var2)
-    generateJumpifeq(strcmp_ret_lesser, "GF", "valid", "bool", "true");
-    generateGt("GF", "valid", "GF", "tmp1", "GF", "tmp2"); // strlen(var1) > strlen(var2)
-    generateJumpifeq(strcmp_ret_greater, "GF", "valid", "bool", "true");
-
-    // Strings are equal
-    generateLabel(strcmp_end);
+    // S1 = S2
     generatePushs("int", "0");
     generateJump(strcmp_ret);
 
-    // S1 lesser
+    // S1 != S2
+    generateLabel(strcmp_end_length);
+    generatePushs("LF", "uniq");
+    generatePushs("LF", "_uniq");
+    generateLts(); // S1 < S2
+    generatePushs("bool", "true");
+    generateJumpifeqs(strcmp_ret_lesser); // JMP IF: S1 < S2
+    generatePushs("int", "1");
+    generateJump(strcmp_ret);
+
+    // S1 < S2 SCENARIO
     generateLabel(strcmp_ret_lesser);
     generatePushs("int", "-1");
     generateJump(strcmp_ret);
 
-    // S1 greater
-    generateLabel(strcmp_ret_greater);
-    generatePushs("int", "1");
-    generateJump(strcmp_ret);
-
-    // Return label
+    // Return label, free memory
     generateLabel(strcmp_ret);
     free(uniq); free(_uniq);
 
