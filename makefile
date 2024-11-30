@@ -86,6 +86,8 @@ test_first_phase: debug_first_phase
 
 test: test_scanner test_token_buffer test_precedence test_symtable test_parser_retcode
 
+test_fit: bin/ifj24
+	./IFJ24-tests-master/test.sh ./IFJ24-tests-master ./bin/ifj24 ic24int
 
 # Clean target to remove the executables
 clean:
