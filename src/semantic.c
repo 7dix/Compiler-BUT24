@@ -242,7 +242,10 @@ T_RET_VAL check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
                 (*tree)->resultType = TYPE_STRING_NULL_RESULT;
                 break;
             }
-
+            case LITERAL_STRING:{ 
+                (*tree)->resultType = TYPE_STRING_LITERAL_RESULT;
+                break;
+            }
             default:{
                 list_dispose(listPostfix);
                 return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;

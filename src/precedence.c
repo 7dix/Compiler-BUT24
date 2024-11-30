@@ -28,6 +28,7 @@
  * E -> id
  * E -> int_value
  * E -> float_value
+ * E -> string_value 
  * 
  * T -> E < E
  * T -> E > E
@@ -72,6 +73,7 @@ OPERATOR_INDEX precedenceIndex(TOKEN_TYPE type){
         case IDENTIFIER:return ID;
         case INT:return ID;
         case FLOAT:return ID;
+        case STRING:return ID;
         case NULL_TOKEN:return ID;
         case PLUS:return PL;
         case MINUS:return MIN;

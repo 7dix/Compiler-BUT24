@@ -101,7 +101,7 @@ bool is_token_in_expr(T_TOKEN *token) {
                 token->type == PLUS || token->type == MINUS || token->type == MULTIPLY ||
                 token->type == DIVIDE || token->type == BRACKET_LEFT_SIMPLE ||
                 token->type == BRACKET_RIGHT_SIMPLE || token->type == IDENTIFIER ||
-                token->type == NULL_TOKEN );
+                token->type == NULL_TOKEN || token->type == STRING);
 }
 
 /**

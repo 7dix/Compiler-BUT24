@@ -213,6 +213,13 @@ T_RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table){
             continue;
         }
 
+        // LITERAL STRING
+        if(list->active->node->token->type == STRING){
+            list->active->literalType = LITERAL_STRING;
+            list_next(list);
+            continue;
+        }
+
         // OPERATOR
         if(list->active->node->token->type == PLUS || list->active->node->token->type == MINUS || list->active->node->token->type == MULTIPLY || list->active->node->token->type == DIVIDE || list->active->node->token->type == LESS_THAN || list->active->node->token->type == GREATER_THAN || list->active->node->token->type == LESS_THAN_EQUAL || list->active->node->token->type == GREATER_THAN_EQUAL || list->active->node->token->type == EQUAL || list->active->node->token->type == NOT_EQUAL){
             list->active->literalType = OPERATOR_OF_EXPR;
