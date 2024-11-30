@@ -1,0 +1,39 @@
+const ifj = @import("ifj24.zig");
+
+pub fn main() void {
+    var num1 = 108;
+    var num2 = 111;
+    var num3 = 102;
+    var num4 = 97;
+    var num5 = 115;
+    var num6 = 101;
+    var num7 = 107;
+    ifj.write("Interger: 108 | Expected: l | Result: ");
+    var ret = ifj.chr(num);
+    ifj.write(ret);
+    ifj.write("\n");
+    ifj.write("Interger: 111 | Expected: o | Result: ");
+    var ret = ifj.chr(num);
+    ifj.write(ret);
+    ifj.write("\n");
+    ifj.write("Interger: 102 | Expected: f | Result: ");
+    var ret = ifj.chr(num);
+    ifj.write(ret);
+    ifj.write("\n");
+    ifj.write("Interger: 97 | Expected: a | Result: ");
+    var ret = ifj.chr(num);
+    ifj.write(ret);
+    ifj.write("\n");
+    ifj.write("Interger: 115 | Expected: s | Result: ");
+    var ret = ifj.chr(num);
+    ifj.write(ret);
+    ifj.write("\n");
+    ifj.write("Interger: 101 | Expected: e | Result: ");
+    var ret = ifj.chr(num);
+    ifj.write(ret);
+    ifj.write("\n");
+    ifj.write("Interger: 107 | Expected: k | Result: ");
+    var ret = ifj.chr(num);
+    ifj.write(ret);
+    ifj.write("\n");
+}
