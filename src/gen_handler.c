@@ -570,16 +570,18 @@ void callBISubstring(T_TOKEN *var, T_TOKEN *beg, T_TOKEN *end) {
     // Loop
     generateLabel(substr_loop);
 
+    // check if end is reached (beg == end)
+    printf("EQ GF@valid GF@beg %s\n", _end);
+    generateJumpifeq(substr_end, "GF", "valid", "bool", "true");
+    printf("GT GF@valid GF@beg %s\n", _end);
+    generateJumpifeq(substr_end, "GF", "valid", "bool", "true");
+
     // get char
     printf("GETCHAR GF@char LF@%s GF@beg\n", uniq);
     generateConcat("GF", "tmp2", "GF", "tmp2", "GF", "char");
 
     // increment beg
     printf("ADD GF@beg GF@beg int@1\n");
-
-    // check if end is reached (beg == end)
-    printf("EQ GF@valid GF@beg %s\n", _end);
-    generateJumpifeq(substr_end, "GF", "valid", "bool", "true");
 
     generateJump(substr_loop);
 
