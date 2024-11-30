@@ -160,9 +160,15 @@ int compare_var_types(VarType *existing, VarType *new) {
     }
 
     if (*existing == VAR_VOID) {
+
         if (*new == VAR_NULL) {
             return RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
         }
+
+        if (*new == STRING_LITERAL) {
+            return RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
+        }
+
         *existing = *new;
         return RET_VAL_OK;
     }

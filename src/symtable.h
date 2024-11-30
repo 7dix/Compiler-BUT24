@@ -33,6 +33,7 @@ typedef enum {
     VAR_ANY, // special case for ifj.write()
     VAR_NULL, // not used in vars, unification with expr checks
     VAR_BOOL, // not used in vars, unification with expr checks
+    STRING_LITERAL,
     VAR_VOID
 } VarType;
 

@@ -903,7 +903,7 @@ bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
         // TODO: need to check if this is correct based on right side of assignment
         // Check if variable type was set
         if (data.var.type == VAR_VOID) {
-            error_flag = RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;;
+            error_flag = RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
             return false;
         }
 
@@ -2223,6 +2223,9 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
             case TYPE_STRING_NULL_RESULT:
                 exprRes = VAR_STRING_NULL;
                 break;
+            case TYPE_STRING_LITERAL_RESULT:
+                exprRes = STRING_LITERAL;
+                break;
             case TYPE_NOTSET_RESULT:
             default:
                 tree_dispose(&tree);
@@ -2374,6 +2377,9 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
             case TYPE_STRING_NULL_RESULT:
                 exprRes = VAR_STRING_NULL;
                 break;
+            case TYPE_STRING_LITERAL_RESULT:
+                exprRes = STRING_LITERAL;
+                break;
             case TYPE_NOTSET_RESULT:
             default:
                 tree_dispose(&tree);
@@ -2450,6 +2456,9 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
                 break;
             case TYPE_STRING_NULL_RESULT:
                 exprRes = VAR_STRING_NULL;
+                break;
+            case TYPE_STRING_LITERAL_RESULT:
+                exprRes = STRING_LITERAL;
                 break;
             case TYPE_NOTSET_RESULT:
             default:
