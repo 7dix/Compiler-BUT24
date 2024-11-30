@@ -1947,7 +1947,7 @@ bool syntax_id_start(T_TOKEN_BUFFER *buffer, Symbol *symbol) {
         }
         
         symbol->data.var.modified = true;
-        //symbol->data.var.used = true;
+        symbol->data.var.used = true;
 
         if (!syntax_assign(buffer, &(symbol->data))) { // ASSIGN
             return false;
