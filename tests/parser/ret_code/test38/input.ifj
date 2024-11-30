@@ -168,4 +168,46 @@ pub fn main() void {
     ifj.write(" -> ");
     ifj.write(sub);
     ifj.write("\n");
+
+    s = ifj.string("otasekmalofasek");
+    i = 8;
+    j = 15;
+    sub = ifj.substring(s, i, j);
+    ifj.write("Testujeme substr |");
+    ifj.write(s);
+    ifj.write("| od ");
+    ifj.write(i);
+    ifj.write(" do ");
+    ifj.write(j);
+    ifj.write(" -> ");
+    ifj.write(sub);
+    ifj.write("\n");
+
+    s = ifj.string("letadelniburgerkingincident");
+    i = 10;
+    j = 28;
+    sub = ifj.substring(s, i, j);
+    ifj.write("Testujeme substr |");
+    ifj.write(s);
+    ifj.write("| od ");
+    ifj.write(i);
+    ifj.write(" do ");
+    ifj.write(j);
+    ifj.write(" -> ");
+    ifj.write(sub);
+    ifj.write("\n");
+
+    s = ifj.string("marta sere hrozne dlouho (20 min)");
+    i = 7;
+    j = 11;
+    sub = ifj.substring(s, i, j);
+    ifj.write("Testujeme substr |");
+    ifj.write(s);
+    ifj.write("| od ");
+    ifj.write(i);
+    ifj.write(" do ");
+    ifj.write(j);
+    ifj.write(" -> ");
+    ifj.write(sub);
+    ifj.write("\n");
 } 
