@@ -753,13 +753,16 @@ void callBIWrite(T_TOKEN *var) {
         printf("WRITE int@%d\n", var->value.intVal);
     }
     else if (var->type == FLOAT) {
-        printf("WRITE float@%lf\n", var->value.floatVal);
+        printf("WRITE float@%a\n", var->value.floatVal);
     }
     else if (var->type == STRING) {
         char *out = NULL;
         handleCorrectStringFormat(var->value.stringVal, &out);
         generateWrite("string", out);
         free(out);
+    }
+    else if (var->type == NULL_TOKEN) {
+        printf("WRITE nil@nil\n");
     }
 }
 

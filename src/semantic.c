@@ -38,6 +38,14 @@ int check_function_call(T_SYM_TABLE *table, T_FN_CALL *fn_call) {
                 if (symbol->type != SYM_VAR) {
                     return RET_VAL_SEMANTIC_FUNCTION_ERR; //TODO: correct return value?
                 }
+
+                if (fn->data.func.argv[i].type == STRING_VAR_STRING &&
+                    symbol->data.var.type == VAR_STRING) {
+
+                    symbol->data.var.used = true;
+                    break;
+                }
+
                 // check if the variable is of the correct type
                 if (symbol->data.var.type != fn->data.func.argv[i].type &&
                     fn->data.func.argv[i].type != VAR_ANY) {
