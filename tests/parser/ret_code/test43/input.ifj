@@ -1,0 +1,10 @@
+const ifj = @import("ifj24.zig");
+
+pub fn main() void {
+    var str1 = ifj.string("OTASEK");
+    var str2 = ifj.string("LOFASEK");
+    ifj.write("STR1: OTASEK, STR2: LOFASEK | Expected: OTASEKLOFASEK | Result: ");
+    var ret = ifj.concat(str1, str2);
+    ifj.write(ret);
+    ifj.write("\n");
+}
