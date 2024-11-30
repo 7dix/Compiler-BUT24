@@ -1,0 +1,15 @@
+const ifj = @import("ifj24.zig");
+
+pub fn main() void {
+    ifj.write("TEST IFJ.I2F|F2I\n");
+    const a = 5;
+    ifj.write(a); ifj.write("\n");
+    const b = ifj.i2f(a);
+    ifj.write(b); ifj.write("\n");
+
+    ifj.write(5); ifj.write("\n");
+    const c = ifj.i2f(5);
+    ifj.write(c); ifj.write("\n");
+
+     
+}

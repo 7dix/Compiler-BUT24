@@ -1941,6 +1941,11 @@ bool syntax_id_start(T_TOKEN_BUFFER *buffer, Symbol *symbol) {
             error_flag = RET_VAL_SEMANTIC_UNDEFINED_ERR; // TODO: correct error code?
             return false;
         }
+        if (symbol->data.var.is_const) {
+            error_flag = RET_VAL_SEMANTIC_REDEF_OR_BAD_ASSIGN_ERR;
+            return false;
+        }
+        
         symbol->data.var.modified = true;
         //symbol->data.var.used = true;
 
