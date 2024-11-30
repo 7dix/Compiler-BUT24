@@ -1,10 +1,24 @@
 const ifj = @import("ifj24.zig");
 
 pub fn main() void {
-    var str1 = ifj.string("OTASEK");
-    var str2 = ifj.string("LOFASEK");
+    const str1 = ifj.string("OTASEK");
+    const str2 = ifj.string("LOFASEK");
     ifj.write("STR1: OTASEK, STR2: LOFASEK | Expected: OTASEKLOFASEK | Result: ");
-    var ret = ifj.concat(str1, str2);
+    const ret = ifj.concat(str1, str2);
     ifj.write(ret);
+    ifj.write("\n");
+
+    const str3 = ifj.string("OTASEK");
+    const str4 = ifj.string("");
+    ifj.write("STR1: OTASEK, STR2:  | Expected: OTASEK | Result: ");
+    const ret2 = ifj.concat(str3, str4);
+    ifj.write(ret2);
+    ifj.write("\n");
+
+    const str5 = ifj.string("");
+    const str6 = ifj.string("LOFASEK");
+    ifj.write("STR1: , STR2: LOFASEK | Expected: LOFASEK | Result: ");
+    const ret3 = ifj.concat(str5, str6);
+    ifj.write(ret3);
     ifj.write("\n");
 }
