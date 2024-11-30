@@ -7,7 +7,7 @@ pub fn main() void {
     const str4 = ifj.string("ZUBOS");
     const str5 = ifj.string("EXTRADLOUHYRETEZECJAKLOFAS");
     const err1 = 128;
-    const err2 = 3,14;
+    const err2 = 3.14;
     ifj.write("STR: OTASEK | Expected: 6 | Result: ");
     var ret = ifj.length(str1);
     ifj.write(ret);

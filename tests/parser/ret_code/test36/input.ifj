@@ -5,8 +5,8 @@ pub fn main() void {
     ifj.write("TEST IFJ.ORD\n");
     ifj.write("----------------\n");
     
-    const string = ifj.string("");
-    const ord = ifj.ord(string, 0);
+    var string = ifj.string("");
+    var ord = ifj.ord(string, 0);
     ifj.write("Test v retezci |");
     ifj.write(string);
     ifj.write("| na pozici 0 je znak s ordinalni hodnotou: ");
