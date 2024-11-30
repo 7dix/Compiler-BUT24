@@ -105,7 +105,7 @@ void hashtable_remove(Hashtable *ht, const char *key);
 typedef struct T_SCOPE {
     Hashtable *ht;
     struct T_SCOPE *parent;
-    int while_defined_id;
+    int fc_defined_id;
 } T_SCOPE;
 
 // Symtable encapsulation structure
@@ -113,7 +113,7 @@ typedef struct T_SYM_TABLE {
     T_SCOPE *top;
     int label_cnt;
     int var_id_cnt;
-    int while_def_cnt;
+    int fc_defined_cnt;
     char *current_fn_name;
 } T_SYM_TABLE;
 
@@ -134,7 +134,7 @@ int get_var_id(T_SYM_TABLE *table, const char *key);
 Symbol *get_var(T_SYM_TABLE *table, const char *name);
 int check_for_unused_vars(T_SYM_TABLE *table);
 bool generate_labels(T_SYM_TABLE *table, char **label1, char **label2);
-int is_in_while(T_SYM_TABLE *table);
+int is_in_fc(T_SYM_TABLE *table);
 void set_fn_name(T_SYM_TABLE *table, char *name);
 char *get_fn_name(T_SYM_TABLE *table);
 

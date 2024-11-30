@@ -90,11 +90,11 @@ void generatePopFrame() {
 }
 
 void generateDefvar(char *frame, char *var) {
-    int whileDefId;
-    whileDefId = is_in_while(ST);
+    int fcDefId;
+    fcDefId = is_in_fc(ST);
 
-    if (whileDefId >= 0) {
-        printf("JUMPIFEQ skipDefvar$%d LF@whileIsDefined$%d bool@true\n", labelCounter, whileDefId);
+    if (fcDefId >= 0) {
+        printf("JUMPIFEQ skipDefvar$%d LF@defined$%d bool@true\n", labelCounter, fcDefId);
         printf("DEFVAR LF@%s\n", var);
         printf("LABEL skipDefvar$%d\n", labelCounter);
         labelCounter++;

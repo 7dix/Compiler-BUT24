@@ -835,7 +835,19 @@ void callBIFn(T_FN_CALL *fn) {
  * 
  * @note The expression must be solved before calling this function.
  */
-void handleIfStartBool(char *labelElse) {
+void handleIfStartBool(char *labelElse, int upper, int current) {
+    if (upper >= 0) {
+        printf("JUMPIFEQ skipDefvar$%d LF@defined$%d bool@true\n", labelCounter, upper);
+        printf("DEFVAR LF@defined$%d\n", current);
+        printf("MOVE LF@defined$%d bool@false\n", current);
+        printf("LABEL skipDefvar$%d\n", labelCounter);
+        labelCounter++;
+    }
+    else {
+        printf("DEFVAR LF@defined$%d\n", current);
+        printf("MOVE LF@defined$%d bool@false\n", current);
+    }
+
     generatePops("GF", "tmp1");
     generateJumpifneq(labelElse, "GF", "tmp1", "bool", "true");
 }
@@ -851,17 +863,28 @@ void handleIfStartBool(char *labelElse) {
  * 
  * @note The expression must be solved before calling this function.
  */
-void handleIfStartNil(char *labelElse, T_TOKEN *var) {
+void handleIfStartNil(char *labelElse, T_TOKEN *var, int upper, int current) {
+    if (upper >= 0) {
+        printf("JUMPIFEQ skipDefvar$%d LF@defined$%d bool@true\n", labelCounter, upper);
+        printf("DEFVAR LF@defined$%d\n", current);
+        printf("MOVE LF@defined$%d bool@false\n", current);
+        printf("LABEL skipDefvar$%d\n", labelCounter);
+        labelCounter++;
+    }
+    else {
+        printf("DEFVAR LF@defined$%d\n", current);
+        printf("MOVE LF@defined$%d bool@false\n", current);
+    }
+
     generatePops("GF", "tmp1");
-    
+    generateType("GF", "tmp2", "GF", "tmp1");
+    generateJumpifeq(labelElse, "GF", "tmp2", "string", "nil");
+
     char *uniq = NULL;
     generateUniqueIdentifier(var->lexeme, &uniq);
     generateDefvar("LF", uniq);
     generateMove("LF", uniq, "GF", "tmp1");
     free(uniq);
-
-    generateType("GF", "tmp2", "GF", "tmp1");
-    generateJumpifeq(labelElse, "GF", "tmp2", "string", "nil");
 }
 
 /**
@@ -872,9 +895,35 @@ void handleIfStartNil(char *labelElse, T_TOKEN *var) {
  * @param labelEnd The end label to jump to.
  * @param labelElse The else label to jump to.
  */
-void createIfElse(char *labelEnd, char *labelElse) {
+void createIfElse(char *labelEnd, char *labelElse, int upper, int currIf, int currElse) {
+    printf("MOVE LF@defined$%d bool@true\n", currIf);
+
+    if (upper >= 0) {
+        printf("JUMPIFEQ skipDefvar$%d LF@defined$%d bool@true\n", labelCounter, upper);
+        printf("DEFVAR LF@defined$%d\n", currElse);
+        printf("MOVE LF@defined$%d bool@false\n", currElse);
+        printf("LABEL skipDefvar$%d\n", labelCounter);
+        labelCounter++;
+    }
+    else {
+        printf("DEFVAR LF@defined$%d\n", currElse);
+        printf("MOVE LF@defined$%d bool@false\n", currElse);
+    }
+
     generateJump(labelEnd);
     generateLabel(labelElse);
+
+    if (upper >= 0) {
+        printf("JUMPIFEQ skipDefvar$%d LF@defined$%d bool@true\n", labelCounter, upper);
+        printf("DEFVAR LF@defined$%d\n", currElse);
+        printf("MOVE LF@defined$%d bool@false\n", currElse);
+        printf("LABEL skipDefvar$%d\n", labelCounter);
+        labelCounter++;
+    }
+    else {
+        printf("DEFVAR LF@defined$%d\n", currElse);
+        printf("MOVE LF@defined$%d bool@false\n", currElse);
+    }
 }
 
 /**
@@ -884,7 +933,8 @@ void createIfElse(char *labelEnd, char *labelElse) {
  * 
  * @param labelEnd The end label to jump to.
  */
-void createIfEnd(char *labelEnd) {
+void createIfEnd(char *labelEnd, int current) {
+    printf("MOVE LF@defined$%d bool@true\n", current);
     generateLabel(labelEnd);
 }
 
@@ -897,15 +947,15 @@ void createIfEnd(char *labelEnd) {
  */
 void createWhileBoolHeader(char *labelStart, int upper, int current) { // Upper > -1, not inside of while, >= 0 inside of while (ID OF TOP WHILE)
     if (upper >= 0) {
-        printf("JUMPIFEQ skipDefvar$%d LF@whileIsDefined$%d bool@true\n", labelCounter, upper);
-        printf("DEFVAR LF@whileIsDefined$%d\n", current);
-        printf("MOVE LF@whileIsDefined$%d bool@false\n", current);
+        printf("JUMPIFEQ skipDefvar$%d LF@defined$%d bool@true\n", labelCounter, upper);
+        printf("DEFVAR LF@defined$%d\n", current);
+        printf("MOVE LF@defined$%d bool@false\n", current);
         printf("LABEL skipDefvar$%d\n", labelCounter);
         labelCounter++;
     }
     else {
-        printf("DEFVAR LF@whileIsDefined$%d\n", current);
-        printf("MOVE LF@whileIsDefined$%d bool@false\n", current);
+        printf("DEFVAR LF@defined$%d\n", current);
+        printf("MOVE LF@defined$%d bool@false\n", current);
     }
     generateLabel(labelStart);
 }
@@ -920,15 +970,15 @@ void createWhileBoolHeader(char *labelStart, int upper, int current) { // Upper 
  */
 void createWhileNilHeader(char *labelStart, T_TOKEN *var, int upper, int current) {
     if (upper >= 0) {
-        printf("JUMPIFEQ skipDefvar$%d LF@whileIsDefined$%d bool@true\n", labelCounter, upper);
-        printf("DEFVAR LF@whileIsDefined$%d\n", current);
-        printf("MOVE LF@whileIsDefined$%d bool@false\n", current);
+        printf("JUMPIFEQ skipDefvar$%d LF@defined$%d bool@true\n", labelCounter, upper);
+        printf("DEFVAR LF@defined$%d\n", current);
+        printf("MOVE LF@defined$%d bool@false\n", current);
         printf("LABEL skipDefvar$%d\n", labelCounter);
         labelCounter++;
     }
     else {
-        printf("DEFVAR LF@whileIsDefined$%d\n", current);
-        printf("MOVE LF@whileIsDefined$%d bool@false\n", current);
+        printf("DEFVAR LF@defined$%d\n", current);
+        printf("MOVE LF@defined$%d bool@false\n", current);
     }
 
     char *uniq = NULL;
@@ -979,7 +1029,7 @@ void handleWhileNil(char *labelEnd, T_TOKEN *var) {
  * @param labelEnd The end label to jump to.
  */
 void createWhileEnd(char *labelStart, char *labelEnd, int whileDefCounter) {
-    printf("MOVE LF@whileIsDefined$%d bool@true\n", whileDefCounter);
+    printf("MOVE LF@defined$%d bool@true\n", whileDefCounter);
     generateJump(labelStart);
     generateLabel(labelEnd);
 }
