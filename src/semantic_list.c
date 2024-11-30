@@ -57,7 +57,7 @@ T_RET_VAL list_insert_last(T_LIST_PTR list, T_TREE_NODE_PTR node){
     element->prev = NULL;
     element->next = NULL;
     element->node = node;
-    element->value = 0.0;
+    element->value = 0.1;
     element->literalType = LITERAL_NOT_SET;
 
     // Check if list is empty, and insert element
@@ -143,12 +143,13 @@ T_RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table){
             if(symbol->data.var.is_const){
                 switch (symbol->data.var.type){ // const :i32
                 case VAR_INT:{
-                    list->active->literalType = LITERAL_INT;
+                    list->active->literalType = NLITERAL_INT;
                     break;
                 }
                 case VAR_FLOAT:{ // const :f64
                     list->active->literalType = LITERAL_FLOAT;
-                    list->active->value = symbol->data.var.float_value;
+                    if (symbol->data.var.const_expr) list->active->value = symbol->data.var.float_value;
+                    else if (list->active->node->token->type == FLOAT) list->active->value = list->active->node->token->value.floatVal;
                     break;
                 }
                 default:{
