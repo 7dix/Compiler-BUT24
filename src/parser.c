@@ -30,7 +30,6 @@ T_RET_VAL error_flag = RET_VAL_OK;
 bool is_token_in_expr(T_TOKEN *token);
 bool syntax_start(T_TOKEN_BUFFER *token_buffer);
 bool syntax_prolog(T_TOKEN_BUFFER *buffer);
-bool syntax_fn_defs(T_TOKEN_BUFFER *buffer);
 bool syntax_fn_def(T_TOKEN_BUFFER *buffer);
 bool syntax_fn_def_next(T_TOKEN_BUFFER *buffer);
 bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer);
@@ -124,7 +123,7 @@ bool is_token_relation_operator(T_TOKEN *token) {
  * 
  * `START` is defined as:
  * 
- * `START -> PROLOG FN_DEFS END`
+ * `START -> PROLOG FN_DEF_NEXT END`
  * @param *token_buffer pointer to token buffer
  * @return `bool`
  * @retval `true` - correct syntax
@@ -135,7 +134,7 @@ bool syntax_start(T_TOKEN_BUFFER *token_buffer) {
     if (!syntax_prolog(token_buffer)) { // PROLOG
         return false;
     }
-    if (!syntax_fn_defs(token_buffer)) { // FN_DEFS
+    if (!syntax_fn_def_next(token_buffer)) { // FN_DEF_NEXT
         return false;
     }
     if (!syntax_end(token_buffer)) { // END
@@ -200,7 +199,6 @@ bool syntax_prolog(T_TOKEN_BUFFER *buffer) {
 
     // check that string is equal to "ifj24.zig"
     if (strcmp(token->value.stringVal, "ifj24.zig") != 0) {
-        // TODO: is this syntax or semantic error?
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -217,32 +215,6 @@ bool syntax_prolog(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
-    return true;
-}
-
-/**
- * @brief Simulates `FN_DEFS` non-terminal.
- * 
- * `FN_DEFS` is defined as:
- * 
- * `FN_DEFS -> FN_DEF FN_DEF_NEXT`
- * 
- * This function uses following global variables:
- * 
- * - `int error_flag`
- * @param *token_buffer pointer to token buffer
- * @return `bool`
- * @retval `true` - correct syntax
- * @retval `false` - syntax error
- */
-bool syntax_fn_defs(T_TOKEN_BUFFER *buffer) {
-
-    if (!syntax_fn_def(buffer)) { // FN_DEF
-        return false;
-    }
-    if (!syntax_fn_def_next(buffer)) { // FN_DEF_NEXT
-        return false;
-    }
     return true;
 }
 

@@ -36,7 +36,6 @@ bool needs_last_token = false;
 bool get_save_token(T_TOKEN_BUFFER *token_buffer, T_TOKEN **token);
 bool syntax_fp_start(T_TOKEN_BUFFER *buffer);
 bool syntax_fp_prolog(T_TOKEN_BUFFER *buffer);
-bool syntax_fp_fn_defs(T_TOKEN_BUFFER *buffer);
 bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer);
 bool syntax_fp_fn_def_next(T_TOKEN_BUFFER *buffer);
 bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer, SymbolData *data);
@@ -330,7 +329,7 @@ T_RET_VAL first_phase(T_TOKEN_BUFFER *token_buffer) {
  * 
  * `START` is defined as:
  * 
- * `START -> PROLOG FN_DEFS END`
+ * `START -> PROLOG FN_DEF_NEXT END`
  * @param *token_buffer pointer to token buffer
  * @return `bool`
  * @retval `true` - correct syntax
@@ -341,7 +340,7 @@ bool syntax_fp_start(T_TOKEN_BUFFER *token_buffer) {
     if (!syntax_fp_prolog(token_buffer)) { // PROLOG
         return false;
     }
-    if (!syntax_fp_fn_defs(token_buffer)) { // FN_DEFS
+    if (!syntax_fp_fn_def_next(token_buffer)) { // FN_DEF_NEXT
         return false;
     }
     if (!syntax_fp_end(token_buffer)) { // END
@@ -438,29 +437,6 @@ bool syntax_fp_prolog(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
-    return true;
-}
-
-/**
- * @brief Simulates `FN_DEFS` non-terminal.
- * 
- * `FN_DEFS` is defined as:
- * 
- * `FN_DEFS -> FN_DEF FN_DEF_NEXT`
- * 
- * @param *token_buffer pointer to token buffer
- * @return `bool`
- * @retval `true` - correct syntax
- * @retval `false` - syntax error
- */
-bool syntax_fp_fn_defs(T_TOKEN_BUFFER *buffer) {
-
-    if (!syntax_fp_fn_def(buffer)) { // FN_DEF
-        return false;
-    }
-    if (!syntax_fp_fn_def_next(buffer)) { // FN_DEF_NEXT
-        return false;
-    }
     return true;
 }
 
