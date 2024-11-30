@@ -6,6 +6,8 @@ pub fn main() void {
     const str3 = ifj.string("MARTINEK");
     const str4 = ifj.string("ZUBOS");
     const str5 = ifj.string("EXTRADLOUHYRETEZECJAKLOFAS");
+    const err1 = 128;
+    const err2 = 3,14;
     ifj.write("STR: OTASEK | Expected: 6 | Result: ");
     var ret = ifj.length(str1);
     ifj.write(ret);
@@ -24,6 +26,14 @@ pub fn main() void {
     ifj.write("\n");
     ifj.write("STR: EXTRADLOUHYRETEZECJAKLOFAS | Expected: 26 | Result: ");
     ret = ifj.length(str5);
+    ifj.write(ret);
+    ifj.write("\n");
+    ifj.write("INPUT IS A NUM | Expected: ERR | Result: ");
+    ret = ifj.length(err1);
+    ifj.write(ret);
+    ifj.write("\n");
+    ifj.write("INPUT IS A FLOAT | Expected: ERR | Result: ");
+    ret = ifj.length(err2);
     ifj.write(ret);
     ifj.write("\n");
 }
