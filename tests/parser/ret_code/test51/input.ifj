@@ -1,0 +1,21 @@
+const ifj = @import("ifj24.zig");
+
+pub fn reverseString(s: []u8) []u8 {
+    const len = ifj.length(s);
+    var reversed = ifj.string("");
+    var i: i32 = len - 1;
+    while (i >= 0) {
+        const charSlice = ifj.substring(s, i, i + 1);
+        reversed = ifj.concat(reversed, charSlice);
+        i = i - 1;
+    }
+    return reversed;
+}
+
+pub fn main() void {
+    const original = ifj.string("hello");
+    const reversed = reverseString(original);
+    ifj.write("Reversed string | Expected: olleh | Result:");
+    ifj.write(reversed);
+    ifj.write("\n");
+}

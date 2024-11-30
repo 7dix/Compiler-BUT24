@@ -1,0 +1,7 @@
+const ifj = @import("ifj24.zig");
+
+pub fn main() void {
+    const str = ifj.string("gaga");
+    ifj.concat(str);
+    ifj.write("Invalid number of arguments | Expected: 2");
+}

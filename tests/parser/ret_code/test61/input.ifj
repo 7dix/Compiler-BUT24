@@ -1,0 +1,6 @@
+const ifj = @import("ifj24.zig");
+
+pub fn main() void {
+    const num = 1.23E+;
+    ifj.write("Invalid floating point exponent | Expected: SYNTAX ERROR");
+}

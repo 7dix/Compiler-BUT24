@@ -1,0 +1,19 @@
+const ifj = @import("ifj24.zig");
+
+pub fn nestedLoops() void {
+    var i: i32 = 0;
+    var j: i32 = 0;
+    ifj.write("Nested loops 2 | Expected: 0 1 2 0 1 2 0 1 2 | Result: ");
+    while (i < 3) {
+        j = 0;
+        while (j < 3) {
+            ifj.write(j);
+            j = j + 1;
+        }
+        i = i + 1;
+    }
+}
+
+pub fn main() void {
+    nestedLoops();
+}

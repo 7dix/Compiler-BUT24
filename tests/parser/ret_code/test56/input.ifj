@@ -1,0 +1,9 @@
+const ifj = @import("ifj24.zig");
+
+pub fn main() void {
+    const str = ifj.string("123");
+    const num = ifj.str2i(str);
+    ifj.write("What is being tested | Expected: 123 | Result:");
+    ifj.write(num);
+    ifj.write("\n");
+}

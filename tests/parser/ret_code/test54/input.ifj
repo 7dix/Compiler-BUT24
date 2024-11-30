@@ -1,0 +1,22 @@
+const ifj = @import("ifj24.zig");
+
+pub fn main() void {
+    const a = 5;
+    const b = 3;
+    const sum = a + b;
+    const diff = a - b;
+    const prod = a * b;
+    const quot = a / b;
+    ifj.write("What is being tested | Expected: 8 | Result:");
+    ifj.write(sum);
+    ifj.write("\n");
+    ifj.write("What is being tested | Expected: 2 | Result:");
+    ifj.write(diff);
+    ifj.write("\n");
+    ifj.write("What is being tested | Expected: 15 | Result:");
+    ifj.write(prod);
+    ifj.write("\n");
+    ifj.write("What is being tested | Expected: 1 | Result:");
+    ifj.write(quot);
+    ifj.write("\n");
+}
