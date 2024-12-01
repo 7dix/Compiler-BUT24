@@ -964,6 +964,7 @@ bool simulate_fn_body(T_TOKEN_BUFFER *buffer) {
                 break;
 
             case EOF_TOKEN:
+                error_flag_fp = RET_VAL_SYNTAX_ERR;
                 return false;
             default:
                 break;
