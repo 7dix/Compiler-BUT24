@@ -64,4 +64,6 @@ dkms.conf
 
 compose-dev.yaml
 
-IFJ24-tests-master/out
+tests/IFJ24-tests-master/out
+
+*.out
