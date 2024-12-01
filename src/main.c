@@ -54,6 +54,10 @@ int main() {
     if (error_code != RET_VAL_OK) {
         // print error to stderr
         fprintf(stderr, "Error: First phase failed with error code %d\n", error_code);
+        // if there is valid token, attempt to print line where the error occured
+        if (token_buffer != NULL && token_buffer->current != NULL) {
+            fprintf(stderr, "Error occured at or around line %d\n", token_buffer->current->token->line);
+        }
         // in case of error, free res., return error code
         free_token_buffer(&token_buffer);
         symtable_free(ST);
@@ -71,6 +75,10 @@ int main() {
     if (error_code != RET_VAL_OK) {
         // print error to stderr
         fprintf(stderr, "Error: Second phase failed with error code %d\n", error_code);
+        // if there is valid token, attempt to print line where the error occured
+        if (token_buffer != NULL && token_buffer->current != NULL) {
+            fprintf(stderr, "Error occured at or around line %d\n", token_buffer->current->token->line);
+        }
         // in case of error, free res., return error code
         free_token_buffer(&token_buffer);
         symtable_free(ST);
