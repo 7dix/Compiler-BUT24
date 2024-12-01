@@ -2,14 +2,17 @@ const ifj = @import("ifj24.zig");
 
 pub fn main() void {
     const str1 = ifj.string("test");
-    const str2 = ifj.string("test");
-    const str3 = ifj.string("different");
-    const cmp1 = ifj.strcmp(str1, str2);
-    const cmp2 = ifj.strcmp(str1, str3);
-    ifj.write("What is being tested | Expected: 0 | Result:");
+    const str2 = ifj.string("different");
+    const cmp1 = ifj.strcmp(str1, str1);
+    const cmp2 = ifj.strcmp(str1, str2);
+    const cmp3 = ifj.strcmp(str2, str1);
+    ifj.write("Expected: 0\nResult: ");
     ifj.write(cmp1);
     ifj.write("\n");
-    ifj.write("What is being tested | Expected: non-zero | Result:");
+    ifj.write("Expected: 1\nResult: ");
     ifj.write(cmp2);
+    ifj.write("\n");
+    ifj.write("Expected: -1\nResult: ");
+    ifj.write(cmp3);
     ifj.write("\n");
 }

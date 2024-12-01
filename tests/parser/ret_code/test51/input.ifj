@@ -5,8 +5,14 @@ pub fn reverseString(s: []u8) []u8 {
     var reversed = ifj.string("");
     var i: i32 = len - 1;
     while (i >= 0) {
-        const charSlice = ifj.substring(s, i, i + 1);
-        reversed = ifj.concat(reversed, charSlice);
+        const i_inc = i + 1;
+        const charSlice = ifj.substring(s, i, i_inc);
+        if (charSlice) |slice| {
+            reversed = ifj.concat(reversed, slice);
+        } else {
+            ifj.write("Error");
+        }
+        
         i = i - 1;
     }
     return reversed;
@@ -15,7 +21,7 @@ pub fn reverseString(s: []u8) []u8 {
 pub fn main() void {
     const original = ifj.string("hello");
     const reversed = reverseString(original);
-    ifj.write("Reversed string | Expected: olleh | Result:");
+    ifj.write("Reversed string\nExp: |olleh|\nRes: |");
     ifj.write(reversed);
-    ifj.write("\n");
+    ifj.write("|\n");
 }

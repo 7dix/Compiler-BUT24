@@ -1,14 +1,14 @@
 const ifj = @import("ifj24.zig");
 pub fn main() void {
     var num = 10;
-    ifj.write("If statements | Expected: Greater than 5 | Result: ");
+    ifj.write("If statements\nExpected: Greater than 5\nResult: ");
     if (num > 5) {
         ifj.write("Greater than 5\n");
     } else {
         ifj.write("Lesser or eq to 5\n");
     }
     num = 4;
-    ifj.write("If statements | Expected: Lesser or eq to 5 | Result: ");
+    ifj.write("Expected: Lesser or eq to 5\nResult: ");
     if (num > 5) {
         ifj.write("Greater than 5\n");
     } else {

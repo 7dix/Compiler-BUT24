@@ -5,9 +5,9 @@ pub fn main() void {
     const str2 = ifj.string("World");
     const concatenated = ifj.concat(str1, str2);
     const length = ifj.length(concatenated);
-    ifj.write("STRLEN and CONCAT | Expected: HelloWorld, 10 | Result:");
+    ifj.write("STRLEN and CONCAT\nExpected: |HelloWorld|, 10\nResult: |");
     ifj.write(concatenated);
-    ifj.write(", ");
+    ifj.write("|, ");
     ifj.write(length);
     ifj.write("\n");
 }

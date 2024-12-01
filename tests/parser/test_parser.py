@@ -73,6 +73,11 @@ def run_test(test_folder, test_number):
         print_colored(f"TEST {test_number} FAILED", "red")
         print(f"  Expected: {expected_text} (Code: {expected_output})")
         print(f"  Got: {actual_text} (Code: {actual_output})")
+        
+        # If there is stderr output, print it
+        if result.stderr:
+            print_colored(f"  STDERR: {result.stderr}", "red")
+        
         return test_number, "FAILED"
 
 def run_tests(test_type):
