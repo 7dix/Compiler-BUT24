@@ -1872,7 +1872,9 @@ bool syntax_assign_expr_or_fn_call(T_TOKEN_BUFFER *buffer) {
     }
 
     // codegen print mov for right side
-    handleAssign(token->lexeme);
+    if (symbol->type == SYM_VAR) {
+        handleAssign(token->lexeme);
+    }
 
     return true;
 }
@@ -1970,6 +1972,7 @@ bool syntax_id_start(T_TOKEN_BUFFER *buffer, Symbol *symbol) {
         return true;
     }
 
+    // void function call to a user defined function
     // second branch -> FUNCTION_ARGUMENTS
     if (token->type == BRACKET_LEFT_SIMPLE) { // (
         if (symbol->type != SYM_FUNC) {
@@ -1983,12 +1986,6 @@ bool syntax_id_start(T_TOKEN_BUFFER *buffer, Symbol *symbol) {
         fn_call.argv = NULL;
         fn_call.argc = 0;
 
-        // check function is non-void
-        if (fn_call.ret_type == VAR_VOID) {
-            error_flag = RET_VAL_SEMANTIC_FUNCTION_ERR; // TODO: correct error code?
-            return false;
-        }
-
         move_back(buffer); // token needed in FUNCTION_ARGUMENTS
         if (!syntax_function_arguments(buffer, &fn_call)) { // FUNCTION_ARGUMENTS
             return false;
@@ -1997,6 +1994,12 @@ bool syntax_id_start(T_TOKEN_BUFFER *buffer, Symbol *symbol) {
         // Check if the function call is correct
         error_flag = check_function_call(ST, &fn_call);
         if (error_flag != RET_VAL_OK) {
+            return false;
+        }
+
+        // check function is non-void
+        if (fn_call.ret_type != VAR_VOID) {
+            error_flag = RET_VAL_SEMANTIC_FUNCTION_ERR;
             return false;
         }
 
