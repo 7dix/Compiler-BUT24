@@ -34,7 +34,8 @@ typedef enum {
     VAR_NULL, // not used in vars, unification with expr checks
     VAR_BOOL, // not used in vars, unification with expr checks
     STRING_LITERAL,
-    VAR_VOID
+    VAR_VOID,
+    VAR_NONE,
 } VarType;
 
 // Parameter structure

@@ -869,7 +869,7 @@ bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
     data.var.modified = false;
     data.var.used = false;
     data.var.const_expr = false;
-    data.var.type = VAR_VOID;
+    data.var.type = VAR_NONE;
     data.var.id = -1;
     data.var.float_value = 0.0;
 
@@ -902,7 +902,7 @@ bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
 
         // TODO: need to check if this is correct based on right side of assignment
         // Check if variable type was set
-        if (data.var.type == VAR_VOID) {
+        if (data.var.type == VAR_NONE) {
             error_flag = RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
             return false;
         }
@@ -948,7 +948,7 @@ bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
 
         // TODO: need to check if this is correct based on right side of assignment
         // Check if variable type was set
-        if (data.var.type == VAR_VOID) {
+        if (data.var.type == VAR_NONE) {
             error_flag = RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
             return false;
         }
@@ -998,7 +998,8 @@ bool syntax_var_def_after_id(T_TOKEN_BUFFER *buffer, SymbolData *data) {
     // first branch -> : TYPE = ASSIGN
     if (token->type == COLON) { // :
 
-        if (!syntax_type(buffer, &(data->var.type))) { // TYPE
+        VarType type = VAR_NONE; // store type definition here
+        if (!syntax_type(buffer, &type)) { // TYPE
             return false;
         }
 
@@ -1011,7 +1012,14 @@ bool syntax_var_def_after_id(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         if (!syntax_assign(buffer, data)) { // ASSIGN
             return false;
         }
-    
+
+        error_flag = compare_var_types(&type, &(data->var.type));
+        if (error_flag != RET_VAL_OK) {
+            return false;
+        }
+
+        data->var.type = type;
+
         return true;
     }
 
@@ -1019,6 +1027,11 @@ bool syntax_var_def_after_id(T_TOKEN_BUFFER *buffer, SymbolData *data) {
     if (token->type == ASSIGN) { // =
 
         if (!syntax_assign(buffer, data)) { // ASSIGN
+            return false;
+        }
+
+        if (data->var.type == VAR_NULL) {
+            error_flag = RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
             return false;
         }
 
@@ -1226,7 +1239,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         SymbolData data;
         data.var.type = fc_nullable_convert_type((*tree)->resultType);
         // TODO: check behaviour of VAR_NULL !!
-        if (data.var.type == VAR_VOID) {
+        if (data.var.type == VAR_NONE) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             return false;
         }
@@ -1536,7 +1549,7 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
         SymbolData data;
         data.var.type = fc_nullable_convert_type((*tree)->resultType);
         // TODO: check behaviour of VAR_NULL !!
-        if (data.var.type == VAR_VOID) {
+        if (data.var.type == VAR_NONE) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             return false;
         }
@@ -1563,8 +1576,8 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
         int fc_defined_current = is_in_fc(ST);
 
         // Add the | identifier | to the symtable
-        data.var.is_const = true; // TODO: check corectness
-        data.var.modified = true; // TODO: check corectness
+        data.var.is_const = true;
+        data.var.modified = true;
         data.var.used = false;
         data.var.id = -1;
         if (!symtable_add_symbol(ST, token->lexeme, SYM_VAR, data)) {
@@ -1912,7 +1925,7 @@ bool syntax_assign_discard_expr_or_fn_call(T_TOKEN_BUFFER *buffer) {
 
     // Dummy for return type
     SymbolData data;
-    data.var.type = VAR_VOID;
+    data.var.type = VAR_NONE;
 
     // handling of expression
     if (!syntax_assign(buffer, &data)) { // ASSIGN
@@ -2091,8 +2104,6 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         is_return = true;
     }
 
-
-
     // we have several branches, choose here
     next_token(buffer, &token);
     
@@ -2134,13 +2145,15 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         fn_call.name = fn_name;
         fn_call.ret_type = symbol->data.func.return_type;
 
-
-
-        if (compare_var_types(&(data->var.type), &(symbol->data.func.return_type)) != 0) {
-            error_flag = RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
+        error_flag = compare_var_types(&(data->var.type), &(symbol->data.func.return_type));
+        if (error_flag != RET_VAL_OK) {
             return false;
         }
 
+        if (fn_call.ret_type == VAR_VOID) {
+            error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            return false;
+        }
 
         next_token(buffer, &token); // (
         if (token->type != BRACKET_LEFT_SIMPLE) {
@@ -2208,7 +2221,7 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         }
 
         // tree->resultType
-        VarType exprRes = VAR_VOID;
+        VarType exprRes = VAR_NONE;
         switch (tree->resultType) {
             case TYPE_NULL_RESULT:
                 exprRes = VAR_NULL;
@@ -2248,9 +2261,10 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
                 return false;
         }
 
-        if (compare_var_types(&(data->var.type), &exprRes) != 0) {
+        error_flag = compare_var_types(&(data->var.type), &exprRes);
+        if (error_flag != RET_VAL_OK) {
+            // TODO: change following when doing returns
             if (!is_return) {
-                error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
                 return false;
             }
             else {
@@ -2321,8 +2335,13 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
 
         fn_call.ret_type = symbol->data.func.return_type;
 
-        if (compare_var_types(&(data->var.type), &(fn_call.ret_type)) != 0) {
-            error_flag = RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
+        error_flag = compare_var_types(&(data->var.type), &(fn_call.ret_type));
+        if (error_flag != RET_VAL_OK) {
+            return false;
+        }
+
+        if (fn_call.ret_type == VAR_VOID) {
+            error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             return false;
         }
 
@@ -2362,7 +2381,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
         }
 
         // tree->resultType
-        VarType exprRes = VAR_VOID;
+        VarType exprRes = VAR_NONE;
         switch (tree->resultType) {
             case TYPE_NULL_RESULT:
                 exprRes = VAR_NULL;
@@ -2402,7 +2421,8 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
                 return false;
         }
 
-        if (compare_var_types(&(data->var.type), &exprRes) != 0) {
+        error_flag = compare_var_types(&(data->var.type), &exprRes);
+        if (error_flag != RET_VAL_OK) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             return false;
         }
@@ -2442,7 +2462,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
         }
 
         // tree->resultType
-        VarType exprRes = VAR_VOID;
+        VarType exprRes = VAR_NONE;
         switch (tree->resultType) {
             case TYPE_NULL_RESULT:
                 exprRes = VAR_NULL;
@@ -2482,7 +2502,8 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
                 return false;
         }
 
-        if (compare_var_types(&(data->var.type), &exprRes) != 0) {
+        error_flag = compare_var_types(&(data->var.type), &exprRes);
+        if (error_flag != RET_VAL_OK) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             return false;
         }

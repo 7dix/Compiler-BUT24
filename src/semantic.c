@@ -146,7 +146,7 @@ int compare_var_types(VarType *existing, VarType *new) {
         return RET_VAL_OK;
     }
 
-    if (*existing == VAR_STRING_NULL && *new == STRING_VAR_STRING) { //TODO: correct?
+    if (*existing == VAR_STRING_NULL && *new == STRING_VAR_STRING) {
         //*existing = VAR_STRING;
         return RET_VAL_OK;
     }
@@ -159,11 +159,7 @@ int compare_var_types(VarType *existing, VarType *new) {
         return RET_VAL_OK;
     }
 
-    if (*existing == VAR_VOID) {
-
-        if (*new == VAR_NULL) {
-            return RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
-        }
+    if (*existing == VAR_NONE) {
 
         if (*new == STRING_LITERAL) {
             return RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
@@ -506,6 +502,8 @@ T_RET_VAL check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
         return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
 
     }
+    
+
     // Return OK
     list_dispose(listPostfix);
     return RET_VAL_OK;
@@ -559,6 +557,6 @@ VarType fc_nullable_convert_type(RESULT_TYPE type) {
         case TYPE_STRING_NULL_RESULT:
             return VAR_STRING;
         default:
-            return VAR_VOID;
+            return VAR_NONE;
     }
 }
