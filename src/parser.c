@@ -1796,6 +1796,7 @@ bool syntax_built_in_void_fn_call(T_TOKEN_BUFFER *buffer) {
     Symbol *symbol = symtable_find_symbol(ST, fn_name);
     if (symbol == NULL || symbol->type != SYM_FUNC) {
         error_flag = RET_VAL_SEMANTIC_UNDEFINED_ERR;
+        free(fn_name);
         return false;
     }
 
@@ -1806,22 +1807,26 @@ bool syntax_built_in_void_fn_call(T_TOKEN_BUFFER *buffer) {
     // check function return type is void
     if (fn_call.ret_type != VAR_VOID) {
         error_flag = RET_VAL_SEMANTIC_FUNCTION_ERR;
+        free(fn_name);
         return false;
     }
 
     next_token(buffer, &token); // (
     if (token->type != BRACKET_LEFT_SIMPLE) {
         error_flag = RET_VAL_SYNTAX_ERR;
+        free(fn_name);
         return false;
     }
 
     if (!syntax_arguments(buffer, &fn_call)) { // ARGUMENTS
+        free(fn_name);
         return false;
     }
 
     // Check if the function call is correct
     error_flag = check_function_call(ST, &fn_call);
     if (error_flag != RET_VAL_OK) {
+        free(fn_name);
         return false;
     }
 
