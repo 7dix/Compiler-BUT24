@@ -13,7 +13,7 @@
 
 
 /**
- * GRAMAR:
+ * GRAMMAR:
  * 
  * S -> E
  * S -> R
@@ -27,6 +27,7 @@
  * E -> int_literal
  * E -> float_literal
  * E -> string_literal
+ * E -> null
  * 
  * R -> E < E
  * R -> E > E
