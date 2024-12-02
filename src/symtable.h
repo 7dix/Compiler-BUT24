@@ -140,7 +140,6 @@ void set_fn_name(T_SYM_TABLE *table, char *name);
 char *get_fn_name(T_SYM_TABLE *table);
 
 
-
 extern T_SYM_TABLE *ST;
 
 #endif // H_SYMTABLE

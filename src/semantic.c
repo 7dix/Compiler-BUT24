@@ -2,14 +2,24 @@
 // PROJECT: IFJ24 - Compiler for the IFJ24 language @ FIT BUT 2BIT
 // TEAM: Martin Zůbek (253206)
 // AUTHORS:
-// <Otakar Kočí> (xkocio00)
-// Martin Zůbek (253206)
+//  <Otakar Kočí> (xkocio00)
+//  <Martin Zůbek> (253206)
 //
 // YEAR: 2024
+// NOTES: Helper functions for semantic analysis
+
 #include "semantic.h"
 
 
-// check if the function call is valid
+/**
+ * @brief checks if the function call is valid
+ * 
+ * @param table Pointer to the symbol table
+ * @param fn_call Pointer to the function call
+ * @return int as defined in `T_RET_VAL` `return_values.h`
+ * @retval 0=RET_VAL_OK if the function call is valid
+ * @retval 1-9 if the function call is invalid
+ */
 int check_function_call(T_SYM_TABLE *table, T_FN_CALL *fn_call) {
     Symbol *fn = symtable_find_symbol(table, fn_call->name);
     if (fn == NULL || fn->type != SYM_FUNC) {
@@ -95,7 +105,15 @@ int check_function_call(T_SYM_TABLE *table, T_FN_CALL *fn_call) {
     return RET_VAL_OK;
 }
 
-// add argument to function call
+/**
+ * @brief Function for adding argument to function call
+ * 
+ * @param fn_call Pointer to the function call
+ * @param arg Pointer to the argument
+ * @return int as defined in `T_RET_VAL` `return_values.h`
+ * @retval 0=RET_VAL_OK if the argument was added successfully
+ * @retval 1=RET_VAL_INTERNAL_ERR if the memory allocation failed
+ */
 int add_arg_to_fn_call(T_FN_CALL *fn_call, T_TOKEN *arg) {
     if (fn_call->argc == 0) {
         fn_call->argv = (T_TOKEN **) malloc(sizeof(T_TOKEN *));
@@ -113,32 +131,40 @@ int add_arg_to_fn_call(T_FN_CALL *fn_call, T_TOKEN *arg) {
     return RET_VAL_OK;
 }
 
-// free function call arguments
+/**
+ * @brief Function for freeing function call arguments
+ * 
+ * @param fn_call
+ */
 void free_fn_call_args(T_FN_CALL *fn_call) {
     if (fn_call->argv != NULL) {
         free(fn_call->argv);
     }
 }
 
-// Compare variable types
+/**
+ * @brief Function for checking type compatibility
+ * 
+ * @param existing Pointer to the existing variable type (left side)
+ * @param new Pointer to the new variable type (right side)
+ * @return int as defined in `T_RET_VAL` `return_values.h`
+ * @retval 0=RET_VAL_OK if the types are compatible
+ * @retval 1-9 if incompatible
+ */
 int compare_var_types(VarType *existing, VarType *new) {
-    // TODO: check all is correct
     if (*existing == *new) {
         return RET_VAL_OK;
     }
 
     if (*existing == VAR_INT_NULL && (*new == VAR_INT || *new == VAR_NULL)) {
-        //*existing = VAR_INT;
         return RET_VAL_OK;
     }
 
     if (*existing == VAR_FLOAT_NULL && (*new == VAR_FLOAT || *new == VAR_NULL)) {
-        //*existing = VAR_FLOAT;
         return RET_VAL_OK;
     }
 
     if (*existing == VAR_STRING_NULL && (*new == VAR_STRING || *new == VAR_NULL)) {
-        //*existing = VAR_STRING;
         return RET_VAL_OK;
     }
 
@@ -147,7 +173,6 @@ int compare_var_types(VarType *existing, VarType *new) {
     }
 
     if (*existing == VAR_STRING_NULL && *new == STRING_VAR_STRING) {
-        //*existing = VAR_STRING;
         return RET_VAL_OK;
     }
 
@@ -510,7 +535,14 @@ T_RET_VAL check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
 
 }
 
-// put parameter to symbol table
+/**
+ * @brief Function for adding function parameters to the symbol table
+ * 
+ * @param name Name of the function
+ * @return int as defined in `T_RET_VAL` `return_values.h`
+ * @retval 0=RET_VAL_OK added successfully
+ * @retval 1=RET_VAL_INTERNAL_ERR failed
+ */
 int put_param_to_symtable(char *name) {
     if (name == NULL) {
         return RET_VAL_INTERNAL_ERR;
@@ -542,11 +574,24 @@ int put_param_to_symtable(char *name) {
     }
     return RET_VAL_OK;
 }
-
+/**
+ * @brief Function for checking if the result type is nullable
+ * 
+ * @param type Result type
+ * @return bool
+ * @retval true if the result type is nullable
+ * @retval false if the result type is not nullable
+ */
 bool is_result_type_nullable(RESULT_TYPE type) {
     return type == TYPE_NULL_RESULT || type == TYPE_INT_NULL_RESULT || type == TYPE_FLOAT_NULL_RESULT || type == TYPE_STRING_NULL_RESULT;
 }
 
+/**
+ * @brief Function for converting nullable result type to non-nullable
+ * 
+ * @param type Result type
+ * @return VarType
+ */
 VarType fc_nullable_convert_type(RESULT_TYPE type) {
     switch (type) {
         case TYPE_NULL_RESULT:

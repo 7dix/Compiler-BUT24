@@ -3,9 +3,9 @@
 // TEAM: Martin Zůbek (253206)
 // AUTHORS:
 //  <Marek Tenora> (xtenor02)
-// <Otakar Kočí> (xkocio00)
-// Martin Zůbek (253206)
-// Kryštof Valenta (xvalenk00)
+//  <Otakar Kočí> (xkocio00)
+//  <Martin Zůbek> (253206)
+//  <Kryštof Valenta> (xvalenk00)
 //
 // YEAR: 2024
 // NOTES:   Implementation of Symtable with hash table and stack of scopes.
@@ -152,14 +152,17 @@ void hashtable_remove(Hashtable *ht, const char *key) {
     }
 }
 
-// Initialize symbol table
+/**
+ * @brief Initialize the symbol table
+ * 
+ * @return T_SYM_TABLE* Pointer to the symbol table, or null if allocation failed
+ */
 T_SYM_TABLE *symtable_init()
 {
     T_SYM_TABLE *table = (T_SYM_TABLE*) malloc(sizeof(T_SYM_TABLE));
     if (table == NULL)
-    {
         return NULL;
-    }
+
     table->var_id_cnt = 0;
     table->label_cnt = 0;
     table->fc_defined_cnt = 0;
@@ -168,31 +171,53 @@ T_SYM_TABLE *symtable_init()
     return table;
 }
 
-// Add a new scope to the symbol table
+/**
+ * @brief Add a new scope to the symbol table
+ * 
+ * Also sets the flow control id if the scope is a while/if/else
+ * 
+ * @param table Pointer to the symbol table
+ * @param is_fc True if the scope is a flow control statement
+ * @return true added successfully
+ * @return false if operation failed
+ */
 bool symtable_add_scope(T_SYM_TABLE *table, bool is_fc) {
     if (table == NULL) {
         return false;
     }
+
     T_SCOPE *new_scope = (T_SCOPE *) malloc(sizeof(T_SCOPE));
     if (new_scope == NULL) {
         return false;
     }
+
     new_scope->ht = hashtable_init();
     if (new_scope->ht == NULL) {
         free(new_scope);
         return false;
     }
+    // if the scope is a flow control statement, set the id
+    // for handling of DEFVARs (encapsulated in flow controls) in codegen
     if (is_fc) {
         new_scope->fc_defined_id = table->fc_defined_cnt++;
     } else {
         new_scope->fc_defined_id = -1;
     }
+
     new_scope->parent = table->top;
     table->top = new_scope;
     return true;
 }
 
-// Remove the top scope from the symbol table
+/**
+ * @brief Remove the top scope from the symbol table
+ * 
+ * @param table Pointer to the symbol table
+ * @param check_unused_vars if true, check for unused and unmodified variables
+ * @return int RET_VAL_OK if operation was successful
+ * @return int RET_VAL_INTERNAL_ERR if operation failed
+ * @return int RET_VAL_SEMANTIC_UNUSED_VAR_ERR if unused variable was found
+ */
 int symtable_remove_scope(T_SYM_TABLE *table, bool check_unused_vars) {
     if (table == NULL || table->top == NULL) {
         return RET_VAL_INTERNAL_ERR;
@@ -213,17 +238,33 @@ int symtable_remove_scope(T_SYM_TABLE *table, bool check_unused_vars) {
     return RET_VAL_OK;
 }
 
-// Add a new symbol to the current scope
+/**
+ * @brief Add a symbol to the symbol table
+ * 
+ * @param table Pointer to the symbol table
+ * @param key Symbols name
+ * @param type Symbols type
+ * @param data Symbols data
+ * @return Symbol* Pointer to the symbol, or null if operation failed
+ */
 Symbol *symtable_add_symbol(T_SYM_TABLE *table, const char *key, SymbolType type, SymbolData data) {
     if (table == NULL || table->top == NULL) {
         return NULL;
     }
-    if (type == SYM_VAR)
+
+    if (type == SYM_VAR) {
         data.var.id = table->var_id_cnt++;
+    }
     return hashtable_insert(table->top->ht, key, type, data);
 }
 
-// Find a symbol in the symbol table,  go through all scopes
+/**
+ * @brief Find a symbol in the symbol table
+ * 
+ * @param table Pointer to the symbol table
+ * @param key Symbols name
+ * @return Symbol* Pointer to the symbol, or null if not found
+ */
 Symbol *symtable_find_symbol(T_SYM_TABLE *table, const char *key) {
     if (table == NULL || table->top == NULL) {
         return NULL;
@@ -241,18 +282,33 @@ Symbol *symtable_find_symbol(T_SYM_TABLE *table, const char *key) {
     return NULL;
 }
 
-// Free the symbol table
+/**
+ * @brief Free the symbol table and all its scopes
+ * 
+ * @param table Pointer to the symbol table
+ */
 void symtable_free(T_SYM_TABLE *table) {
     if (table == NULL) {
         return;
     }
     while (table->top != NULL) {
+        // Remove all scopes, do not check for unused variables
         symtable_remove_scope(table, false);
     }
     free(table);
 }
 
-// Add a parameter to the symbol data
+/**
+ * @brief Add a parameter to the symbol data
+ * 
+ * Adds a parameter to the symbol data of a function, reallocates the argv array
+ * 
+ * 
+ * @param data Pointer to the symbol data
+ * @param param Parameter to add
+ * @return int RET_VAL_OK if operation was successful
+ * @return int RET_VAL_INTERNAL_ERR if operation failed
+ */
 int add_param_to_symbol_data(SymbolData *data, Param param) {
     if (data == NULL) {
         return RET_VAL_INTERNAL_ERR;
@@ -273,7 +329,13 @@ int add_param_to_symbol_data(SymbolData *data, Param param) {
     return RET_VAL_OK;
 }
 
-// Get the var id
+/**
+ * @brief Get the id of a variable
+ * 
+ * @param table Pointer to the symbol table
+ * @param key Variable name
+ * @return int Variable id, or -1 if not found
+ */
 int get_var_id(T_SYM_TABLE *table, const char *key) {
     Symbol *symbol = symtable_find_symbol(table, key);
     if (symbol == NULL) {
@@ -282,7 +344,13 @@ int get_var_id(T_SYM_TABLE *table, const char *key) {
     return symbol->data.var.id;
 }
 
-// get variable
+/**
+ * @brief Get a variable from the symbol table
+ * 
+ * @param table Pointer to the symbol table
+ * @param key Variable name
+ * @return Symbol* Pointer to the symbol, or null if not found or not a variable (fn)
+ */
 Symbol *get_var(T_SYM_TABLE *table, const char *name) {
     Symbol *symbol = symtable_find_symbol(table, name);
     if (symbol == NULL) {
@@ -294,7 +362,16 @@ Symbol *get_var(T_SYM_TABLE *table, const char *name) {
     return symbol;
 }
 
-// Checks for unused and unmodified variables in the symbol table
+/**
+ * @brief Check for unused variables in the symbol table
+ * 
+ * Checks variable usage and modification flags
+ * 
+ * @param table Pointer to the symbol table
+ * @return int RET_VAL_OK if no unused variables were found
+ * @return int RET_VAL_SEMANTIC_UNUSED_VAR_ERR if unused variable was found
+ * @return int RET_VAL_INTERNAL_ERR if operation failed
+ */
 int check_for_unused_vars(T_SYM_TABLE *table) {
     if (table == NULL || table->top == NULL) {
         return RET_VAL_INTERNAL_ERR;
@@ -304,7 +381,6 @@ int check_for_unused_vars(T_SYM_TABLE *table) {
     for (int i = 0; i < HASHTABLE_SIZE; i++) {
         if (ht->table[i].occupied && ht->table[i].type == SYM_VAR) {
             if (!ht->table[i].data.var.used || !ht->table[i].data.var.modified) {
-                //fprintf(stderr, "Variable '%s' was never used", ht->table[i].name);
                 return RET_VAL_SEMANTIC_UNUSED_VAR_ERR;
             }
         }
@@ -313,8 +389,17 @@ int check_for_unused_vars(T_SYM_TABLE *table) {
     return RET_VAL_OK;
 }
 
-// TODO: finish
-
+/**
+ * @brief Generate two unique labels
+ * 
+ * Uses the label counter from the symbol table to generate two unique labels
+ * 
+ * @param table Pointer to the symbol table
+ * @param label1 Pointer to the first label
+ * @param label2 Pointer to the second label
+ * @return true if labels were generated successfully
+ * @return false if operation failed
+ */
 bool generate_labels(T_SYM_TABLE *table, char **label1, char **label2) {
     if (table == NULL || table->top == NULL) {
         return false;
@@ -341,12 +426,21 @@ bool generate_labels(T_SYM_TABLE *table, char **label1, char **label2) {
     return true;
 }
 
-// Returns the id of the closest flow control statement if,else,while
+/**
+ * @brief Check if we are in a flow control statement
+ * 
+ * The flow control scope can be anywhere above the current scope
+ * 
+ * @param table Pointer to the symbol table
+ * @return int Flow control id, or -1 if not in a flow control statement
+ */
 int is_in_fc(T_SYM_TABLE *table) {
     if (table == NULL || table->top == NULL) {
         return -1;
     }
+
     T_SCOPE *current_scope = table->top;
+
     while (current_scope != NULL) {
         if (current_scope->fc_defined_id != -1) {
             return current_scope->fc_defined_id;
@@ -356,7 +450,12 @@ int is_in_fc(T_SYM_TABLE *table) {
     return -1;
 }
 
-// Saves pointer to provided fn name into symtable pointer
+/**
+ * @brief Set the current function name
+ * 
+ * @param table Pointer to the symbol table
+ * @param name Function name
+ */
 void set_fn_name(T_SYM_TABLE *table, char *name) {
     if (table == NULL) {
         return;
@@ -364,7 +463,12 @@ void set_fn_name(T_SYM_TABLE *table, char *name) {
     table->current_fn_name = name;
 }
 
-// Returns pointer to the current function name
+/**
+ * @brief Get the current function name
+ * 
+ * @param table Pointer to the symbol table
+ * @return char* Function name
+ */
 char *get_fn_name(T_SYM_TABLE *table) {
     if (table == NULL) {
         return NULL;

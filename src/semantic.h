@@ -2,10 +2,11 @@
 // PROJECT: IFJ24 - Compiler for the IFJ24 language @ FIT BUT 2BIT
 // TEAM: Martin Zůbek (253206)
 // AUTHORS:
-// <Otakar Kočí> (xkocio00)
-// Martin Zůbek (253206)
+//  <Otakar Kočí> (xkocio00)
+//  <Martin Zůbek> (253206)
 // 
 // YEAR: 2024
+// NOTES: Header file for module with helper functions for semantic analysis
 
 #ifndef H_SEMANTIC
 #define H_SEMANTIC

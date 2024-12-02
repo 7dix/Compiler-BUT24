@@ -227,14 +227,17 @@ bool add_built_in_functions() {
  */
 bool check_main_exists() {
     Symbol *symbol;
+    // exists main
     if ((symbol = symtable_find_symbol(ST, "main")) == NULL) {
         error_flag_fp = RET_VAL_SEMANTIC_UNDEFINED_ERR;
         return false;
     }
+    // has it void return type
     if (symbol->data.func.return_type != VAR_VOID) {
         error_flag_fp = RET_VAL_SEMANTIC_FUNCTION_ERR;
         return false;
     }
+    // it should have no arguments
     if (symbol->data.func.argc != 0) {
         error_flag_fp = RET_VAL_SEMANTIC_FUNCTION_ERR;
         return false;
@@ -264,7 +267,7 @@ bool check_main_exists() {
  */
 bool get_save_token(T_TOKEN_BUFFER *token_buffer, T_TOKEN **token) {
 
-    if (!needs_last_token)  {
+    if (!needs_last_token)  { // get new token
         (*token) = (T_TOKEN *) malloc(sizeof(T_TOKEN));
         if ((*token) == NULL) {
             error_flag_fp = RET_VAL_INTERNAL_ERR;
@@ -279,13 +282,14 @@ bool get_save_token(T_TOKEN_BUFFER *token_buffer, T_TOKEN **token) {
             return false;
         }
 
+        // save to buffer
         if (!add_token_as_last(token_buffer, *token)) {
             error_flag_fp = RET_VAL_INTERNAL_ERR;
             free((*token));
             return false;
         }
     }
-    else {
+    else { // last token is requested
         get_last_token(token_buffer, token);
         needs_last_token = false;
     }
@@ -317,6 +321,7 @@ T_RET_VAL first_phase(T_TOKEN_BUFFER *token_buffer) {
         return error_flag_fp;
     }
 
+    // Check main existence
     if (!check_main_exists()) {
         return error_flag_fp;
     }
@@ -370,8 +375,8 @@ bool syntax_fp_start(T_TOKEN_BUFFER *token_buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_prolog(T_TOKEN_BUFFER *buffer) {
+    
     T_TOKEN *token;
-
     if (!get_save_token(buffer, &token)) // const
         return false;
     
@@ -461,8 +466,8 @@ bool syntax_fp_prolog(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer) {
+    
     T_TOKEN *token;
-
     // Create new symbol data
     SymbolData data;
     data.func.return_type = VAR_VOID;
@@ -566,8 +571,8 @@ bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_fn_def_next(T_TOKEN_BUFFER *buffer) {
-    T_TOKEN *token;
     
+    T_TOKEN *token;
     // we have two branches, choose here
     if (!get_save_token(buffer, &token)) 
         return false;
@@ -829,6 +834,7 @@ bool syntax_fp_type(T_TOKEN_BUFFER *buffer, VarType *type) {
             *type = VAR_STRING_NULL;
             break;
         default:
+            // we should not reach this point
             break;
     }
 
@@ -855,8 +861,8 @@ bool syntax_fp_type(T_TOKEN_BUFFER *buffer, VarType *type) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_param_next(T_TOKEN_BUFFER *buffer, SymbolData *data) {
+    
     T_TOKEN *token;
-
     // we have two branches, choose here
     if (!get_save_token(buffer, &token)) 
         return false;
@@ -900,8 +906,8 @@ bool syntax_fp_param_next(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_param_after_comma(T_TOKEN_BUFFER *buffer, SymbolData *data) {
+    
     T_TOKEN *token;
-
     // we have two branches, choose here
     if (!get_save_token(buffer, &token)) 
         return false;
@@ -944,6 +950,7 @@ bool syntax_fp_param_after_comma(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * @retval `false` - syntax error
  */
 bool syntax_fp_end(T_TOKEN_BUFFER *buffer) {
+    
     T_TOKEN *token;  
     // check last terminal in the program -> EOF
     if (!get_save_token(buffer, &token)) 
@@ -968,14 +975,16 @@ bool syntax_fp_end(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool simulate_fn_body(T_TOKEN_BUFFER *buffer) {
-    int bracket_count = 1;
+
+    int bracket_count = 1; // to correctly find function end
     T_TOKEN *token;
 
     while (true) {
-        if (!get_save_token(buffer, &token)) {
+        if (!get_save_token(buffer, &token)) { // get token
             return false;
         }
         
+        // check for brackets
         switch (token->type) {
             case BRACKET_LEFT_CURLY:
                 bracket_count++;
@@ -992,8 +1001,12 @@ bool simulate_fn_body(T_TOKEN_BUFFER *buffer) {
                 break;
         }
 
+        // found correct end of function
         if (bracket_count == 0) {
             return true;
         }
     }
+
+    // should not reach this point
+    return false;
 }

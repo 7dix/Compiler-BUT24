@@ -69,13 +69,20 @@ bool syntax_argument(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call);
  * This function uses following global variables:
  * 
  * - `int error_flag`
- * @note TODO: add semantic checks, cleaning, etc.
- * @note TODO: improve comments on return values
  * @param *token_buffer pointer to token buffer
  * @return `int`
  * @retval `RET_VAL_OK` if parsing was successful
  * @retval `RET_VAL_SYNTAX_ERR` if syntax error occurred
  * @retval `RET_VAL_INTERNAL_ERR` if internal error occurred
+ * @retval `RET_VAL_SEMANTIC_UNDEFINED_ERR` sematics
+ * @retval `RET_VAL_SEMANTIC_FUNCTION_ERR` sematics
+ * @retval `RET_VAL_SEMANTIC_REDEF_OR_BAD_ASSIGN_ERR` sematics
+ * @retval `RET_VAL_SEMANTIC_FUNC_RETURN_ERR` sematics
+ * @retval `RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR` sematics
+ * @retval `RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR` sematics
+ * @retval `RET_VAL_SEMANTIC_UNUSED_VAR_ERR` sematics
+ * @retval `RET_VAL_SEMANTIC_OTHER_ERR` sematics
+ * @retval `RET_VAL_INTERNAL_ERR` compiler error
  */
 int run_parser(T_TOKEN_BUFFER *token_buffer) {
     // Start of recursive parser
@@ -159,6 +166,7 @@ bool syntax_start(T_TOKEN_BUFFER *token_buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_prolog(T_TOKEN_BUFFER *buffer) {
+    
     T_TOKEN *token;
 
     next_token(buffer, &token); // const
@@ -258,7 +266,6 @@ bool syntax_fn_def(T_TOKEN_BUFFER *buffer) {
     // save current function name
     set_fn_name(ST, token->lexeme);
 
-
     next_token(buffer, &token); // (
     if (token->type != BRACKET_LEFT_SIMPLE) {
         error_flag = RET_VAL_SYNTAX_ERR;
@@ -282,7 +289,7 @@ bool syntax_fn_def(T_TOKEN_BUFFER *buffer) {
     // reset current function name
     set_fn_name(ST, NULL);
 
-    // CD: generate implicit return, needs to be changed in the future
+    // CD: generate implicit return
     createReturn();
 
     return true;
@@ -346,16 +353,16 @@ bool syntax_fn_def_next(T_TOKEN_BUFFER *buffer) {
  * This function uses following global variables:
  * 
  * - `int error_flag`
+ * 
+ * - `T_SYM_TABLE *ST`
  * @param *token_buffer pointer to token buffer
  * @return `bool`
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
 bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
-    // TODO: add cleaning, etc.
-    // TODO: possible simplification by checking only void type
+    
     T_TOKEN *token;
-
     // we have two branches, choose here
     next_token(buffer, &token);
     // first branch -> TYPE { CODE_BLOCK_NEXT }
@@ -376,11 +383,12 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
             return false;
         }
 
-        // SCOPE INCREASE
+        // entering function scope
         if (!symtable_add_scope(ST, false)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false; 
         }
+        // add function parameters to symtable
         error_flag = put_param_to_symtable(get_fn_name(ST));
         if (error_flag != RET_VAL_OK) {
             return false;
@@ -393,7 +401,7 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
             return false;
         }
 
-        // SCOPE DECREASE, check for unused variables
+        // leaving function scope, check for unused variables
         error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
             return false;
@@ -417,11 +425,12 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
             return false;
         }
 
-        // SCOPE INCREASE
+        // entering function scope
         if (!symtable_add_scope(ST, false)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false;
         }
+        // add function parameters to symtable
         error_flag = put_param_to_symtable(get_fn_name(ST));
         if (error_flag != RET_VAL_OK) {
             return false;
@@ -434,7 +443,7 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
             return false;
         }
 
-        // SCOPE DECREASE, check for unused variables
+        // leaving function scope, check for unused variables
         error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
             return false;
@@ -853,14 +862,16 @@ bool syntax_code_block(T_TOKEN_BUFFER *buffer) {
  * This function uses following global variables:
  * 
  * - `int error_flag`
+ * 
+ * - `T_SYM_TABLE *ST`
  * @param *token_buffer pointer to token buffer
  * @return `bool`
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
 bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
+    
     T_TOKEN *token;
-
     // Create new symbol data
     char *name = NULL;
     SymbolData data;
@@ -899,7 +910,6 @@ bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
             return false;
         }
 
-        // TODO: need to check if this is correct based on right side of assignment
         // Check if variable type was set
         if (data.var.type == VAR_NONE) {
             error_flag = RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
@@ -1011,6 +1021,7 @@ bool syntax_var_def_after_id(T_TOKEN_BUFFER *buffer, SymbolData *data) {
             return false;
         }
 
+        // check type compatibility
         error_flag = compare_var_types(&type, &(data->var.type));
         if (error_flag != RET_VAL_OK) {
             return false;
@@ -1028,6 +1039,7 @@ bool syntax_var_def_after_id(T_TOKEN_BUFFER *buffer, SymbolData *data) {
             return false;
         }
 
+        // atemtpting assign of null during var definition
         if (data->var.type == VAR_NULL) {
             error_flag = RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
             return false;
@@ -1050,6 +1062,8 @@ bool syntax_var_def_after_id(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * This function uses following global variables:
  * 
  * - `int error_flag`
+ * 
+ * - `T_SYM_TABLE *ST`
  * @param *token_buffer pointer to token buffer
  * @return `bool`
  * @retval `true` - correct syntax
@@ -1112,6 +1126,8 @@ bool syntax_if_statement(T_TOKEN_BUFFER *buffer) {
  * This function uses following global variables:
  * 
  * - `int error_flag`
+ * 
+ * - `T_SYM_TABLE *ST`
  * @param *token_buffer pointer to token buffer
  * @param *tree pointer to expression tree
  * @return `bool`
@@ -1135,10 +1151,16 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         // CD: generate expression
         createStackByPostorder(*tree);
 
+        // not needed anymore
         tree_dispose(tree);
 
+        // get id of flow control defined check
+        // if not in flow control, return -1
+        // needed in codegen for correct handling of variable
+        // definitions in flow control statements
         int fc_defined_upper = is_in_fc(ST);
 
+        // create if scope
         if (!symtable_add_scope(ST, true)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false;
@@ -1147,13 +1169,20 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         char *labelElse = NULL;
         char *labelEnd = NULL;
 
+        // generate labels for if - else/end blocks
         if (!generate_labels(ST,&labelElse, &labelEnd)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false;
         }
 
+        // get id of flow control defined check
+        // returns id of this if statement
+        // needed in codegen for correct handling of variable
+        // definitions in flow control statements
         int fc_defined_if = is_in_fc(ST);
 
+        // CD: generate if header with special variable for checking
+        // whether its inner var definitions were already defined
         handleIfStartBool(labelElse, fc_defined_upper, fc_defined_if);
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
@@ -1162,12 +1191,15 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             return false;
         }
 
+        // leaving if scope, check unused variables
         error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
             free(labelElse);
             free(labelEnd);
             return false;
         }
+
+        // enter else scope
         if (!symtable_add_scope(ST, true)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             free(labelElse);
@@ -1175,8 +1207,15 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             return false;
         }
 
+        // get id of flow control defined check
+        // returns id of this else statement
+        // needed in codegen for correct handling of variable
+        // definitions in flow control statements
         int fc_defined_else = is_in_fc(ST);
 
+        // CD: generate if else header, also generates handling of
+        // special variables for checking whether its inner var definitions
+        // were already defined
         createIfElse(labelEnd, labelElse, fc_defined_upper, fc_defined_if, fc_defined_else);
 
         next_token(buffer, &token); // }
@@ -1209,12 +1248,14 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             return false;
         }
 
+        // CD: generate end of if-else block, handles special variable
+        // for checking inner else block DEFVAR statements
         createIfEnd(labelEnd, fc_defined_else);
 
         free(labelElse);
         free(labelEnd);
 
-        // SCOPE DECREASE
+        // leaving else scope, check unused vars
         error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
             return false;
@@ -1231,7 +1272,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
 
     // second branch -> | identifier | { CODE_BLOCK_NEXT } else { CODE_BLOCK_NEXT }
     if (token->type == PIPE) { // |
-        
+        // it has to be nullable expression
         if (!is_result_type_nullable((*tree)->resultType)) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             tree_dispose(tree);
@@ -1239,6 +1280,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         }
 
         SymbolData data;
+        // get type of nullable expression
         data.var.type = fc_nullable_convert_type((*tree)->resultType);
         if (data.var.type == VAR_NONE) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
@@ -1247,9 +1289,8 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         }
 
         // CD: generate expression
-
         createStackByPostorder(*tree);
-
+        // not needed anymore
         tree_dispose(tree);
 
         next_token(buffer, &token); // identifier
@@ -1258,9 +1299,13 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             return false;
         }
 
+        // get id of flow control defined check
+        // if not in flow control, return -1
+        // needed in codegen for correct handling of variable
+        // definitions in flow control statements
         int fc_defined_upper = is_in_fc(ST);
 
-        // SCOPE INCREASE
+        // enter if scope
         if (!symtable_add_scope(ST, true)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false; 
@@ -1268,6 +1313,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
 
         char *labelElse = NULL;
         char *labelEnd = NULL;
+        // generate labels for if - else/end blocks
         if (!generate_labels(ST,&labelElse, &labelEnd)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false;
@@ -1280,6 +1326,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         data.var.used = false;
         data.var.id = -1;
 
+        // non nullable variable should not be defined now
         if (symtable_find_symbol(ST, token->lexeme) != NULL) {
             error_flag = RET_VAL_SEMANTIC_REDEF_OR_BAD_ASSIGN_ERR;
             free(labelElse);
@@ -1287,6 +1334,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             return false;
         }
 
+        // Add variable to symtable
         if (!symtable_add_symbol(ST, token->lexeme, SYM_VAR, data)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             free(labelElse);
@@ -1294,9 +1342,15 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             return false;
         }
 
+        // get id of flow control defined check
+        // returns id of this if statement
+        // needed in codegen for correct handling of variable
+        // definitions in flow control statements
         int fc_defined_if = is_in_fc(ST);
 
-        // CD: generate if nullable header
+        // CD: generate if nullable header, also generates handling of
+        // special variables for checking whether its inner var definitions
+        // were already defined
         handleIfStartNil(labelElse, token, fc_defined_upper, fc_defined_if);
 
         next_token(buffer, &token); // |
@@ -1321,7 +1375,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             return false;
         }
 
-        // SCOPE DECREASE
+        // leaving if scope, check unused variables
         error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
             free(labelElse);
@@ -1353,7 +1407,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             return false;
         }
 
-        // SCOPE INCREASE
+        // enter else scope
         if (!symtable_add_scope(ST, true)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             free(labelElse);
@@ -1361,9 +1415,14 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             return false; 
         }
 
+        // get id of flow control defined check
+        // returns id of this else statement
+        // needed in codegen for correct handling of variable
+        // definitions in flow control statements
         int fc_defined_else = is_in_fc(ST);
 
-        // CD: generate if nullable else
+        // CD: generate if nullable else, also generates handling of
+        // special variables for inner var definitions checks
         createIfElse(labelEnd, labelElse, fc_defined_upper, fc_defined_if, fc_defined_else);
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
@@ -1372,7 +1431,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             return false;
         }
 
-        // SCOPE DECREASE
+        // leaving else scope, check for unused variables
         error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
             free(labelElse);
@@ -1380,8 +1439,10 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             return false;
         }
 
-        // CD: generate if nullable end
+        // CD: generate if nullable end, also generates handling of
+        // special variables for inner else block DEFVARs
         createIfEnd(labelEnd, fc_defined_else);
+        
         free(labelElse);
         free(labelEnd);
 
@@ -1408,6 +1469,8 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
  * This function uses following global variables:
  * 
  * - `int error_flag`
+ * 
+ * - `T_SYM_TABLE *ST`
  * @param *token_buffer pointer to token buffer
  * @return `bool`
  * @retval `true` - correct syntax
@@ -1468,6 +1531,8 @@ bool syntax_while_statement(T_TOKEN_BUFFER *buffer) {
  * This function uses following global variables:
  * 
  * - `int error_flag`
+ * 
+ * - `T_SYM_TABLE *ST`
  * @param *token_buffer pointer to token buffer
  * @return `bool`
  * @retval `true` - correct syntax
@@ -1480,7 +1545,7 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
     next_token(buffer, &token);
     // first branch -> { CODE_BLOCK_NEXT }
     if (token->type == BRACKET_LEFT_CURLY) { // {
-
+        // check if expression is of type bool
         if ((*tree)->resultType != TYPE_BOOL_RESULT) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             tree_dispose(tree);
@@ -1489,16 +1554,20 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
 
         char *labelStart = NULL;
         char *labelEnd = NULL;
+        // generate labels for while
         if (!generate_labels(ST,&labelStart, &labelEnd)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             tree_dispose(tree);
             return false;
         }
 
-
+        // get id of flow control defined check
+        // if not in flow control, return -1
+        // needed in codegen for correct handling of variable
+        // definitions in flow control statements
         int fc_defined_upper = is_in_fc(ST);
 
-        // SCOPE INCREASE
+        // enter while scope
         if (!symtable_add_scope(ST, true)) {
             tree_dispose(tree);
             free(labelStart);
@@ -1507,9 +1576,15 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
             return false; 
         }
 
+        // get id of flow cntrl defined check
+        // returns id of this while
+        // needed in code gen for correct handling of var
+        // definitions in flow control stat.
         int fc_defined_current = is_in_fc(ST);
 
-        // CD: generate while start
+        // CD: generate while start, also generates handling of
+        // special var (defined$N) for checking whether its inner var
+        // definitions were already defined
         createWhileBoolHeader(labelStart, fc_defined_upper, fc_defined_current);
 
         // CD: generate expression
@@ -1517,7 +1592,7 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
 
         // CD: generate while condition
         handleWhileBool(labelEnd);
-
+        // not needed anymore
         tree_dispose(tree);
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
@@ -1526,12 +1601,14 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
             return false;
         }
 
-        // CD: generate while end
+        // CD: generate while end, also generates handling for
+        // special var (defined$N) for checking whether its inner var
+        // definitions were already defined
         createWhileEnd(labelStart, labelEnd, fc_defined_current);
         free(labelStart);
         free(labelEnd);
 
-        // SCOPE DECREASE
+        // leaving while scope, check unused variables
         error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
             return false;
@@ -1548,7 +1625,7 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
 
     // second branch -> | identifier | { CODE_BLOCK_NEXT }
     if (token->type == PIPE) { // |
-
+        // expression must be nullable
         if (!is_result_type_nullable((*tree)->resultType)) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             tree_dispose(tree);
@@ -1556,6 +1633,7 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
         }
 
         SymbolData data;
+        // get type of crearting non nullable expression
         data.var.type = fc_nullable_convert_type((*tree)->resultType);
         if (data.var.type == VAR_NONE) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
@@ -1570,21 +1648,30 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
             return false;
         }
 
+        // does new non nullable var already exist?
         if (symtable_find_symbol(ST, token->lexeme) != NULL) {
             error_flag = RET_VAL_SEMANTIC_REDEF_OR_BAD_ASSIGN_ERR;
             tree_dispose(tree);
             return false;
         }
 
+        // get id of flow cntrl defined check
+        // if not in flow control, return -1
+        // needed in code gen for correct handling of var
+        // definitions in flow control stat.
         int fc_defined_upper = is_in_fc(ST);
 
-        // SCOPE INCREASE
+        // enter while scope
         if (!symtable_add_scope(ST, true)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             tree_dispose(tree);
             return false; 
         }
 
+        // get id of flow cntrl defined check
+        // returns id of this while
+        // needed in code gen for correct handling of var
+        // definitions in flow control stat.
         int fc_defined_current = is_in_fc(ST);
 
         // Add the | identifier | to the symtable
@@ -1601,13 +1688,16 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
 
         char *labelStart = NULL;
         char *labelEnd = NULL;
+        // generate labels for while
         if (!generate_labels(ST,&labelStart, &labelEnd)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             tree_dispose(tree);
             return false;
         }
 
-        // CD: generate while start
+        // CD: generate while start, also generates handling of
+        // special var for checking whether its inner variable
+        // definitions were already defined or not
         createWhileNilHeader(labelStart, token, fc_defined_upper, fc_defined_current);
 
         // CD: generate expression
@@ -1615,7 +1705,7 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
 
         // CD: generate while condition
         handleWhileNil(labelEnd, token);
-
+        // not needed anymore
         tree_dispose(tree);
 
         next_token(buffer, &token); // |
@@ -1640,12 +1730,14 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
             return false;
         }
 
-        // CD: generate while end
+        // CD: generate while end, also generates sets helping
+        // variable defined to true, as everything should be
+        // already defined in this while block
         createWhileEnd(labelStart, labelEnd, fc_defined_current);
         free(labelStart);
         free(labelEnd);
 
-        // SCOPE DECREASE
+        // leaving while scope, check for unused variables
         error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
             return false;
@@ -1711,6 +1803,8 @@ bool syntax_return(T_TOKEN_BUFFER *buffer) {
  * This function uses following global variables:
  * 
  * - `int error_flag`
+ * 
+ * - `T_SYM_TABLE *ST`
  * @param *token_buffer pointer to token buffer
  * @return `bool`
  * @retval `true` - correct syntax
@@ -1743,13 +1837,15 @@ bool syntax_return_remaining(T_TOKEN_BUFFER *buffer) {
         data.var.modified = false;
         data.var.used = false;
         data.var.const_expr = false;
-
+        
+        // get symbol representing current function
         Symbol *symbol = symtable_find_symbol(ST, get_fn_name(ST));
         if (symbol == NULL) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false;
         }
 
+        // save its return type
         data.var.type = symbol->data.func.return_type;
 
         // handling of expression
@@ -1774,12 +1870,15 @@ bool syntax_return_remaining(T_TOKEN_BUFFER *buffer) {
  * This function uses following global variables:
  * 
  * - `int error_flag`
+ * 
+ * - `T_SYM_TABLE *ST`
  * @param *token_buffer pointer to token buffer
  * @return `bool`
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
 bool syntax_built_in_void_fn_call(T_TOKEN_BUFFER *buffer) {
+    
     T_TOKEN *token;
     T_FN_CALL fn_call;
     fn_call.argv = NULL;
@@ -1883,6 +1982,8 @@ bool syntax_built_in_void_fn_call(T_TOKEN_BUFFER *buffer) {
  * This function uses following global variables:
  * 
  * - `int error_flag`
+ * 
+ * - `T_SYM_TABLE *ST`
  * @param *token_buffer pointer to token buffer
  * @return `bool`
  * @retval `true` - correct syntax
@@ -1897,7 +1998,8 @@ bool syntax_assign_expr_or_fn_call(T_TOKEN_BUFFER *buffer) {
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
-
+    
+    // get symbol of currently read identifier
     Symbol *symbol = symtable_find_symbol(ST, token->lexeme);
 
     // Check if the identifier is defined
@@ -1910,7 +2012,7 @@ bool syntax_assign_expr_or_fn_call(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
-    // codegen print mov for right side
+    // CD print mov for right side
     if (symbol->type == SYM_VAR) {
         handleAssign(token->lexeme);
     }
@@ -1976,6 +2078,8 @@ bool syntax_assign_discard_expr_or_fn_call(T_TOKEN_BUFFER *buffer) {
  * This function uses following global variables:
  * 
  * - `int error_flag`
+ * 
+ * - `T_SYM_TABLE *ST`
  * @param *token_buffer pointer to token buffer
  * @param *symbol pointer to symbol
  * @return `bool`
@@ -1989,15 +2093,17 @@ bool syntax_id_start(T_TOKEN_BUFFER *buffer, Symbol *symbol) {
     next_token(buffer, &token);
     // first branch -> = ASSIGN
     if (token->type == ASSIGN) { // =
+        // assigning but not a variable
         if (symbol->type != SYM_VAR) {
             error_flag = RET_VAL_SEMANTIC_UNDEFINED_ERR;
             return false;
         }
+        // must not be constant
         if (symbol->data.var.is_const) {
             error_flag = RET_VAL_SEMANTIC_REDEF_OR_BAD_ASSIGN_ERR;
             return false;
         }
-        
+        // set used and modified flags
         symbol->data.var.modified = true;
         symbol->data.var.used = true;
 
@@ -2111,6 +2217,8 @@ bool syntax_function_arguments(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call) {
  * This function uses following global variables:
  * 
  * - `int error_flag`
+ * 
+ * - `T_SYM_TABLE *ST`
  * @param *token_buffer pointer to token buffer
  * @param *data pointer to symbol data
  * @return `bool`
@@ -2120,7 +2228,7 @@ bool syntax_function_arguments(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call) {
 bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
     T_TOKEN *token;
 
-    // set return flag for error handling based previous token
+    // set return flag for error handling based on previous token
     bool is_return = false;
 
     move_back(buffer);
@@ -2171,12 +2279,14 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         fn_call.name = fn_name;
         fn_call.ret_type = symbol->data.func.return_type;
 
+        // check type compatibility
         error_flag = compare_var_types(&(data->var.type), &(symbol->data.func.return_type));
         if (error_flag != RET_VAL_OK) {
             free(fn_name);
             return false;
         }
 
+        // assigning void function
         if (fn_call.ret_type == VAR_VOID) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             free(fn_name);
@@ -2242,11 +2352,13 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
 
         T_TREE_NODE_PTR tree;
         tree_init(&tree);
+        // switch to bottom-up parsing
         error_flag = precedenceSyntaxMain(buffer, &tree, ASS_END);
         if (error_flag != RET_VAL_OK) {
             return false;
         }
-
+        
+        // process expression semantics and derive result type
         error_flag = check_expression(ST, &tree);
         if (error_flag != RET_VAL_OK){
             tree_dispose(&tree);
@@ -2254,6 +2366,7 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         }
 
         // tree->resultType
+        // convert result_type to var_type
         VarType exprRes = VAR_NONE;
         switch (tree->resultType) {
             case TYPE_NULL_RESULT:
@@ -2294,6 +2407,7 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
                 return false;
         }
 
+        // check type compatibility
         error_flag = compare_var_types(&(data->var.type), &exprRes);
         if (error_flag != RET_VAL_OK) {
             tree_dispose(&tree);
@@ -2310,7 +2424,7 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
 
         // CD: generate expression
         createStackByPostorder(tree);
-
+        // not needed anymore
         tree_dispose(&tree);
 
         next_token(buffer, &token); // ;
@@ -2340,6 +2454,8 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * This function uses following global variables:
  * 
  * - `int error_flag`
+ * 
+ * - `T_SYM_TABLE *ST`
  * @param *token_buffer pointer to token buffer
  * @param *data symbol data
  * @return `bool`
@@ -2367,12 +2483,12 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
         }
 
         fn_call.ret_type = symbol->data.func.return_type;
-
+        // check type compatibility
         error_flag = compare_var_types(&(data->var.type), &(fn_call.ret_type));
         if (error_flag != RET_VAL_OK) {
             return false;
         }
-
+        // assigning void function
         if (fn_call.ret_type == VAR_VOID) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             return false;
@@ -2403,6 +2519,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
 
         T_TREE_NODE_PTR tree;
         tree_init(&tree);
+        // switch to bottom-up parsing
         error_flag = precedenceSyntaxMain(buffer, &tree, ASS_END);
         if (error_flag != RET_VAL_OK) {
             return false;
@@ -2416,6 +2533,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
         }
 
         // tree->resultType
+        // convert result type to var type
         VarType exprRes = VAR_NONE;
         switch (tree->resultType) {
             case TYPE_NULL_RESULT:
@@ -2455,7 +2573,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
                 error_flag = RET_VAL_INTERNAL_ERR;
                 return false;
         }
-
+        // check type compatibility
         error_flag = compare_var_types(&(data->var.type), &exprRes);
         if (error_flag != RET_VAL_OK) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
@@ -2465,7 +2583,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
 
         // CD: generate expression
         createStackByPostorder(tree);
-
+        // not needed anymore
         tree_dispose(&tree);
         
 
@@ -2480,12 +2598,13 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
     // third branch -> EXPRESSION ;
     if (is_token_in_expr(token)) { // is token in expression ?
         // we have to move back twice to get to the beginning of the expression
-        // we ate the first token of the expression as identifier in ASSIGN non-terminal
+        // we consumed the first token of the expression as identifier in ASSIGN non-terminal
         move_back(buffer);
         move_back(buffer);
 
         T_TREE_NODE_PTR tree;
         tree_init(&tree);
+        // switch to bottom-up parsing
         error_flag = precedenceSyntaxMain(buffer, &tree, ASS_END);
         if (error_flag != RET_VAL_OK) {
             return false;
@@ -2498,7 +2617,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
             return false;
         }
 
-        // tree->resultType
+        // tree->resultType, convert result type
         VarType exprRes = VAR_NONE;
         switch (tree->resultType) {
             case TYPE_NULL_RESULT:
@@ -2538,7 +2657,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
                 error_flag = RET_VAL_INTERNAL_ERR;
                 return false;
         }
-
+        // check type compatibility
         error_flag = compare_var_types(&(data->var.type), &exprRes);
         if (error_flag != RET_VAL_OK) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
@@ -2548,7 +2667,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
 
         // CD: generate expression
         createStackByPostorder(tree);
-
+        // not needed anymore
         tree_dispose(&tree);
 
         next_token(buffer, &token); // ;
