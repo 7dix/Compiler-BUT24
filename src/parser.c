@@ -1088,7 +1088,7 @@ bool syntax_if_statement(T_TOKEN_BUFFER *buffer) {
     // follows an EXPRESSION, switching to bottom-up parsing
     T_TREE_NODE_PTR tree;
     tree_init(&tree);
-    error_flag = precedenceSyntaxMain(buffer, &tree, IF_WHILE_END);
+    error_flag = precedence_syntax_main(buffer, &tree, IF_WHILE_END);
     if (error_flag != RET_VAL_OK) {
         return false;
     }
@@ -1142,7 +1142,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
     // first branch -> { CODE_BLOCK_NEXT } else { CODE_BLOCK_NEXT }
     if (token->type == BRACKET_LEFT_CURLY) { // {
         
-        if ((*tree)->resultType != TYPE_BOOL_RESULT) {
+        if ((*tree)->result_type != TYPE_BOOL_RESULT) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             tree_dispose(tree);
             return false;
@@ -1273,7 +1273,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
     // second branch -> | identifier | { CODE_BLOCK_NEXT } else { CODE_BLOCK_NEXT }
     if (token->type == PIPE) { // |
         // it has to be nullable expression
-        if (!is_result_type_nullable((*tree)->resultType)) {
+        if (!is_result_type_nullable((*tree)->result_type)) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             tree_dispose(tree);
             return false;
@@ -1281,7 +1281,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
 
         SymbolData data;
         // get type of nullable expression
-        data.var.type = fc_nullable_convert_type((*tree)->resultType);
+        data.var.type = fc_nullable_convert_type((*tree)->result_type);
         if (data.var.type == VAR_NONE) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             tree_dispose(tree);
@@ -1495,7 +1495,7 @@ bool syntax_while_statement(T_TOKEN_BUFFER *buffer) {
     // follows an EXPRESSION, switching to bottom-up parsing
     T_TREE_NODE_PTR tree;
     tree_init(&tree);
-    error_flag = precedenceSyntaxMain(buffer, &tree, IF_WHILE_END);
+    error_flag = precedence_syntax_main(buffer, &tree, IF_WHILE_END);
     if (error_flag != RET_VAL_OK) {
         return false;
     }
@@ -1546,7 +1546,7 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
     // first branch -> { CODE_BLOCK_NEXT }
     if (token->type == BRACKET_LEFT_CURLY) { // {
         // check if expression is of type bool
-        if ((*tree)->resultType != TYPE_BOOL_RESULT) {
+        if ((*tree)->result_type != TYPE_BOOL_RESULT) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             tree_dispose(tree);
             return false;
@@ -1626,7 +1626,7 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
     // second branch -> | identifier | { CODE_BLOCK_NEXT }
     if (token->type == PIPE) { // |
         // expression must be nullable
-        if (!is_result_type_nullable((*tree)->resultType)) {
+        if (!is_result_type_nullable((*tree)->result_type)) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             tree_dispose(tree);
             return false;
@@ -1634,7 +1634,7 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
 
         SymbolData data;
         // get type of crearting non nullable expression
-        data.var.type = fc_nullable_convert_type((*tree)->resultType);
+        data.var.type = fc_nullable_convert_type((*tree)->result_type);
         if (data.var.type == VAR_NONE) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             tree_dispose(tree);
@@ -2353,7 +2353,7 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         T_TREE_NODE_PTR tree;
         tree_init(&tree);
         // switch to bottom-up parsing
-        error_flag = precedenceSyntaxMain(buffer, &tree, ASS_END);
+        error_flag = precedence_syntax_main(buffer, &tree, ASS_END);
         if (error_flag != RET_VAL_OK) {
             return false;
         }
@@ -2365,10 +2365,10 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
             return false;
         }
 
-        // tree->resultType
+        // tree->result_type
         // convert result_type to var_type
         VarType exprRes = VAR_NONE;
-        switch (tree->resultType) {
+        switch (tree->result_type) {
             case TYPE_NULL_RESULT:
                 exprRes = VAR_NULL;
                 break;
@@ -2520,7 +2520,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
         T_TREE_NODE_PTR tree;
         tree_init(&tree);
         // switch to bottom-up parsing
-        error_flag = precedenceSyntaxMain(buffer, &tree, ASS_END);
+        error_flag = precedence_syntax_main(buffer, &tree, ASS_END);
         if (error_flag != RET_VAL_OK) {
             return false;
         }
@@ -2532,10 +2532,10 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
             return false;
         }
 
-        // tree->resultType
+        // tree->result_type
         // convert result type to var type
         VarType exprRes = VAR_NONE;
-        switch (tree->resultType) {
+        switch (tree->result_type) {
             case TYPE_NULL_RESULT:
                 exprRes = VAR_NULL;
                 break;
@@ -2605,7 +2605,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
         T_TREE_NODE_PTR tree;
         tree_init(&tree);
         // switch to bottom-up parsing
-        error_flag = precedenceSyntaxMain(buffer, &tree, ASS_END);
+        error_flag = precedence_syntax_main(buffer, &tree, ASS_END);
         if (error_flag != RET_VAL_OK) {
             return false;
         }
@@ -2617,9 +2617,9 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
             return false;
         }
 
-        // tree->resultType, convert result type
+        // tree->result_type, convert result type
         VarType exprRes = VAR_NONE;
-        switch (tree->resultType) {
+        switch (tree->result_type) {
             case TYPE_NULL_RESULT:
                 exprRes = VAR_NULL;
                 break;

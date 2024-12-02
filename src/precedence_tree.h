@@ -37,9 +37,9 @@ typedef struct T_TREE_NODE {
     struct T_TREE_NODE *left;
     struct T_TREE_NODE *right;
     T_TOKEN *token;
-    bool convertToFloat;
-    bool convertToInt;
-    RESULT_TYPE resultType;
+    bool convert_to_float;
+    bool convert_to_int;
+    RESULT_TYPE result_type;
 
 } T_TREE_NODE, *T_TREE_NODE_PTR;
 
@@ -49,10 +49,10 @@ typedef struct T_TREE_NODE {
 void tree_init(T_TREE_NODE_PTR *tree);
 
 // Function declaration for create node of tree
-T_TREE_NODE_PTR createNode(T_TOKEN *token);
+T_TREE_NODE_PTR tree_create_node(T_TOKEN *token);
 
 // Function declaration for create subtree
-T_TREE_NODE_PTR createSubTree(T_TREE_NODE_PTR operator, T_TREE_NODE_PTR left, T_TREE_NODE_PTR right);
+T_TREE_NODE_PTR tree_create_sub_tree(T_TREE_NODE_PTR operator, T_TREE_NODE_PTR left, T_TREE_NODE_PTR right);
 
 // Function declaration for delete all nodes in tree and free memory
 void tree_dispose(T_TREE_NODE_PTR *tree);

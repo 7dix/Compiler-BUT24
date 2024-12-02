@@ -42,7 +42,7 @@
 
 
 // Precednce table 
-PRECEDENCE precedenceTable[14][14] = {
+PRECEDENCE precedence_table[14][14] = {
     //              ID        +         -         *         /          <         >         <=         >=        ==         !=         (           )         $
     /* ID */   { ERR,      GR_COMP,  GR_COMP,  GR_COMP,  GR_COMP,   GR_COMP,  GR_COMP,   GR_COMP,   GR_COMP,  GR_COMP,   GR_COMP,   ERR,       GR_COMP,  GR_COMP },
     /* +  */   { LSS_COMP, GR_COMP,  GR_COMP,  LSS_COMP, LSS_COMP,  GR_COMP,  GR_COMP,   GR_COMP,   GR_COMP,  GR_COMP,   GR_COMP,   LSS_COMP,  GR_COMP,  GR_COMP },
@@ -66,7 +66,7 @@ PRECEDENCE precedenceTable[14][14] = {
  * @param type Type of operator/token
  * @return Index of operator in precedence table, -1 if error
 */
-OPERATOR_INDEX precedenceIndex(TOKEN_TYPE type){
+OPERATOR_INDEX prec_index_table(TOKEN_TYPE type){
 
     switch (type){
         case IDENTIFIER:return ID;
@@ -96,8 +96,8 @@ OPERATOR_INDEX precedenceIndex(TOKEN_TYPE type){
  * @param coll Index of collumn in precedence table
  * @return Precdence in table, -1 if error
 */
-PRECEDENCE getPrecedence(OPERATOR_INDEX row, OPERATOR_INDEX coll){ 
-    if(row != -1 && coll != -1) return precedenceTable[row][coll];
+PRECEDENCE get_precedence(OPERATOR_INDEX row, OPERATOR_INDEX coll){ 
+    if(row != -1 && coll != -1) return precedence_table[row][coll];
     else return ERR;
 }
 
@@ -107,22 +107,22 @@ PRECEDENCE getPrecedence(OPERATOR_INDEX row, OPERATOR_INDEX coll){
  * @param stack Pointer on stack
  * @return Count of variables in stack
 */
-int reduceVaribles(T_STACK_PTR stack){
+int count_reduce(T_STACK_PTR stack){
     // Count of reduce items
-    int countOfVarRed = 0;
-    if (stack->countItems == 1) return 1;
-    if (stack->countItems == 0) return 0;
+    int count_of_r = 0;
+    if (stack->count_items == 1) return 1;
+    if (stack->count_items == 0) return 0;
         
     // Get top of stack
-    T_STACK_ITEM_PTR startingItem = stack_top(stack);
+    T_STACK_ITEM_PTR starting_item = stack_top(stack);
 
     // Counting until the we find SHIFT or stack doesn't terminals and shifts
-    while (startingItem != NULL && startingItem->type != SHIFT){
-        countOfVarRed++;
-        startingItem = startingItem->prev;
+    while (starting_item != NULL && starting_item->type != SHIFT){
+        count_of_r++;
+        starting_item = starting_item->prev;
 
     }
-    return countOfVarRed;
+    return count_of_r;
     
 }
 
@@ -132,29 +132,29 @@ int reduceVaribles(T_STACK_PTR stack){
  * @param stack Pointer on stack
  * @return Number of type reduce rule, if rule doesn't exist return 0
 */
-int canReduce(T_STACK_PTR stack){
+int can_reduce(T_STACK_PTR stack){
 
     // Count of reduce items
-    int countOfVarRed = reduceVaribles(stack);
+    int count_of_r = count_reduce(stack);
 
     // Rule doesn't exist
-    if(countOfVarRed != 1 && countOfVarRed != 3) return 0;
+    if(count_of_r != 1 && count_of_r != 3) return 0;
 
     // E -> id | int_value | float_value
-    if (countOfVarRed == 1 && stack->top->type == TERMINAL) return 1;
+    if (count_of_r == 1 && stack->top->type == TERMINAL) return 1;
     // E -> R | T
-    if (countOfVarRed == 1 && (stack->top->type == NON_TERMINAL_R || stack->top->type == NON_TERMINAL_E )) return 2;
+    if (count_of_r == 1 && (stack->top->type == NON_TERMINAL_R || stack->top->type == NON_TERMINAL_E )) return 2;
     
     T_STACK_ITEM_PTR left = stack_top(stack);
     T_STACK_ITEM_PTR operator = left->prev;
     T_STACK_ITEM_PTR right = operator->prev;
 
     // E -> E + E | E - E | E * E | E / E  IT IS EQUAL TO 3
-    if(countOfVarRed == 3 && (left->type == NON_TERMINAL_E && right->type == NON_TERMINAL_E) && (operator->token->type == PLUS || operator->token->type == MINUS || operator->token->type == MULTIPLY || operator->token->type == DIVIDE)) return 3;
+    if(count_of_r == 3 && (left->type == NON_TERMINAL_E && right->type == NON_TERMINAL_E) && (operator->token->type == PLUS || operator->token->type == MINUS || operator->token->type == MULTIPLY || operator->token->type == DIVIDE)) return 3;
     // T -> E < E | E > E | E <= E | E >= E | E == E | E != E IT IS EQUAL TO 4
-    if (countOfVarRed == 3 && (left->type == NON_TERMINAL_E && right->type == NON_TERMINAL_E) && (operator->token->type == LESS_THAN || operator->token->type == GREATER_THAN || operator->token->type == LESS_THAN_EQUAL || operator->token->type == GREATER_THAN_EQUAL || operator->token->type == EQUAL || operator->token->type == NOT_EQUAL)) return 4;
+    if (count_of_r == 3 && (left->type == NON_TERMINAL_E && right->type == NON_TERMINAL_E) && (operator->token->type == LESS_THAN || operator->token->type == GREATER_THAN || operator->token->type == LESS_THAN_EQUAL || operator->token->type == GREATER_THAN_EQUAL || operator->token->type == EQUAL || operator->token->type == NOT_EQUAL)) return 4;
     // E -> (E) IT IS EQUAL TO 5
-    if (countOfVarRed == 3 && left->node->token->type == BRACKET_RIGHT_SIMPLE && (operator->type == NON_TERMINAL_E || operator->type == NON_TERMINAL_R) && right->node->token->type == BRACKET_LEFT_SIMPLE) return 5;
+    if (count_of_r == 3 && left->node->token->type == BRACKET_RIGHT_SIMPLE && (operator->type == NON_TERMINAL_E || operator->type == NON_TERMINAL_R) && right->node->token->type == BRACKET_LEFT_SIMPLE) return 5;
 
     return 0;
 
@@ -166,10 +166,10 @@ int canReduce(T_STACK_PTR stack){
  * @param stack Pointer on stack
  * @param tree Pointer on tree
  * @param rule Number of reduce rule
- * @param makeTree Flag for create tree
+ * @param make_tree_flag Flag for create tree
  * @return True if reduce was successful, false if error
  */
-bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool makeTree){
+bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool make_tree_flag){
 
     // Init variables
     T_STACK_ITEM_PTR operator = NULL;
@@ -183,7 +183,7 @@ bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool makeTree){
         case 1:
         {
             // Get node of tree of reduce item
-            T_TREE_NODE_PTR neterminalNode = (stack_top(stack))->node;
+            T_TREE_NODE_PTR neterminal_node= (stack_top(stack))->node;
 
             // Pop terminal
             stack_pop(stack);
@@ -194,7 +194,7 @@ bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool makeTree){
             if(stack_push(stack, NULL, NON_TERMINAL_E)) return false;
 
             // Set node of non terminal E
-            (stack->top)->node = neterminalNode;    
+            (stack->top)->node = neterminal_node;    
             return true;
         }
 
@@ -226,9 +226,9 @@ bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool makeTree){
 
 
             // Create subtree, of reduce item
-            root = createSubTree(operator->node, right->node, left->node);
+            root = tree_create_sub_tree(operator->node, right->node, left->node);
             // If is end of expression, theen start creating tree
-            if(makeTree) *tree = root;
+            if(make_tree_flag) *tree = root;
 
             // Pop right neterminal
             stack_pop(stack);
@@ -258,9 +258,9 @@ bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool makeTree){
             left = operator->prev;
 
             // Create subtree, of reduce item
-            root = createSubTree(operator->node, right->node, left->node);
+            root = tree_create_sub_tree(operator->node, right->node, left->node);
             // If is end of expression, theen start creating tree
-            if (makeTree) *tree = root;
+            if (make_tree_flag) *tree = root;
 
             // Pop right neeterminal
             stack_pop(stack);
@@ -320,26 +320,26 @@ bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool makeTree){
  * @param buffer Pointer on buffer of tokens
  * @param tree Pointer on tree
  * @param typeEnd Type of end of expression
- * @param makeTree Flag for create tree
+ * @parammake_tree_flag Flag for create tree
  * @return 0 if analysis is successful, 2 if syntax error, 99 if internal error (malloc for example)
 */
-T_RET_VAL precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_END typeEnd){
+T_RET_VAL precedence_syntax_main(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_END typeEnd){
 
     // Create and init stack
     T_STACK stack;
     stack_init(&stack);
 
     // Count of brackets
-    int countBrac = 0;
+    int count_brac = 0;
     // Count of relational operators
-    unsigned int countRelOperatoes = 0;
+    unsigned int count_rel_operators = 0;
 
     // Flag for begin of expression
-    bool beginDollar = true;
+    bool begin_dollar = true;
     // Flag for end of expression, and for create tree
-    bool notEndDollar = false;
+    bool not_end_dollar = false;
     // Flag for continue reduction
-    bool continueReduction = false;    
+    bool conntionue_reduce = false;    
 
     // Token for analysis
     T_TOKEN *token = NULL;
@@ -349,54 +349,54 @@ T_RET_VAL precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TY
 
     
     // Precednce analysis
-    while(!is_empty(&stack) || beginDollar){
+    while(!is_empty(&stack) || begin_dollar){
 
         // Get token from buffer, until end of expression
-        if(!continueReduction && (notEndDollar || beginDollar)) next_token(buffer, &token);
+        if(!conntionue_reduce && (not_end_dollar || begin_dollar)) next_token(buffer, &token);
 
         // Get the toppest terminal on stack
         T_STACK_ITEM_PTR topTerminal = stack_top_terminal(&stack);
 
         // Search for end of expression
-        if(!continueReduction && (notEndDollar || beginDollar) && ((token->type == BRACKET_RIGHT_SIMPLE && countBrac == 0 && countRelOperatoes <= 1 && typeEnd == IF_WHILE_END) || (token->type == SEMICOLON && countBrac == 0 && countRelOperatoes <= 1 && typeEnd == ASS_END))) notEndDollar = false;
+        if(!conntionue_reduce && (not_end_dollar || begin_dollar) && ((token->type == BRACKET_RIGHT_SIMPLE && count_brac == 0 && count_rel_operators <= 1 && typeEnd == IF_WHILE_END) || (token->type == SEMICOLON && count_brac == 0 && count_rel_operators <= 1 && typeEnd == ASS_END))) not_end_dollar = false;
 
         // Counting relational operators in an expression  
-        if (!continueReduction && (notEndDollar || beginDollar) && (token->type == EQUAL || token->type == NOT_EQUAL || token->type == LESS_THAN || token->type == LESS_THAN_EQUAL || token->type == GREATER_THAN || token->type == GREATER_THAN_EQUAL)) countRelOperatoes++;
+        if (!conntionue_reduce && (not_end_dollar || begin_dollar) && (token->type == EQUAL || token->type == NOT_EQUAL || token->type == LESS_THAN || token->type == LESS_THAN_EQUAL || token->type == GREATER_THAN || token->type == GREATER_THAN_EQUAL)) count_rel_operators++;
 
         // If the number of relational operators is more than one, then is it error
-        if(!continueReduction && (notEndDollar || beginDollar) && (countRelOperatoes > 1)){
+        if(!conntionue_reduce && (not_end_dollar || begin_dollar) && (count_rel_operators > 1)){
             stack_dispose(&stack);
             return RET_VAL_SYNTAX_ERR;
         }
         
         // Counting of breackets in an expression
-        if (!continueReduction && (notEndDollar || beginDollar) && token->type == BRACKET_LEFT_SIMPLE) countBrac++;
-        if (!continueReduction && (notEndDollar || beginDollar) && token->type == BRACKET_RIGHT_SIMPLE) countBrac--;
+        if (!conntionue_reduce && (not_end_dollar || begin_dollar) && token->type == BRACKET_LEFT_SIMPLE) count_brac++;
+        if (!conntionue_reduce && (not_end_dollar || begin_dollar) && token->type == BRACKET_RIGHT_SIMPLE) count_brac--;
 
         // If there are more right brackets than left brackets, then is it error
-        if (!continueReduction && (notEndDollar || beginDollar) && countBrac < 0){
+        if (!conntionue_reduce && (not_end_dollar || begin_dollar) && count_brac < 0){
             stack_dispose(&stack);
             return RET_VAL_SYNTAX_ERR;
         }
 
         // Simulation of a dollar on the stack
-        if (beginDollar){
-            precedence = getPrecedence(DOLLAR, precedenceIndex(token->type));
-            beginDollar = false;
-            notEndDollar= true;
+        if (begin_dollar){
+            precedence = get_precedence(DOLLAR, prec_index_table(token->type));
+            begin_dollar = false;
+            not_end_dollar= true;
         }
-        else if (topTerminal == NULL && !beginDollar && notEndDollar) precedence = getPrecedence(DOLLAR, precedenceIndex(token->type));
-        else if (notEndDollar) precedence = getPrecedence(precedenceIndex(topTerminal->token->type), precedenceIndex(token->type));
-        else if (!notEndDollar && topTerminal == NULL && !beginDollar && stack.countItems == 1 && precedence == GR_COMP) precedence = GR_COMP;
-        else precedence = getPrecedence(precedenceIndex(topTerminal->token->type), DOLLAR);
+        else if (topTerminal == NULL && !begin_dollar && not_end_dollar) precedence = get_precedence(DOLLAR, prec_index_table(token->type));
+        else if (not_end_dollar) precedence = get_precedence(prec_index_table(topTerminal->token->type), prec_index_table(token->type));
+        else if (!not_end_dollar && topTerminal == NULL && !begin_dollar && stack.count_items == 1 && precedence == GR_COMP) precedence = GR_COMP;
+        else precedence = get_precedence(prec_index_table(topTerminal->token->type), DOLLAR);
         
         // End of raduction, if the precedence is greater than the input symbol
-        if (precedence == LSS_COMP && continueReduction){
+        if (precedence == LSS_COMP && conntionue_reduce){
             //Turn off the flag for continue reduction
-            continueReduction = false;
+            conntionue_reduce = false;
 
             // If is not end of expression, then push new terminal on stack after reduction
-            if (!notEndDollar) continue;
+            if (!not_end_dollar) continue;
             
             // Shift
             if (stack_insert_less(&stack, topTerminal)){
@@ -425,7 +425,7 @@ T_RET_VAL precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TY
                     stack_dispose(&stack);
                     return RET_VAL_INTERNAL_ERR;
                 }
-                continueReduction = false;
+                conntionue_reduce = false;
 
                 break;
 
@@ -445,19 +445,19 @@ T_RET_VAL precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TY
             case GR_COMP:
 
                 // Number of reduce rul
-                if (!canReduce(&stack)){
+                if (!can_reduce(&stack)){
                     stack_dispose(&stack);
                     return RET_VAL_SYNTAX_ERR;
                 }
                 
 
                 
-                if(!reduce(&stack, tree , canReduce(&stack), !notEndDollar)){
+                if(!reduce(&stack, tree , can_reduce(&stack), !not_end_dollar)){
                     stack_dispose(&stack);
                     return RET_VAL_INTERNAL_ERR;
                 }
                 
-                continueReduction = true;
+                conntionue_reduce = true;
                 
                 break;
             

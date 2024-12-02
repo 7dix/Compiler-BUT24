@@ -51,7 +51,7 @@ typedef struct T_LIST_ELEMENT {
     struct T_LIST_ELEMENT *next;
     struct T_LIST_ELEMENT *prev;    
     T_TREE_NODE_PTR node;
-    LITERAL_TYPE literalType;
+    LITERAL_TYPE literal_type;
     float value;
 } T_LIST_ELEMENT, *T_LIST_ELEMENT_PTR;
 

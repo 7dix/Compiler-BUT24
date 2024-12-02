@@ -36,7 +36,7 @@ typedef struct T_STACK_ITEM {
 
 // Declaration of stack
 typedef struct T_STACK {
-    unsigned int countItems;
+    unsigned int count_items;
     T_STACK_ITEM_PTR top;         
 } T_STACK, *T_STACK_PTR;
 

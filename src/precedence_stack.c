@@ -14,7 +14,7 @@
  * @param stack Pointer on stack for initialization
 */
 void stack_init(T_STACK_PTR stack) {
-    stack->countItems = 0;
+    stack->count_items = 0;
     stack->top = NULL;
 }
 
@@ -25,7 +25,7 @@ void stack_init(T_STACK_PTR stack) {
  * @return True if stack is empty, false otherwise
 */
 bool is_empty(T_STACK_PTR stack){
-    return stack->countItems == 0 || stack->top == NULL;
+    return stack->count_items == 0 || stack->top == NULL;
 }
 
 /**
@@ -53,7 +53,7 @@ T_RET_VAL stack_push(T_STACK_PTR stack, T_TOKEN *token, STACK_ITEM_TYPE type){
     }else{
     
         // Create new node of tree
-        T_TREE_NODE_PTR node = createNode(token);
+        T_TREE_NODE_PTR node = tree_create_node(token);
 
         // Check if node was created
         if(node == NULL) return RET_VAL_INTERNAL_ERR;
@@ -76,7 +76,7 @@ T_RET_VAL stack_push(T_STACK_PTR stack, T_TOKEN *token, STACK_ITEM_TYPE type){
     }
 
     // Increment count of items in stack
-    stack->countItems++;
+    stack->count_items++;
 
     return RET_VAL_OK;
 }
@@ -94,7 +94,7 @@ void stack_pop(T_STACK_PTR stack){
     T_STACK_ITEM_PTR tokenPop = stack->top;
 
     // Set new top of stack, based if stack has anothers items or not
-    if (stack->countItems == 1) stack->top = NULL;
+    if (stack->count_items == 1) stack->top = NULL;
     else stack->top = tokenPop->prev;
     
     // Delete popped item from memory
@@ -102,7 +102,7 @@ void stack_pop(T_STACK_PTR stack){
     free(tokenPop);
 
     // Decrement count of items in stack
-    stack->countItems--;
+    stack->count_items--;
      
 }
 
@@ -164,12 +164,12 @@ T_RET_VAL stack_insert_less(T_STACK_PTR stack, T_STACK_ITEM_PTR terminal){
     if(terminal == stack_top(stack) && !is_empty(stack)){
         itemPush->prev = terminal;
         stack->top = itemPush;
-        stack->countItems++;
+        stack->count_items++;
         return RET_VAL_OK;
     // If terminal is on top of stack and stack is empty, then will be inserted less on top of stack
     }else if(terminal == NULL && is_empty(stack)){
         stack->top = itemPush;
-        stack->countItems++;
+        stack->count_items++;
         return RET_VAL_OK;
     
     }else if(terminal == NULL && !is_empty(stack)){
@@ -179,7 +179,7 @@ T_RET_VAL stack_insert_less(T_STACK_PTR stack, T_STACK_ITEM_PTR terminal){
         }
 
         begin->prev = itemPush;
-        stack->countItems++;
+        stack->count_items++;
         return RET_VAL_OK;
         
     }else{
@@ -193,7 +193,7 @@ T_RET_VAL stack_insert_less(T_STACK_PTR stack, T_STACK_ITEM_PTR terminal){
 
         itemPush->prev = terminal;
         beforeTerminal->prev = itemPush;
-        stack->countItems++;
+        stack->count_items++;
 
         return RET_VAL_OK;
     }
@@ -211,7 +211,7 @@ void stack_dispose(T_STACK_PTR stack) {
         stack_pop(stack);
     }
     
-    stack->countItems = 0;
+    stack->count_items = 0;
     stack->top = NULL;
 
     return;  

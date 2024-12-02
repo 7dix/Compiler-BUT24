@@ -58,7 +58,7 @@ T_RET_VAL list_insert_last(T_LIST_PTR list, T_TREE_NODE_PTR node){
     element->next = NULL;
     element->node = node;
     element->value = 0.1;
-    element->literalType = LITERAL_NOT_SET;
+    element->literal_type = LITERAL_NOT_SET;
 
     // Check if list is empty, and insert element
     if(list->size == 0){
@@ -71,7 +71,6 @@ T_RET_VAL list_insert_last(T_LIST_PTR list, T_TREE_NODE_PTR node){
         list->last = element;
     }
 
-    
     // Incrementing size
     list->size++;
     return RET_VAL_OK;
@@ -143,11 +142,11 @@ T_RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table){
             if(symbol->data.var.is_const){
                 switch (symbol->data.var.type){ // const :i32
                 case VAR_INT:{
-                    list->active->literalType = NLITERAL_INT;
+                    list->active->literal_type = NLITERAL_INT;
                     break;
                 }
                 case VAR_FLOAT:{ // const :f64
-                    list->active->literalType = LITERAL_FLOAT;
+                    list->active->literal_type = LITERAL_FLOAT;
                     if (symbol->data.var.const_expr) list->active->value = symbol->data.var.float_value;
                     //else if (list->active->node->token->type == FLOAT) list->active->value = list->active->node->token->value.floatVal;
                     break;
@@ -160,11 +159,11 @@ T_RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table){
             }else{
                 switch (symbol->data.var.type){
                     case VAR_INT:{ // var :i32
-                        list->active->literalType = NLITERAL_INT;
+                        list->active->literal_type = NLITERAL_INT;
                         break;
                     }
                     case VAR_FLOAT:{ // var :f64
-                        list->active->literalType = NLITERAL_FLOAT;
+                        list->active->literal_type = NLITERAL_FLOAT;
                         break;
                     }
                     default:{
@@ -174,16 +173,16 @@ T_RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table){
             }
 
             // var :?i32 | const :?i32
-            if(symbol->data.var.type == VAR_INT_NULL) list->active->literalType = NLITERAL_INT_NULL;
+            if(symbol->data.var.type == VAR_INT_NULL) list->active->literal_type = NLITERAL_INT_NULL;
             
             // var :?f64 | const :?f64
-            if(symbol->data.var.type == VAR_FLOAT_NULL) list->active->literalType = NLITERAL_FLOAT_NULL;
+            if(symbol->data.var.type == VAR_FLOAT_NULL) list->active->literal_type = NLITERAL_FLOAT_NULL;
 
             // var :?[]u8 | const :[]u8          
-            if(symbol->data.var.type == VAR_STRING_NULL) list->active->literalType = NLITERAL_STRING_NULL;
+            if(symbol->data.var.type == VAR_STRING_NULL) list->active->literal_type = NLITERAL_STRING_NULL;
             
             // var :[]u8 | const :[]u8
-            if (symbol->data.var.type == VAR_STRING) list->active->literalType = NLITERAL_STRING;
+            if (symbol->data.var.type == VAR_STRING) list->active->literal_type = NLITERAL_STRING;
             
             // Error of not set type
             if(symbol->data.var.type == VAR_VOID) return RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
@@ -195,20 +194,20 @@ T_RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table){
         
         // NULL
         if(list->active->node->token->type == NULL_TOKEN){
-            list->active->literalType = LITERAL_NULL;
+            list->active->literal_type = LITERAL_NULL;
             list_next(list);
             continue;
         }
         // LITERAL INT
         if(list->active->node->token->type == INT){
-            list->active->literalType = LITERAL_INT;
+            list->active->literal_type = LITERAL_INT;
             list_next(list);
             continue;
         }
 
         // LITERAL FLOAT
         if(list->active->node->token->type == FLOAT){
-            list->active->literalType = LITERAL_FLOAT;
+            list->active->literal_type = LITERAL_FLOAT;
             list->active->value = list->active->node->token->value.floatVal;
             list_next(list);
             continue;
@@ -216,14 +215,14 @@ T_RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table){
 
         // LITERAL STRING
         if(list->active->node->token->type == STRING){
-            list->active->literalType = LITERAL_STRING;
+            list->active->literal_type = LITERAL_STRING;
             list_next(list);
             continue;
         }
 
         // OPERATOR
         if(list->active->node->token->type == PLUS || list->active->node->token->type == MINUS || list->active->node->token->type == MULTIPLY || list->active->node->token->type == DIVIDE || list->active->node->token->type == LESS_THAN || list->active->node->token->type == GREATER_THAN || list->active->node->token->type == LESS_THAN_EQUAL || list->active->node->token->type == GREATER_THAN_EQUAL || list->active->node->token->type == EQUAL || list->active->node->token->type == NOT_EQUAL){
-            list->active->literalType = OPERATOR_OF_EXPR;
+            list->active->literal_type = OPERATOR_OF_EXPR;
             list_next(list);
             continue;
         }
@@ -242,35 +241,35 @@ T_RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table){
 void list_delete_two_after(T_LIST_PTR list){
     
     // Elements for delete
-    T_LIST_ELEMENT_PTR deleteOne = list->active->prev;
-    T_LIST_ELEMENT_PTR deleteTwo = deleteOne->prev;
+    T_LIST_ELEMENT_PTR delete_one = list->active->prev;
+    T_LIST_ELEMENT_PTR delete_two = delete_one->prev;
 
-    // If deleteTwo is first element, set active like first item
-    if(list->first == deleteTwo) list->first = list->active;
+    // If delete_two is first element, set active like first item
+    if(list->first == delete_two) list->first = list->active;
     
 
     // Linked list depending on the position of the active element
-    if(deleteTwo->prev == NULL){ 
+    if(delete_two->prev == NULL){ 
          list->active->prev = NULL;
     }
     else{  
-        list->active->prev = deleteTwo->prev;
-        deleteTwo->prev->next = list->active;
+        list->active->prev = delete_two->prev;
+        delete_two->prev->next = list->active;
     }
 
     // Destroy links
-    deleteOne->prev = NULL;
-    deleteOne->next = NULL;
-    deleteTwo->prev = NULL;
-    deleteTwo->next = NULL;
+    delete_one->prev = NULL;
+    delete_one->next = NULL;
+    delete_two->prev = NULL;
+    delete_two->next = NULL;
 
     // Delete elements
-    free(deleteOne);
-    free(deleteTwo);
+    free(delete_one);
+    free(delete_two);
 
     // Decrement size
     list->size = list->size - 2;
-
+    
     if(list->size == 1) list->last = list->active;
     
     return;
@@ -295,17 +294,17 @@ void list_dispose(T_LIST_PTR list){
 
     // Temporary variables
     T_LIST_ELEMENT_PTR element = list->first;
-    T_LIST_ELEMENT_PTR nextElement = NULL;
+    T_LIST_ELEMENT_PTR next_element = NULL;
 
 
     // Free all elements in list
     while(list->size != 0){
         // Save next element
-        nextElement = element->next;
+        next_element = element->next;
         // Free current element
         free(element);
         // Move to next element
-        element = nextElement;
+        element = next_element;
         //Decrement size
         list->size--;        
     }

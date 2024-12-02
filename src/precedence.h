@@ -49,20 +49,22 @@ typedef enum TYPE_END{
 } TYPE_END;
 
 // Function declarations for return index of the operator in precedence table
-OPERATOR_INDEX priorityIndexTable(TOKEN_TYPE type);
+OPERATOR_INDEX prec_index_table(TOKEN_TYPE type);
 
 // Function declarations for return precedence in table
-PRECEDENCE getPrecedence(OPERATOR_INDEX row, OPERATOR_INDEX coll);
+PRECEDENCE get_precedence(OPERATOR_INDEX row, OPERATOR_INDEX coll);
 
 // Function declarations for main function of precedence syntax analysis
-T_RET_VAL precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_END typeEnd);
+T_RET_VAL precedence_syntax_main(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_END typeEnd);
 
+// Function declarations for set count of reduced items
+int count_reduce(T_STACK_PTR stack);
 
 // Function declaration for search reuce rule
-int canReduce(T_STACK_PTR stack);
+int can_reduce(T_STACK_PTR stack);
 
 // Function declaritions or reduce
-bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool makeTree);
+bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool make_tree_flag);
 
 
 #endif // H_PRECEDENCE

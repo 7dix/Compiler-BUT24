@@ -195,66 +195,66 @@ void createStackByPostorder(T_TREE_NODE *tree) {
         generatePushs("LF", uniq);
         free(uniq);
 
-        if (tree->convertToFloat) {
+        if (tree->convert_to_float) {
             generateInt2Floats();
         }
-        else if (tree->convertToInt) {
+        else if (tree->convert_to_int) {
             generateFloat2Ints();
         }
     }
     else if (tree->token->type == INT) {
         generatePushsInt(tree->token->value.intVal);
-        if (tree->convertToFloat) {
+        if (tree->convert_to_float) {
             generateInt2Floats();
         }
 
     }
     else if (tree->token->type == FLOAT) {
         generatePushsFloat(tree->token->value.floatVal);
-        if (tree->convertToInt) {
+        if (tree->convert_to_int) {
             generateFloat2Ints();
         }
 
     }
     else if (tree->token->type == PLUS) { // +
         generateAdds();
-        if (tree->convertToFloat) {
+        if (tree->convert_to_float) {
             generateInt2Floats();
         }
-        else if (tree->convertToInt) {
+        else if (tree->convert_to_int) {
             generateFloat2Ints();
         }
     }
     else if (tree->token->type == MINUS) { // -
         generateSubs();
-        if (tree->convertToFloat) {
+        if (tree->convert_to_float) {
             generateInt2Floats();
         }
-        else if (tree->convertToInt) {
+        else if (tree->convert_to_int) {
             generateFloat2Ints();
         }
     }
     else if (tree->token->type == MULTIPLY) { // *
         generateMuls();
-        if (tree->convertToFloat) {
+        if (tree->convert_to_float) {
             generateInt2Floats();
         }
-        else if (tree->convertToInt) {
+        else if (tree->convert_to_int) {
             generateFloat2Ints();
         }
     }
     else if (tree->token->type == DIVIDE) { // /
-        if (tree->resultType == TYPE_INT_RESULT) {
+        if (tree->result_type == TYPE_INT_RESULT) {
             generateIdivs();
         }
         else {
             generateDivs();
         }
         // Re-type
-        if (tree->convertToFloat) {
+        if (tree->convert_to_float) {
             generateInt2Floats();
         }
-        else if (tree->convertToInt) {
+        else if (tree->convert_to_int) {
             generateFloat2Ints();
         }
     }
