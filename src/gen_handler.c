@@ -688,6 +688,7 @@ void callBIOrd (T_TOKEN *var, T_TOKEN *index) {
         len = snprintf(_index, 0, "LF@%s", uniq);
         _index = (char *) malloc((len+1)*sizeof(char));
         sprintf(_index, "LF@%s", uniq);
+        free(uniq);
     }
 
     generateUniqueIdentifier(var->lexeme, &uniq);
