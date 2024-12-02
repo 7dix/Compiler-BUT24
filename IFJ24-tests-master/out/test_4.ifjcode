@@ -1,0 +1,108 @@
+.IFJcode24
+DEFVAR GF@tmp1
+DEFVAR GF@tmp2
+DEFVAR GF@char
+DEFVAR GF@char2
+DEFVAR GF@valid
+DEFVAR GF@trash
+DEFVAR GF@index
+DEFVAR GF@beg
+CALL main
+EXIT int@0
+LABEL f
+CREATEFRAME
+PUSHFRAME
+DEFVAR LF@x$0
+POPS LF@x$0
+PUSHS LF@x$0
+PUSHS int@10
+LTS
+DEFVAR LF@defined$0
+MOVE LF@defined$0 bool@false
+POPS GF@tmp1
+JUMPIFNEQ $0 GF@tmp1 bool@true
+PUSHS LF@x$0
+PUSHS int@1
+SUBS
+POPFRAME
+RETURN
+MOVE LF@defined$0 bool@true
+DEFVAR LF@defined$1
+MOVE LF@defined$1 bool@false
+JUMP $1
+LABEL $0
+DEFVAR LF@defined$1
+MOVE LF@defined$1 bool@false
+PUSHS LF@x$0
+PUSHS int@1
+SUBS
+JUMPIFEQ skipDefvar$0 LF@defined$1 bool@true
+DEFVAR LF@y$1
+LABEL skipDefvar$0
+POPS LF@y$1
+WRITE string@calling\032g\032with\032
+WRITE LF@y$1
+WRITE string@\010
+PUSHS LF@y$1
+CALL g
+JUMPIFEQ skipDefvar$1 LF@defined$1 bool@true
+DEFVAR LF@res$2
+LABEL skipDefvar$1
+POPS LF@res$2
+PUSHS LF@res$2
+POPFRAME
+RETURN
+MOVE LF@defined$1 bool@true
+LABEL $1
+POPFRAME
+RETURN
+LABEL g
+CREATEFRAME
+PUSHFRAME
+DEFVAR LF@x$3
+POPS LF@x$3
+PUSHS LF@x$3
+PUSHS int@0
+GTS
+DEFVAR LF@defined$2
+MOVE LF@defined$2 bool@false
+POPS GF@tmp1
+JUMPIFNEQ $2 GF@tmp1 bool@true
+WRITE string@calling\032f\032with\032
+WRITE LF@x$3
+WRITE string@\010
+PUSHS LF@x$3
+CALL f
+JUMPIFEQ skipDefvar$2 LF@defined$2 bool@true
+DEFVAR LF@y$4
+LABEL skipDefvar$2
+POPS LF@y$4
+PUSHS LF@y$4
+POPFRAME
+RETURN
+MOVE LF@defined$2 bool@true
+DEFVAR LF@defined$3
+MOVE LF@defined$3 bool@false
+JUMP $3
+LABEL $2
+DEFVAR LF@defined$3
+MOVE LF@defined$3 bool@false
+PUSHS int@200
+POPFRAME
+RETURN
+MOVE LF@defined$3 bool@true
+LABEL $3
+POPFRAME
+RETURN
+LABEL main
+CREATEFRAME
+PUSHFRAME
+PUSHS int@10
+CALL g
+DEFVAR LF@res$5
+POPS LF@res$5
+WRITE string@res:\032
+WRITE LF@res$5
+WRITE string@\010
+POPFRAME
+RETURN

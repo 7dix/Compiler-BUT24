@@ -1,0 +1,242 @@
+.IFJcode24
+DEFVAR GF@tmp1
+DEFVAR GF@tmp2
+DEFVAR GF@char
+DEFVAR GF@char2
+DEFVAR GF@valid
+DEFVAR GF@trash
+DEFVAR GF@index
+DEFVAR GF@beg
+CALL main
+EXIT int@0
+LABEL main
+CREATEFRAME
+PUSHFRAME
+WRITE string@Enter\032a\032string:\032
+READ GF@tmp1 string
+PUSHS GF@tmp1
+DEFVAR LF@inputStr$0
+POPS LF@inputStr$0
+PUSHS LF@inputStr$0
+DEFVAR LF@defined$0
+MOVE LF@defined$0 bool@false
+POPS GF@tmp1
+TYPE GF@tmp2 GF@tmp1
+JUMPIFEQ $0 GF@tmp2 string@nil
+JUMPIFEQ skipDefvar$0 LF@defined$0 bool@true
+DEFVAR LF@str$1
+LABEL skipDefvar$0
+MOVE LF@str$1 GF@tmp1
+WRITE string@You\032entered\032the\032string:\032
+WRITE LF@str$1
+WRITE string@\010
+MOVE LF@defined$0 bool@true
+DEFVAR LF@defined$1
+MOVE LF@defined$1 bool@false
+JUMP $1
+LABEL $0
+DEFVAR LF@defined$1
+MOVE LF@defined$1 bool@false
+WRITE string@Error:\032Invalid\032string\032input.\010
+MOVE LF@defined$1 bool@true
+LABEL $1
+WRITE string@Enter\032an\032integer:\032
+READ GF@tmp1 int
+PUSHS GF@tmp1
+DEFVAR LF@inputInt$2
+POPS LF@inputInt$2
+PUSHS LF@inputInt$2
+DEFVAR LF@defined$2
+MOVE LF@defined$2 bool@false
+POPS GF@tmp1
+TYPE GF@tmp2 GF@tmp1
+JUMPIFEQ $2 GF@tmp2 string@nil
+JUMPIFEQ skipDefvar$1 LF@defined$2 bool@true
+DEFVAR LF@intVal$3
+LABEL skipDefvar$1
+MOVE LF@intVal$3 GF@tmp1
+WRITE string@You\032entered\032the\032integer:\032
+WRITE LF@intVal$3
+WRITE string@\010
+PUSHS LF@intVal$3
+INT2FLOATS
+JUMPIFEQ skipDefvar$2 LF@defined$2 bool@true
+DEFVAR LF@intToFloat$4
+LABEL skipDefvar$2
+POPS LF@intToFloat$4
+WRITE string@Converted\032integer\032to\032float:\032
+WRITE LF@intToFloat$4
+WRITE string@\010
+MOVE LF@defined$2 bool@true
+DEFVAR LF@defined$3
+MOVE LF@defined$3 bool@false
+JUMP $3
+LABEL $2
+DEFVAR LF@defined$3
+MOVE LF@defined$3 bool@false
+WRITE string@Error:\032Invalid\032integer\032input.\010
+MOVE LF@defined$3 bool@true
+LABEL $3
+WRITE string@Enter\032a\032floating-point\032number:\032
+READ GF@tmp1 float
+PUSHS GF@tmp1
+DEFVAR LF@inputFloat$5
+POPS LF@inputFloat$5
+PUSHS LF@inputFloat$5
+DEFVAR LF@defined$4
+MOVE LF@defined$4 bool@false
+POPS GF@tmp1
+TYPE GF@tmp2 GF@tmp1
+JUMPIFEQ $4 GF@tmp2 string@nil
+JUMPIFEQ skipDefvar$3 LF@defined$4 bool@true
+DEFVAR LF@floatVal$6
+LABEL skipDefvar$3
+MOVE LF@floatVal$6 GF@tmp1
+WRITE string@You\032entered\032the\032float:\032
+WRITE LF@floatVal$6
+WRITE string@\010
+PUSHS LF@floatVal$6
+FLOAT2INTS
+JUMPIFEQ skipDefvar$4 LF@defined$4 bool@true
+DEFVAR LF@floatToInt$7
+LABEL skipDefvar$4
+POPS LF@floatToInt$7
+WRITE string@Converted\032float\032to\032integer:\032
+WRITE LF@floatToInt$7
+WRITE string@\010
+MOVE LF@defined$4 bool@true
+DEFVAR LF@defined$5
+MOVE LF@defined$5 bool@false
+JUMP $5
+LABEL $4
+DEFVAR LF@defined$5
+MOVE LF@defined$5 bool@false
+WRITE string@Error:\032Invalid\032floating-point\032input.\010
+MOVE LF@defined$5 bool@true
+LABEL $5
+PUSHS string@Hello
+DEFVAR LF@str1$8
+POPS LF@str1$8
+PUSHS string@,\032World!
+DEFVAR LF@str2$9
+POPS LF@str2$9
+CONCAT GF@tmp1 LF@str1$8 LF@str2$9
+PUSHS GF@tmp1
+DEFVAR LF@concatenated$10
+POPS LF@concatenated$10
+WRITE string@Concatenated\032string:\032
+WRITE LF@concatenated$10
+WRITE string@\010
+WRITE string@Length\032of\032concatenated\032string:\032
+STRLEN GF@tmp1 LF@concatenated$10
+PUSHS GF@tmp1
+DEFVAR LF@len$11
+POPS LF@len$11
+WRITE LF@len$11
+WRITE string@\010
+MOVE GF@beg int@0
+STRLEN GF@tmp1 LF@concatenated$10
+LT GF@valid int@0 int@0
+JUMPIFEQ substr_err0 GF@valid bool@true
+LT GF@valid int@5 int@0
+JUMPIFEQ substr_err0 GF@valid bool@true
+GT GF@valid int@0 int@5
+JUMPIFEQ substr_err0 GF@valid bool@true
+GT GF@valid int@0 GF@tmp1
+EQ GF@tmp2 int@0 GF@tmp1
+OR GF@valid GF@valid GF@tmp2
+JUMPIFEQ substr_err0 GF@valid bool@true
+GT GF@valid int@5 GF@tmp1
+JUMPIFEQ substr_err0 GF@valid bool@true
+MOVE GF@tmp2 string@
+LABEL substr_loop0
+EQ GF@valid GF@beg int@5
+JUMPIFEQ substr_end0 GF@valid bool@true
+GT GF@valid GF@beg int@5
+JUMPIFEQ substr_end0 GF@valid bool@true
+GETCHAR GF@char LF@concatenated$10 GF@beg
+CONCAT GF@tmp2 GF@tmp2 GF@char
+ADD GF@beg GF@beg int@1
+JUMP substr_loop0
+LABEL substr_end0
+PUSHS GF@tmp2
+JUMP substr_ret0
+LABEL substr_err0
+MOVE GF@tmp2 nil@nil
+PUSHS GF@tmp2
+JUMP substr_ret0
+LABEL substr_ret0
+DEFVAR LF@subStr$12
+POPS LF@subStr$12
+PUSHS LF@subStr$12
+DEFVAR LF@defined$6
+MOVE LF@defined$6 bool@false
+POPS GF@tmp1
+TYPE GF@tmp2 GF@tmp1
+JUMPIFEQ $6 GF@tmp2 string@nil
+JUMPIFEQ skipDefvar$5 LF@defined$6 bool@true
+DEFVAR LF@sub$13
+LABEL skipDefvar$5
+MOVE LF@sub$13 GF@tmp1
+WRITE string@Substring\032(first\0325\032chars):\032
+WRITE LF@sub$13
+WRITE string@\010
+MOVE LF@defined$6 bool@true
+DEFVAR LF@defined$7
+MOVE LF@defined$7 bool@false
+JUMP $7
+LABEL $6
+DEFVAR LF@defined$7
+MOVE LF@defined$7 bool@false
+WRITE string@Error:\032Invalid\032substring\032operation.\010
+MOVE LF@defined$7 bool@true
+LABEL $7
+PUSHS LF@str1$8
+PUSHS LF@str2$9
+JUMPIFNEQS strcmp_end_length0
+PUSHS int@0
+JUMP strcmp_ret0
+LABEL strcmp_end_length0
+PUSHS LF@str1$8
+PUSHS LF@str2$9
+LTS
+PUSHS bool@true
+JUMPIFEQS strcmp_ret_lesser0
+PUSHS int@1
+JUMP strcmp_ret0
+LABEL strcmp_ret_lesser0
+PUSHS int@-1
+JUMP strcmp_ret0
+LABEL strcmp_ret0
+DEFVAR LF@comparisonResult$14
+POPS LF@comparisonResult$14
+WRITE string@String\032comparison\032result\032(str1\032vs\032str2):\032
+WRITE LF@comparisonResult$14
+WRITE string@\010
+STRLEN GF@tmp1 LF@concatenated$10
+JUMPIFEQ ord_err0 GF@tmp1 int@0
+LT GF@valid int@1 GF@tmp1
+JUMPIFEQ ord_err0 GF@valid bool@false
+LT GF@valid int@1 int@0
+JUMPIFEQ ord_err0 GF@valid bool@true
+PUSHS LF@concatenated$10
+PUSHS int@1
+STRI2INTS
+JUMP ord_ret0
+LABEL ord_err0
+PUSHS int@0
+LABEL ord_ret0
+DEFVAR LF@ordValue$15
+POPS LF@ordValue$15
+WRITE string@Ordinal\032value\032of\0322nd\032character\032in\032concatenated\032string:\032
+WRITE LF@ordValue$15
+WRITE string@\010
+PUSHS LF@ordValue$15
+INT2CHARS
+DEFVAR LF@charFromOrd$16
+POPS LF@charFromOrd$16
+WRITE string@Character\032created\032from\032ordinal\032value:\032
+WRITE LF@charFromOrd$16
+WRITE string@\010
+POPFRAME
+RETURN

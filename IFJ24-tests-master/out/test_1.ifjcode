@@ -1,0 +1,110 @@
+.IFJcode24
+DEFVAR GF@tmp1
+DEFVAR GF@tmp2
+DEFVAR GF@char
+DEFVAR GF@char2
+DEFVAR GF@valid
+DEFVAR GF@trash
+DEFVAR GF@index
+DEFVAR GF@beg
+CALL main
+EXIT int@0
+LABEL main
+CREATEFRAME
+PUSHFRAME
+WRITE string@Zadejte\032cislo\032pro\032vypocet\032faktorialu\010
+READ GF@tmp1 int
+PUSHS GF@tmp1
+DEFVAR LF@a$0
+POPS LF@a$0
+PUSHS LF@a$0
+DEFVAR LF@defined$0
+MOVE LF@defined$0 bool@false
+POPS GF@tmp1
+TYPE GF@tmp2 GF@tmp1
+JUMPIFEQ $0 GF@tmp2 string@nil
+JUMPIFEQ skipDefvar$0 LF@defined$0 bool@true
+DEFVAR LF@val$1
+LABEL skipDefvar$0
+MOVE LF@val$1 GF@tmp1
+PUSHS LF@val$1
+PUSHS int@0
+LTS
+JUMPIFEQ skipDefvar$1 LF@defined$0 bool@true
+DEFVAR LF@defined$1
+MOVE LF@defined$1 bool@false
+LABEL skipDefvar$1
+POPS GF@tmp1
+JUMPIFNEQ $2 GF@tmp1 bool@true
+WRITE string@Faktorial\032
+WRITE LF@val$1
+WRITE string@\032nelze\032spocitat\010
+MOVE LF@defined$1 bool@true
+JUMPIFEQ skipDefvar$2 LF@defined$0 bool@true
+DEFVAR LF@defined$2
+MOVE LF@defined$2 bool@false
+LABEL skipDefvar$2
+JUMP $3
+LABEL $2
+JUMPIFEQ skipDefvar$3 LF@defined$0 bool@true
+DEFVAR LF@defined$2
+MOVE LF@defined$2 bool@false
+LABEL skipDefvar$3
+PUSHS LF@val$1
+INT2FLOATS
+JUMPIFEQ skipDefvar$4 LF@defined$2 bool@true
+DEFVAR LF@d$2
+LABEL skipDefvar$4
+POPS LF@d$2
+PUSHS float@0x1p+0
+JUMPIFEQ skipDefvar$5 LF@defined$2 bool@true
+DEFVAR LF@vysl$3
+LABEL skipDefvar$5
+POPS LF@vysl$3
+JUMPIFEQ skipDefvar$6 LF@defined$2 bool@true
+DEFVAR LF@defined$3
+MOVE LF@defined$3 bool@false
+LABEL skipDefvar$6
+LABEL $4
+PUSHS LF@d$2
+PUSHS int@0
+INT2FLOATS
+GTS
+POPS GF@tmp1
+JUMPIFNEQ $5 GF@tmp1 bool@true
+PUSHS LF@vysl$3
+PUSHS LF@d$2
+MULS
+POPS LF@vysl$3
+PUSHS LF@d$2
+PUSHS float@0x1p+0
+SUBS
+POPS LF@d$2
+MOVE LF@defined$3 bool@true
+JUMP $4
+LABEL $5
+WRITE string@Vysledek:\032
+WRITE LF@vysl$3
+WRITE string@\032=\032
+PUSHS LF@vysl$3
+FLOAT2INTS
+JUMPIFEQ skipDefvar$7 LF@defined$2 bool@true
+DEFVAR LF@vysl_i32$4
+LABEL skipDefvar$7
+POPS LF@vysl_i32$4
+WRITE LF@vysl_i32$4
+WRITE string@\010
+MOVE LF@defined$2 bool@true
+LABEL $3
+MOVE LF@defined$0 bool@true
+DEFVAR LF@defined$4
+MOVE LF@defined$4 bool@false
+JUMP $1
+LABEL $0
+DEFVAR LF@defined$4
+MOVE LF@defined$4 bool@false
+WRITE string@Faktorial\032pro\032null\032nelze\032spocitat\010
+MOVE LF@defined$4 bool@true
+LABEL $1
+POPFRAME
+RETURN

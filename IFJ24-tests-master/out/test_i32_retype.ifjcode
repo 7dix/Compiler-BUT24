@@ -1,0 +1,50 @@
+.IFJcode24
+DEFVAR GF@tmp1
+DEFVAR GF@tmp2
+DEFVAR GF@char
+DEFVAR GF@char2
+DEFVAR GF@valid
+DEFVAR GF@trash
+DEFVAR GF@index
+DEFVAR GF@beg
+CALL main
+EXIT int@0
+LABEL main
+CREATEFRAME
+PUSHFRAME
+READ GF@tmp1 float
+PUSHS GF@tmp1
+DEFVAR LF@b$0
+POPS LF@b$0
+PUSHS LF@b$0
+DEFVAR LF@defined$0
+MOVE LF@defined$0 bool@false
+POPS GF@tmp1
+TYPE GF@tmp2 GF@tmp1
+JUMPIFEQ $0 GF@tmp2 string@nil
+JUMPIFEQ skipDefvar$0 LF@defined$0 bool@true
+DEFVAR LF@B$1
+LABEL skipDefvar$0
+MOVE LF@B$1 GF@tmp1
+PUSHS int@5
+INT2FLOATS
+PUSHS LF@B$1
+ADDS
+JUMPIFEQ skipDefvar$1 LF@defined$0 bool@true
+DEFVAR LF@ab$2
+LABEL skipDefvar$1
+POPS LF@ab$2
+WRITE LF@ab$2
+MOVE LF@defined$0 bool@true
+DEFVAR LF@defined$1
+MOVE LF@defined$1 bool@false
+JUMP $1
+LABEL $0
+DEFVAR LF@defined$1
+MOVE LF@defined$1 bool@false
+PUSHS float@0x1.4cccccp+2
+POPS LF@b$0
+MOVE LF@defined$1 bool@true
+LABEL $1
+POPFRAME
+RETURN

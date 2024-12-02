@@ -15,10 +15,8 @@
 /**
  * GRAMAR:
  * 
+ * S -> E
  * S -> R
- * 
- * R -> T
- * R -> E
  * 
  * E -> E + E
  * E -> E - E
@@ -26,17 +24,17 @@
  * E -> E/E
  * E ->(E)
  * E -> id
- * E -> int_value
- * E -> float_value
- * E -> string_value 
+ * E -> int_literal
+ * E -> float_literal
+ * E -> string_literal
  * 
- * T -> E < E
- * T -> E > E
- * T -> E <= E
- * T -> E >= E
- * T -> E == E
- * T -> E != E 
- * T -> E
+ * R -> E < E
+ * R -> E > E
+ * R -> E <= E
+ * R -> E >= E
+ * R -> E == E
+ * R -> E != E 
+ * R -> (R)
  * 
  */
 

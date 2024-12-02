@@ -1,0 +1,432 @@
+.IFJcode24
+DEFVAR GF@tmp1
+DEFVAR GF@tmp2
+DEFVAR GF@char
+DEFVAR GF@char2
+DEFVAR GF@valid
+DEFVAR GF@trash
+DEFVAR GF@index
+DEFVAR GF@beg
+CALL main
+EXIT int@0
+LABEL main
+CREATEFRAME
+PUSHFRAME
+WRITE string@Starting\032complex\032program\032with\032nullable\032handling,\032recursion,\032and\032nested\032conditions.\010
+PUSHS nil@nil
+DEFVAR LF@a$0
+POPS LF@a$0
+PUSHS int@10
+DEFVAR LF@b$1
+POPS LF@b$1
+PUSHS int@5
+DEFVAR LF@c$2
+POPS LF@c$2
+PUSHS LF@a$0
+DEFVAR LF@defined$0
+MOVE LF@defined$0 bool@false
+POPS GF@tmp1
+TYPE GF@tmp2 GF@tmp1
+JUMPIFEQ $0 GF@tmp2 string@nil
+JUMPIFEQ skipDefvar$0 LF@defined$0 bool@true
+DEFVAR LF@value$3
+LABEL skipDefvar$0
+MOVE LF@value$3 GF@tmp1
+WRITE string@Nullable\032a\032is\032not\032null:\032
+WRITE LF@value$3
+WRITE string@\010
+MOVE LF@defined$0 bool@true
+DEFVAR LF@defined$1
+MOVE LF@defined$1 bool@false
+JUMP $1
+LABEL $0
+DEFVAR LF@defined$1
+MOVE LF@defined$1 bool@false
+PUSHS LF@b$1
+JUMPIFEQ skipDefvar$1 LF@defined$1 bool@true
+DEFVAR LF@defined$2
+MOVE LF@defined$2 bool@false
+LABEL skipDefvar$1
+POPS GF@tmp1
+TYPE GF@tmp2 GF@tmp1
+JUMPIFEQ $2 GF@tmp2 string@nil
+JUMPIFEQ skipDefvar$2 LF@defined$2 bool@true
+DEFVAR LF@value$4
+LABEL skipDefvar$2
+MOVE LF@value$4 GF@tmp1
+WRITE string@Nullable\032a\032is\032null,\032but\032b\032is\032not\032null:\032
+WRITE LF@value$4
+WRITE string@\010
+MOVE LF@defined$2 bool@true
+JUMPIFEQ skipDefvar$3 LF@defined$1 bool@true
+DEFVAR LF@defined$3
+MOVE LF@defined$3 bool@false
+LABEL skipDefvar$3
+JUMP $3
+LABEL $2
+JUMPIFEQ skipDefvar$4 LF@defined$1 bool@true
+DEFVAR LF@defined$3
+MOVE LF@defined$3 bool@false
+LABEL skipDefvar$4
+PUSHS LF@c$2
+JUMPIFEQ skipDefvar$5 LF@defined$3 bool@true
+DEFVAR LF@defined$4
+MOVE LF@defined$4 bool@false
+LABEL skipDefvar$5
+POPS GF@tmp1
+TYPE GF@tmp2 GF@tmp1
+JUMPIFEQ $4 GF@tmp2 string@nil
+JUMPIFEQ skipDefvar$6 LF@defined$4 bool@true
+DEFVAR LF@value$5
+LABEL skipDefvar$6
+MOVE LF@value$5 GF@tmp1
+WRITE string@Nullable\032a\032and\032b\032are\032null,\032but\032c\032is\032not\032null:\032
+WRITE LF@value$5
+WRITE string@\010
+MOVE LF@defined$4 bool@true
+JUMPIFEQ skipDefvar$7 LF@defined$3 bool@true
+DEFVAR LF@defined$5
+MOVE LF@defined$5 bool@false
+LABEL skipDefvar$7
+JUMP $5
+LABEL $4
+JUMPIFEQ skipDefvar$8 LF@defined$3 bool@true
+DEFVAR LF@defined$5
+MOVE LF@defined$5 bool@false
+LABEL skipDefvar$8
+WRITE string@All\032nullable\032values\032are\032null.\010
+MOVE LF@defined$5 bool@true
+LABEL $5
+MOVE LF@defined$3 bool@true
+LABEL $3
+MOVE LF@defined$1 bool@true
+LABEL $1
+PUSHS LF@a$0
+PUSHS LF@b$1
+CALL nullable_sum
+DEFVAR LF@sum$6
+POPS LF@sum$6
+WRITE string@Sum\032of\032a\032and\032b:\032
+WRITE LF@sum$6
+WRITE string@\010
+PUSHS int@20
+DEFVAR LF@x$7
+POPS LF@x$7
+PUSHS int@15
+DEFVAR LF@y$8
+POPS LF@y$8
+PUSHS LF@x$7
+PUSHS LF@y$8
+GTS
+DEFVAR LF@defined$6
+MOVE LF@defined$6 bool@false
+POPS GF@tmp1
+JUMPIFNEQ $6 GF@tmp1 bool@true
+WRITE string@x\032is\032greater\032than\032y\010
+PUSHS LF@x$7
+PUSHS int@2
+PUSHS LF@x$7
+PUSHS int@2
+IDIVS
+MULS
+SUBS
+JUMPIFEQ skipDefvar$9 LF@defined$6 bool@true
+DEFVAR LF@half_x$9
+LABEL skipDefvar$9
+POPS LF@half_x$9
+PUSHS LF@half_x$9
+PUSHS int@0
+EQS
+JUMPIFEQ skipDefvar$10 LF@defined$6 bool@true
+DEFVAR LF@defined$7
+MOVE LF@defined$7 bool@false
+LABEL skipDefvar$10
+POPS GF@tmp1
+JUMPIFNEQ $8 GF@tmp1 bool@true
+WRITE string@x\032is\032even\010
+MOVE LF@defined$7 bool@true
+JUMPIFEQ skipDefvar$11 LF@defined$6 bool@true
+DEFVAR LF@defined$8
+MOVE LF@defined$8 bool@false
+LABEL skipDefvar$11
+JUMP $9
+LABEL $8
+JUMPIFEQ skipDefvar$12 LF@defined$6 bool@true
+DEFVAR LF@defined$8
+MOVE LF@defined$8 bool@false
+LABEL skipDefvar$12
+WRITE string@x\032is\032odd\010
+MOVE LF@defined$8 bool@true
+LABEL $9
+PUSHS int@0
+POPS LF@half_x$9
+MOVE LF@defined$6 bool@true
+DEFVAR LF@defined$9
+MOVE LF@defined$9 bool@false
+JUMP $7
+LABEL $6
+DEFVAR LF@defined$9
+MOVE LF@defined$9 bool@false
+WRITE string@x\032is\032not\032greater\032than\032y\010
+PUSHS LF@y$8
+PUSHS int@2
+PUSHS LF@y$8
+PUSHS int@2
+IDIVS
+MULS
+SUBS
+JUMPIFEQ skipDefvar$13 LF@defined$9 bool@true
+DEFVAR LF@half_y$10
+LABEL skipDefvar$13
+POPS LF@half_y$10
+PUSHS LF@half_y$10
+PUSHS int@0
+EQS
+JUMPIFEQ skipDefvar$14 LF@defined$9 bool@true
+DEFVAR LF@defined$10
+MOVE LF@defined$10 bool@false
+LABEL skipDefvar$14
+POPS GF@tmp1
+JUMPIFNEQ $10 GF@tmp1 bool@true
+WRITE string@y\032is\032even\010
+MOVE LF@defined$10 bool@true
+JUMPIFEQ skipDefvar$15 LF@defined$9 bool@true
+DEFVAR LF@defined$11
+MOVE LF@defined$11 bool@false
+LABEL skipDefvar$15
+JUMP $11
+LABEL $10
+JUMPIFEQ skipDefvar$16 LF@defined$9 bool@true
+DEFVAR LF@defined$11
+MOVE LF@defined$11 bool@false
+LABEL skipDefvar$16
+WRITE string@y\032is\032odd\010
+MOVE LF@defined$11 bool@true
+LABEL $11
+PUSHS int@0
+POPS LF@half_y$10
+MOVE LF@defined$9 bool@true
+LABEL $7
+PUSHS int@0
+DEFVAR LF@total_sum$11
+POPS LF@total_sum$11
+PUSHS int@1
+DEFVAR LF@continue_input$12
+POPS LF@continue_input$12
+WRITE string@Enter\032numbers\032to\032sum\032(0\032to\032stop):\010
+DEFVAR LF@defined$12
+MOVE LF@defined$12 bool@false
+LABEL $12
+PUSHS LF@continue_input$12
+PUSHS int@0
+EQS
+NOTS
+POPS GF@tmp1
+JUMPIFNEQ $13 GF@tmp1 bool@true
+READ GF@tmp1 int
+PUSHS GF@tmp1
+JUMPIFEQ skipDefvar$17 LF@defined$12 bool@true
+DEFVAR LF@input$13
+LABEL skipDefvar$17
+POPS LF@input$13
+PUSHS LF@input$13
+JUMPIFEQ skipDefvar$18 LF@defined$12 bool@true
+DEFVAR LF@defined$13
+MOVE LF@defined$13 bool@false
+LABEL skipDefvar$18
+POPS GF@tmp1
+TYPE GF@tmp2 GF@tmp1
+JUMPIFEQ $14 GF@tmp2 string@nil
+JUMPIFEQ skipDefvar$19 LF@defined$13 bool@true
+DEFVAR LF@num$14
+LABEL skipDefvar$19
+MOVE LF@num$14 GF@tmp1
+PUSHS LF@num$14
+PUSHS int@0
+EQS
+JUMPIFEQ skipDefvar$20 LF@defined$13 bool@true
+DEFVAR LF@defined$14
+MOVE LF@defined$14 bool@false
+LABEL skipDefvar$20
+POPS GF@tmp1
+JUMPIFNEQ $16 GF@tmp1 bool@true
+PUSHS int@0
+POPS LF@continue_input$12
+MOVE LF@defined$14 bool@true
+JUMPIFEQ skipDefvar$21 LF@defined$13 bool@true
+DEFVAR LF@defined$15
+MOVE LF@defined$15 bool@false
+LABEL skipDefvar$21
+JUMP $17
+LABEL $16
+JUMPIFEQ skipDefvar$22 LF@defined$13 bool@true
+DEFVAR LF@defined$15
+MOVE LF@defined$15 bool@false
+LABEL skipDefvar$22
+PUSHS LF@total_sum$11
+PUSHS LF@num$14
+ADDS
+POPS LF@total_sum$11
+MOVE LF@defined$15 bool@true
+LABEL $17
+MOVE LF@defined$13 bool@true
+JUMPIFEQ skipDefvar$23 LF@defined$12 bool@true
+DEFVAR LF@defined$16
+MOVE LF@defined$16 bool@false
+LABEL skipDefvar$23
+JUMP $15
+LABEL $14
+JUMPIFEQ skipDefvar$24 LF@defined$12 bool@true
+DEFVAR LF@defined$16
+MOVE LF@defined$16 bool@false
+LABEL skipDefvar$24
+WRITE string@Invalid\032input,\032try\032again.\010
+MOVE LF@defined$16 bool@true
+LABEL $15
+MOVE LF@defined$12 bool@true
+JUMP $12
+LABEL $13
+WRITE string@Total\032sum:\032
+WRITE LF@total_sum$11
+WRITE string@\010
+WRITE string@Enter\032hello\032:\032
+READ GF@tmp1 string
+PUSHS GF@tmp1
+DEFVAR LF@input_str$15
+POPS LF@input_str$15
+PUSHS string@hello
+DEFVAR LF@expected_str$16
+POPS LF@expected_str$16
+PUSHS LF@input_str$15
+DEFVAR LF@defined$17
+MOVE LF@defined$17 bool@false
+POPS GF@tmp1
+TYPE GF@tmp2 GF@tmp1
+JUMPIFEQ $18 GF@tmp2 string@nil
+JUMPIFEQ skipDefvar$25 LF@defined$17 bool@true
+DEFVAR LF@str$17
+LABEL skipDefvar$25
+MOVE LF@str$17 GF@tmp1
+PUSHS LF@str$17
+PUSHS LF@expected_str$16
+JUMPIFNEQS strcmp_end_length0
+PUSHS int@0
+JUMP strcmp_ret0
+LABEL strcmp_end_length0
+PUSHS LF@str$17
+PUSHS LF@expected_str$16
+LTS
+PUSHS bool@true
+JUMPIFEQS strcmp_ret_lesser0
+PUSHS int@1
+JUMP strcmp_ret0
+LABEL strcmp_ret_lesser0
+PUSHS int@-1
+JUMP strcmp_ret0
+LABEL strcmp_ret0
+JUMPIFEQ skipDefvar$26 LF@defined$17 bool@true
+DEFVAR LF@result$18
+LABEL skipDefvar$26
+POPS LF@result$18
+PUSHS LF@result$18
+PUSHS int@0
+EQS
+JUMPIFEQ skipDefvar$27 LF@defined$17 bool@true
+DEFVAR LF@defined$18
+MOVE LF@defined$18 bool@false
+LABEL skipDefvar$27
+POPS GF@tmp1
+JUMPIFNEQ $20 GF@tmp1 bool@true
+WRITE string@Correct\032string\032entered!\010
+MOVE LF@defined$18 bool@true
+JUMPIFEQ skipDefvar$28 LF@defined$17 bool@true
+DEFVAR LF@defined$19
+MOVE LF@defined$19 bool@false
+LABEL skipDefvar$28
+JUMP $21
+LABEL $20
+JUMPIFEQ skipDefvar$29 LF@defined$17 bool@true
+DEFVAR LF@defined$19
+MOVE LF@defined$19 bool@false
+LABEL skipDefvar$29
+WRITE string@Incorrect\032string,\032exiting\032program.\010
+POPFRAME
+RETURN
+MOVE LF@defined$19 bool@true
+LABEL $21
+MOVE LF@defined$17 bool@true
+DEFVAR LF@defined$20
+MOVE LF@defined$20 bool@false
+JUMP $19
+LABEL $18
+DEFVAR LF@defined$20
+MOVE LF@defined$20 bool@false
+WRITE string@No\032string\032input,\032exiting\032program.\010
+POPFRAME
+RETURN
+MOVE LF@defined$20 bool@true
+LABEL $19
+WRITE string@Program\032completed\032successfully.\010
+POPFRAME
+RETURN
+LABEL nullable_sum
+CREATEFRAME
+PUSHFRAME
+DEFVAR LF@b$20
+POPS LF@b$20
+DEFVAR LF@a$19
+POPS LF@a$19
+PUSHS int@0
+DEFVAR LF@sum$21
+POPS LF@sum$21
+PUSHS LF@a$19
+DEFVAR LF@defined$21
+MOVE LF@defined$21 bool@false
+POPS GF@tmp1
+TYPE GF@tmp2 GF@tmp1
+JUMPIFEQ $22 GF@tmp2 string@nil
+JUMPIFEQ skipDefvar$30 LF@defined$21 bool@true
+DEFVAR LF@value$22
+LABEL skipDefvar$30
+MOVE LF@value$22 GF@tmp1
+PUSHS LF@sum$21
+PUSHS LF@value$22
+ADDS
+POPS LF@sum$21
+MOVE LF@defined$21 bool@true
+DEFVAR LF@defined$22
+MOVE LF@defined$22 bool@false
+JUMP $23
+LABEL $22
+DEFVAR LF@defined$22
+MOVE LF@defined$22 bool@false
+MOVE LF@defined$22 bool@true
+LABEL $23
+PUSHS LF@b$20
+DEFVAR LF@defined$23
+MOVE LF@defined$23 bool@false
+POPS GF@tmp1
+TYPE GF@tmp2 GF@tmp1
+JUMPIFEQ $24 GF@tmp2 string@nil
+JUMPIFEQ skipDefvar$31 LF@defined$23 bool@true
+DEFVAR LF@value$23
+LABEL skipDefvar$31
+MOVE LF@value$23 GF@tmp1
+PUSHS LF@sum$21
+PUSHS LF@value$23
+ADDS
+POPS LF@sum$21
+MOVE LF@defined$23 bool@true
+DEFVAR LF@defined$24
+MOVE LF@defined$24 bool@false
+JUMP $25
+LABEL $24
+DEFVAR LF@defined$24
+MOVE LF@defined$24 bool@false
+MOVE LF@defined$24 bool@true
+LABEL $25
+PUSHS LF@sum$21
+POPFRAME
+RETURN
+POPFRAME
+RETURN

@@ -1,0 +1,54 @@
+.IFJcode24
+DEFVAR GF@tmp1
+DEFVAR GF@tmp2
+DEFVAR GF@char
+DEFVAR GF@char2
+DEFVAR GF@valid
+DEFVAR GF@trash
+DEFVAR GF@index
+DEFVAR GF@beg
+CALL main
+EXIT int@0
+LABEL main
+CREATEFRAME
+PUSHFRAME
+READ GF@tmp1 string
+PUSHS GF@tmp1
+DEFVAR LF@a$0
+POPS LF@a$0
+PUSHS string@
+DEFVAR LF@a_without_null$1
+POPS LF@a_without_null$1
+PUSHS LF@a$0
+DEFVAR LF@defined$0
+MOVE LF@defined$0 bool@false
+POPS GF@tmp1
+TYPE GF@tmp2 GF@tmp1
+JUMPIFEQ $0 GF@tmp2 string@nil
+JUMPIFEQ skipDefvar$0 LF@defined$0 bool@true
+DEFVAR LF@b$2
+LABEL skipDefvar$0
+MOVE LF@b$2 GF@tmp1
+PUSHS LF@b$2
+POPS LF@a_without_null$1
+MOVE LF@defined$0 bool@true
+DEFVAR LF@defined$1
+MOVE LF@defined$1 bool@false
+JUMP $1
+LABEL $0
+DEFVAR LF@defined$1
+MOVE LF@defined$1 bool@false
+MOVE LF@defined$1 bool@true
+LABEL $1
+WRITE LF@a$0
+WRITE string@\010
+PUSHS string@--after
+DEFVAR LF@str_after$3
+POPS LF@str_after$3
+PUSHS string@before--
+DEFVAR LF@str_before$4
+POPS LF@str_before$4
+STRLEN GF@tmp1 LF@str_after$3
+PUSHS GF@tmp1
+DEFVAR LF@len_after$5
+POPS LF@len_after$5

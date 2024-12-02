@@ -1,0 +1,203 @@
+.IFJcode24
+DEFVAR GF@tmp1
+DEFVAR GF@tmp2
+DEFVAR GF@char
+DEFVAR GF@char2
+DEFVAR GF@valid
+DEFVAR GF@trash
+DEFVAR GF@index
+DEFVAR GF@beg
+CALL main
+EXIT int@0
+LABEL main
+CREATEFRAME
+PUSHFRAME
+WRITE string@Vitaj\032v\032komplexnom\032testovacom\032programe\032pre\032jazyk\032IFJ24!\010
+PUSHS int@42
+DEFVAR LF@a$0
+POPS LF@a$0
+PUSHS int@13
+DEFVAR LF@b$1
+POPS LF@b$1
+PUSHS LF@a$0
+PUSHS LF@b$1
+ADDS
+DEFVAR LF@result$2
+POPS LF@result$2
+WRITE string@Sucet\032cisel:\032
+WRITE LF@result$2
+WRITE string@\010
+PUSHS LF@result$2
+PUSHS int@50
+GTS
+DEFVAR LF@defined$0
+MOVE LF@defined$0 bool@false
+POPS GF@tmp1
+JUMPIFNEQ $0 GF@tmp1 bool@true
+PUSHS int@10
+POPS LF@result$2
+WRITE string@Vysledok\032je\032vacsi\032ako\03250.\010
+MOVE LF@defined$0 bool@true
+DEFVAR LF@defined$1
+MOVE LF@defined$1 bool@false
+JUMP $1
+LABEL $0
+DEFVAR LF@defined$1
+MOVE LF@defined$1 bool@false
+WRITE string@Vysledok\032je\032mensi\032alebo\032rovny\03250.\010
+MOVE LF@defined$1 bool@true
+LABEL $1
+WRITE string@Vypis\032cisel\032od\0321\032do\0325:\010
+PUSHS int@1
+DEFVAR LF@i$3
+POPS LF@i$3
+DEFVAR LF@defined$2
+MOVE LF@defined$2 bool@false
+LABEL $2
+PUSHS LF@i$3
+PUSHS int@5
+POPS GF@tmp1
+POPS GF@tmp2
+PUSHS GF@tmp2
+PUSHS GF@tmp1
+LTS
+PUSHS GF@tmp2
+PUSHS GF@tmp1
+EQS
+ORS
+POPS GF@tmp1
+JUMPIFNEQ $3 GF@tmp1 bool@true
+WRITE LF@i$3
+WRITE string@\010
+PUSHS LF@i$3
+PUSHS int@1
+ADDS
+POPS LF@i$3
+MOVE LF@defined$2 bool@true
+JUMP $2
+LABEL $3
+PUSHS int@5
+DEFVAR LF@factorialInput$4
+POPS LF@factorialInput$4
+PUSHS LF@factorialInput$4
+CALL factorial
+DEFVAR LF@factorialResult$5
+POPS LF@factorialResult$5
+WRITE string@Faktorial\032cisla\032
+WRITE LF@factorialInput$4
+WRITE string@\032je\032
+WRITE LF@factorialResult$5
+WRITE string@.\010
+PUSHS string@Testovanie\032prace\032s\032retazcami.
+DEFVAR LF@str1$6
+POPS LF@str1$6
+PUSHS string@\032IFJ24\032je\032super!
+DEFVAR LF@str2$7
+POPS LF@str2$7
+CONCAT GF@tmp1 LF@str1$6 LF@str2$7
+PUSHS GF@tmp1
+DEFVAR LF@combined$8
+POPS LF@combined$8
+WRITE string@Spojeny\032retazec:\032
+WRITE LF@combined$8
+WRITE string@\010
+PUSHS int@0
+DEFVAR LF@sum$9
+POPS LF@sum$9
+WRITE string@Zadajte\032cisla\032na\032scitanie\032(0\032ukonci\032vstup):\010
+PUSHS int@1
+DEFVAR LF@brk$10
+POPS LF@brk$10
+DEFVAR LF@defined$3
+MOVE LF@defined$3 bool@false
+LABEL $4
+PUSHS LF@brk$10
+PUSHS int@0
+EQS
+NOTS
+POPS GF@tmp1
+JUMPIFNEQ $5 GF@tmp1 bool@true
+READ GF@tmp1 int
+PUSHS GF@tmp1
+JUMPIFEQ skipDefvar$0 LF@defined$3 bool@true
+DEFVAR LF@input$11
+LABEL skipDefvar$0
+POPS LF@input$11
+PUSHS LF@input$11
+JUMPIFEQ skipDefvar$1 LF@defined$3 bool@true
+DEFVAR LF@defined$4
+MOVE LF@defined$4 bool@false
+LABEL skipDefvar$1
+POPS GF@tmp1
+TYPE GF@tmp2 GF@tmp1
+JUMPIFEQ $6 GF@tmp2 string@nil
+JUMPIFEQ skipDefvar$2 LF@defined$4 bool@true
+DEFVAR LF@num$12
+LABEL skipDefvar$2
+MOVE LF@num$12 GF@tmp1
+PUSHS LF@num$12
+PUSHS int@0
+EQS
+JUMPIFEQ skipDefvar$3 LF@defined$4 bool@true
+DEFVAR LF@defined$5
+MOVE LF@defined$5 bool@false
+LABEL skipDefvar$3
+POPS GF@tmp1
+JUMPIFNEQ $8 GF@tmp1 bool@true
+PUSHS int@0
+POPS LF@brk$10
+MOVE LF@defined$5 bool@true
+JUMPIFEQ skipDefvar$4 LF@defined$4 bool@true
+DEFVAR LF@defined$6
+MOVE LF@defined$6 bool@false
+LABEL skipDefvar$4
+JUMP $9
+LABEL $8
+JUMPIFEQ skipDefvar$5 LF@defined$4 bool@true
+DEFVAR LF@defined$6
+MOVE LF@defined$6 bool@false
+LABEL skipDefvar$5
+PUSHS LF@sum$9
+PUSHS LF@num$12
+ADDS
+POPS LF@sum$9
+MOVE LF@defined$6 bool@true
+LABEL $9
+MOVE LF@defined$4 bool@true
+JUMPIFEQ skipDefvar$6 LF@defined$3 bool@true
+DEFVAR LF@defined$7
+MOVE LF@defined$7 bool@false
+LABEL skipDefvar$6
+JUMP $7
+LABEL $6
+JUMPIFEQ skipDefvar$7 LF@defined$3 bool@true
+DEFVAR LF@defined$7
+MOVE LF@defined$7 bool@false
+LABEL skipDefvar$7
+WRITE string@Neplatny\032vstup!\032Skuste\032znova.\010
+MOVE LF@defined$7 bool@true
+LABEL $7
+MOVE LF@defined$3 bool@true
+JUMP $4
+LABEL $5
+WRITE string@Sucet\032zadanych\032cisel\032je:\032
+WRITE LF@sum$9
+WRITE string@\010
+WRITE string@Zadajte\032'ahoj',\032aby\032ste\032pokracovali:\010
+READ GF@tmp1 string
+PUSHS GF@tmp1
+DEFVAR LF@inputStr$13
+POPS LF@inputStr$13
+PUSHS string@ahoj
+DEFVAR LF@expected$14
+POPS LF@expected$14
+PUSHS LF@inputStr$13
+DEFVAR LF@defined$8
+MOVE LF@defined$8 bool@false
+POPS GF@tmp1
+TYPE GF@tmp2 GF@tmp1
+JUMPIFEQ $10 GF@tmp2 string@nil
+JUMPIFEQ skipDefvar$8 LF@defined$8 bool@true
+DEFVAR LF@in_str$15
+LABEL skipDefvar$8
+MOVE LF@in_str$15 GF@tmp1

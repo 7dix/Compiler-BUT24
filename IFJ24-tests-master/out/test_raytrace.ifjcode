@@ -1,0 +1,343 @@
+.IFJcode24
+DEFVAR GF@tmp1
+DEFVAR GF@tmp2
+DEFVAR GF@char
+DEFVAR GF@char2
+DEFVAR GF@valid
+DEFVAR GF@trash
+DEFVAR GF@index
+DEFVAR GF@beg
+CALL main
+EXIT int@0
+LABEL main
+CREATEFRAME
+PUSHFRAME
+PUSHS float@0x1.4p+4
+DEFVAR LF@viewportWidth$0
+POPS LF@viewportWidth$0
+PUSHS float@0x1.4p+3
+DEFVAR LF@viewportHeight$1
+POPS LF@viewportHeight$1
+PUSHS float@0x0p+0
+DEFVAR LF@sphereX$2
+POPS LF@sphereX$2
+PUSHS float@0x0p+0
+DEFVAR LF@sphereY$3
+POPS LF@sphereY$3
+PUSHS float@0x1.4p+2
+DEFVAR LF@sphereRadius$4
+POPS LF@sphereRadius$4
+PUSHS float@0x1.4p+3
+DEFVAR LF@lightX$5
+POPS LF@lightX$5
+PUSHS float@0x1.4p+3
+DEFVAR LF@lightY$6
+POPS LF@lightY$6
+PUSHS float@0x0p+0
+PUSHS float@0x1p+0
+SUBS
+PUSHS LF@viewportHeight$1
+MULS
+PUSHS float@0x1p+1
+DIVS
+DEFVAR LF@y$7
+POPS LF@y$7
+DEFVAR LF@defined$0
+MOVE LF@defined$0 bool@false
+LABEL $0
+PUSHS LF@y$7
+PUSHS LF@viewportHeight$1
+PUSHS float@0x1p+1
+DIVS
+POPS GF@tmp1
+POPS GF@tmp2
+PUSHS GF@tmp2
+PUSHS GF@tmp1
+LTS
+PUSHS GF@tmp2
+PUSHS GF@tmp1
+EQS
+ORS
+POPS GF@tmp1
+JUMPIFNEQ $1 GF@tmp1 bool@true
+PUSHS float@0x0p+0
+PUSHS float@0x1p+0
+SUBS
+PUSHS LF@viewportWidth$0
+MULS
+PUSHS float@0x1p+1
+DIVS
+JUMPIFEQ skipDefvar$0 LF@defined$0 bool@true
+DEFVAR LF@x$8
+LABEL skipDefvar$0
+POPS LF@x$8
+JUMPIFEQ skipDefvar$1 LF@defined$0 bool@true
+DEFVAR LF@defined$1
+MOVE LF@defined$1 bool@false
+LABEL skipDefvar$1
+LABEL $2
+PUSHS LF@x$8
+PUSHS LF@viewportWidth$0
+PUSHS float@0x1p+1
+DIVS
+POPS GF@tmp1
+POPS GF@tmp2
+PUSHS GF@tmp2
+PUSHS GF@tmp1
+LTS
+PUSHS GF@tmp2
+PUSHS GF@tmp1
+EQS
+ORS
+POPS GF@tmp1
+JUMPIFNEQ $3 GF@tmp1 bool@true
+PUSHS LF@x$8
+PUSHS float@0x1p+0
+MULS
+JUMPIFEQ skipDefvar$2 LF@defined$1 bool@true
+DEFVAR LF@rayX$9
+LABEL skipDefvar$2
+POPS LF@rayX$9
+PUSHS LF@y$7
+PUSHS float@0x1p+0
+MULS
+JUMPIFEQ skipDefvar$3 LF@defined$1 bool@true
+DEFVAR LF@rayY$10
+LABEL skipDefvar$3
+POPS LF@rayY$10
+PUSHS LF@rayX$9
+PUSHS LF@sphereX$2
+SUBS
+JUMPIFEQ skipDefvar$4 LF@defined$1 bool@true
+DEFVAR LF@dx$11
+LABEL skipDefvar$4
+POPS LF@dx$11
+PUSHS LF@rayY$10
+PUSHS LF@sphereY$3
+SUBS
+JUMPIFEQ skipDefvar$5 LF@defined$1 bool@true
+DEFVAR LF@dy$12
+LABEL skipDefvar$5
+POPS LF@dy$12
+PUSHS LF@dx$11
+PUSHS LF@dx$11
+MULS
+PUSHS LF@dy$12
+PUSHS LF@dy$12
+MULS
+ADDS
+JUMPIFEQ skipDefvar$6 LF@defined$1 bool@true
+DEFVAR LF@distSq$13
+LABEL skipDefvar$6
+POPS LF@distSq$13
+PUSHS LF@distSq$13
+PUSHS LF@sphereRadius$4
+PUSHS LF@sphereRadius$4
+MULS
+POPS GF@tmp1
+POPS GF@tmp2
+PUSHS GF@tmp2
+PUSHS GF@tmp1
+LTS
+PUSHS GF@tmp2
+PUSHS GF@tmp1
+EQS
+ORS
+JUMPIFEQ skipDefvar$7 LF@defined$1 bool@true
+DEFVAR LF@defined$2
+MOVE LF@defined$2 bool@false
+LABEL skipDefvar$7
+POPS GF@tmp1
+JUMPIFNEQ $4 GF@tmp1 bool@true
+PUSHS LF@dx$11
+PUSHS LF@sphereRadius$4
+DIVS
+JUMPIFEQ skipDefvar$8 LF@defined$2 bool@true
+DEFVAR LF@nx$14
+LABEL skipDefvar$8
+POPS LF@nx$14
+PUSHS LF@dy$12
+PUSHS LF@sphereRadius$4
+DIVS
+JUMPIFEQ skipDefvar$9 LF@defined$2 bool@true
+DEFVAR LF@ny$15
+LABEL skipDefvar$9
+POPS LF@ny$15
+PUSHS LF@lightX$5
+PUSHS LF@rayX$9
+SUBS
+JUMPIFEQ skipDefvar$10 LF@defined$2 bool@true
+DEFVAR LF@lx$16
+LABEL skipDefvar$10
+POPS LF@lx$16
+PUSHS LF@lightY$6
+PUSHS LF@rayY$10
+SUBS
+JUMPIFEQ skipDefvar$11 LF@defined$2 bool@true
+DEFVAR LF@ly$17
+LABEL skipDefvar$11
+POPS LF@ly$17
+PUSHS LF@lx$16
+PUSHS LF@lx$16
+MULS
+PUSHS LF@ly$17
+PUSHS LF@ly$17
+MULS
+ADDS
+JUMPIFEQ skipDefvar$12 LF@defined$2 bool@true
+DEFVAR LF@input$18
+LABEL skipDefvar$12
+POPS LF@input$18
+PUSHS LF@input$18
+CALL sqrt
+JUMPIFEQ skipDefvar$13 LF@defined$2 bool@true
+DEFVAR LF@lenL$19
+LABEL skipDefvar$13
+POPS LF@lenL$19
+PUSHS LF@lenL$19
+PUSHS float@0x0p+0
+GTS
+JUMPIFEQ skipDefvar$14 LF@defined$2 bool@true
+DEFVAR LF@defined$3
+MOVE LF@defined$3 bool@false
+LABEL skipDefvar$14
+POPS GF@tmp1
+JUMPIFNEQ $6 GF@tmp1 bool@true
+PUSHS LF@lx$16
+PUSHS LF@lenL$19
+DIVS
+JUMPIFEQ skipDefvar$15 LF@defined$3 bool@true
+DEFVAR LF@normLx$20
+LABEL skipDefvar$15
+POPS LF@normLx$20
+PUSHS LF@ly$17
+PUSHS LF@lenL$19
+DIVS
+JUMPIFEQ skipDefvar$16 LF@defined$3 bool@true
+DEFVAR LF@normLy$21
+LABEL skipDefvar$16
+POPS LF@normLy$21
+PUSHS LF@nx$14
+PUSHS LF@normLx$20
+MULS
+PUSHS LF@ny$15
+PUSHS LF@normLy$21
+MULS
+ADDS
+JUMPIFEQ skipDefvar$17 LF@defined$3 bool@true
+DEFVAR LF@dot$22
+LABEL skipDefvar$17
+POPS LF@dot$22
+PUSHS LF@dot$22
+PUSHS float@0x0p+0
+GTS
+JUMPIFEQ skipDefvar$18 LF@defined$3 bool@true
+DEFVAR LF@defined$4
+MOVE LF@defined$4 bool@false
+LABEL skipDefvar$18
+POPS GF@tmp1
+JUMPIFNEQ $8 GF@tmp1 bool@true
+WRITE string@*
+MOVE LF@defined$4 bool@true
+JUMPIFEQ skipDefvar$19 LF@defined$3 bool@true
+DEFVAR LF@defined$5
+MOVE LF@defined$5 bool@false
+LABEL skipDefvar$19
+JUMP $9
+LABEL $8
+JUMPIFEQ skipDefvar$20 LF@defined$3 bool@true
+DEFVAR LF@defined$5
+MOVE LF@defined$5 bool@false
+LABEL skipDefvar$20
+WRITE string@.
+MOVE LF@defined$5 bool@true
+LABEL $9
+MOVE LF@defined$3 bool@true
+JUMPIFEQ skipDefvar$21 LF@defined$2 bool@true
+DEFVAR LF@defined$6
+MOVE LF@defined$6 bool@false
+LABEL skipDefvar$21
+JUMP $7
+LABEL $6
+JUMPIFEQ skipDefvar$22 LF@defined$2 bool@true
+DEFVAR LF@defined$6
+MOVE LF@defined$6 bool@false
+LABEL skipDefvar$22
+WRITE string@.
+MOVE LF@defined$6 bool@true
+LABEL $7
+MOVE LF@defined$2 bool@true
+JUMPIFEQ skipDefvar$23 LF@defined$1 bool@true
+DEFVAR LF@defined$7
+MOVE LF@defined$7 bool@false
+LABEL skipDefvar$23
+JUMP $5
+LABEL $4
+JUMPIFEQ skipDefvar$24 LF@defined$1 bool@true
+DEFVAR LF@defined$7
+MOVE LF@defined$7 bool@false
+LABEL skipDefvar$24
+WRITE string@\032
+MOVE LF@defined$7 bool@true
+LABEL $5
+PUSHS LF@x$8
+PUSHS int@1
+INT2FLOATS
+ADDS
+POPS LF@x$8
+MOVE LF@defined$1 bool@true
+JUMP $2
+LABEL $3
+WRITE string@\010
+PUSHS LF@y$7
+PUSHS int@1
+INT2FLOATS
+ADDS
+POPS LF@y$7
+MOVE LF@defined$0 bool@true
+JUMP $0
+LABEL $1
+WRITE string@Raytracing\032complete.\010
+POPFRAME
+RETURN
+LABEL sqrt
+CREATEFRAME
+PUSHFRAME
+DEFVAR LF@x$23
+POPS LF@x$23
+PUSHS LF@x$23
+PUSHS float@0x1p+1
+DIVS
+DEFVAR LF@guess$24
+POPS LF@guess$24
+PUSHS float@0x1.0c6f7ap-20
+DEFVAR LF@tolerance$25
+POPS LF@tolerance$25
+DEFVAR LF@defined$8
+MOVE LF@defined$8 bool@false
+LABEL $10
+PUSHS LF@guess$24
+PUSHS LF@guess$24
+MULS
+PUSHS LF@x$23
+PUSHS LF@tolerance$25
+ADDS
+GTS
+POPS GF@tmp1
+JUMPIFNEQ $11 GF@tmp1 bool@true
+PUSHS LF@guess$24
+PUSHS LF@x$23
+PUSHS LF@guess$24
+DIVS
+ADDS
+PUSHS float@0x1p+1
+DIVS
+POPS LF@guess$24
+MOVE LF@defined$8 bool@true
+JUMP $10
+LABEL $11
+PUSHS LF@guess$24
+POPFRAME
+RETURN
+POPFRAME
+RETURN

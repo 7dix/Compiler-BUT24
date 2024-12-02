@@ -1,0 +1,71 @@
+.IFJcode24
+DEFVAR GF@tmp1
+DEFVAR GF@tmp2
+DEFVAR GF@char
+DEFVAR GF@char2
+DEFVAR GF@valid
+DEFVAR GF@trash
+DEFVAR GF@index
+DEFVAR GF@beg
+CALL main
+EXIT int@0
+LABEL factorial
+CREATEFRAME
+PUSHFRAME
+DEFVAR LF@n$0
+POPS LF@n$0
+PUSHS int@1
+DEFVAR LF@result$1
+POPS LF@result$1
+PUSHS LF@n$0
+DEFVAR LF@counter$2
+POPS LF@counter$2
+DEFVAR LF@defined$0
+MOVE LF@defined$0 bool@false
+LABEL $0
+PUSHS LF@counter$2
+PUSHS int@1
+GTS
+POPS GF@tmp1
+JUMPIFNEQ $1 GF@tmp1 bool@true
+PUSHS LF@result$1
+PUSHS LF@counter$2
+MULS
+POPS LF@result$1
+PUSHS LF@counter$2
+PUSHS int@1
+SUBS
+POPS LF@counter$2
+MOVE LF@defined$0 bool@true
+JUMP $0
+LABEL $1
+PUSHS LF@result$1
+POPFRAME
+RETURN
+POPFRAME
+RETURN
+LABEL countOccurrences
+CREATEFRAME
+PUSHFRAME
+DEFVAR LF@targetChar$4
+POPS LF@targetChar$4
+DEFVAR LF@s$3
+POPS LF@s$3
+STRLEN GF@tmp1 LF@s$3
+PUSHS GF@tmp1
+DEFVAR LF@len$5
+POPS LF@len$5
+PUSHS int@0
+DEFVAR LF@count$6
+POPS LF@count$6
+PUSHS int@0
+DEFVAR LF@i$7
+POPS LF@i$7
+DEFVAR LF@defined$1
+MOVE LF@defined$1 bool@false
+LABEL $2
+PUSHS LF@i$7
+PUSHS LF@len$5
+LTS
+POPS GF@tmp1
+JUMPIFNEQ $3 GF@tmp1 bool@true
