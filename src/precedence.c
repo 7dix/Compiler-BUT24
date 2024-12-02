@@ -329,8 +329,6 @@ T_RET_VAL precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TY
     T_STACK stack;
     stack_init(&stack);
 
-    
-    
     // Count of brackets
     int countBrac = 0;
     // Count of relational operators
@@ -381,7 +379,7 @@ T_RET_VAL precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TY
             return RET_VAL_SYNTAX_ERR;
         }
 
-        // Simulation of a dollar in the stack
+        // Simulation of a dollar on the stack
         if (beginDollar){
             precedence = getPrecedence(DOLLAR, precedenceIndex(token->type));
             beginDollar = false;
@@ -474,7 +472,7 @@ T_RET_VAL precedenceSyntaxMain(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TY
     }
     
     
-    // Dispose stack (for peace of my soul)
+    // Dispose stack
     stack_dispose(&stack);
 
     // Retrun end of expression to buffer
