@@ -18,7 +18,7 @@
 
 //------------------ PUBLIC FUNCTION PROTOTYPES --------------------------//
 
-T_RET_VAL first_phase(T_TOKEN_BUFFER *token_buffer);
+RET_VAL first_phase(T_TOKEN_BUFFER *token_buffer);
 
 
 

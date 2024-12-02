@@ -34,7 +34,7 @@ typedef enum {
     RET_VAL_SEMANTIC_OTHER_ERR = 10,
     // Internal errors of the compiler -> insufficient memory, etc.
     RET_VAL_INTERNAL_ERR = 99
-} T_RET_VAL;
+} RET_VAL;
 
 
 

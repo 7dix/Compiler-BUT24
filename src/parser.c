@@ -22,7 +22,7 @@
 //--------------------------- GLOBAL VARIABLES ----------------------------//
 
 // Stores any error generated during this phase, see `return_values.h`
-T_RET_VAL error_flag = RET_VAL_OK;
+RET_VAL error_flag = RET_VAL_OK;
 
 
 //------------------ PRIVATE FUNCTION PROTOTYPES --------------------------//
@@ -35,14 +35,14 @@ bool syntax_fn_def_next(T_TOKEN_BUFFER *buffer);
 bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer);
 bool syntax_params(T_TOKEN_BUFFER *buffer);
 bool syntax_param(T_TOKEN_BUFFER *buffer);
-bool syntax_type(T_TOKEN_BUFFER *buffer, VarType *type);
+bool syntax_type(T_TOKEN_BUFFER *buffer, VAR_TYPE *type);
 bool syntax_param_next(T_TOKEN_BUFFER *buffer);
 bool syntax_param_after_comma(T_TOKEN_BUFFER *buffer);
 bool syntax_end(T_TOKEN_BUFFER *buffer);
 bool syntax_code_block_next(T_TOKEN_BUFFER *buffer);
 bool syntax_code_block(T_TOKEN_BUFFER *buffer);
 bool syntax_var_def(T_TOKEN_BUFFER *buffer);
-bool syntax_var_def_after_id(T_TOKEN_BUFFER *buffer, SymbolData *data);
+bool syntax_var_def_after_id(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data);
 bool syntax_if_statement(T_TOKEN_BUFFER *buffer);
 bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree);
 bool syntax_while_statement(T_TOKEN_BUFFER *buffer);
@@ -52,10 +52,10 @@ bool syntax_return_remaining(T_TOKEN_BUFFER *buffer);
 bool syntax_built_in_void_fn_call(T_TOKEN_BUFFER *buffer);
 bool syntax_assign_expr_or_fn_call(T_TOKEN_BUFFER *buffer);
 bool syntax_assign_discard_expr_or_fn_call(T_TOKEN_BUFFER *buffer);
-bool syntax_id_start(T_TOKEN_BUFFER *buffer, Symbol *symbol);
+bool syntax_id_start(T_TOKEN_BUFFER *buffer, T_SYMBOL *symbol);
 bool syntax_function_arguments(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call);
-bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data);
-bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name);
+bool syntax_assign(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data);
+bool syntax_id_assign(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data, char *id_name);
 bool syntax_arguments(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call);
 bool syntax_argument_next(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call);
 bool syntax_argument_after_comma(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call);
@@ -206,7 +206,7 @@ bool syntax_prolog(T_TOKEN_BUFFER *buffer) {
     }
 
     // check that string is equal to "ifj24.zig"
-    if (strcmp(token->value.stringVal, "ifj24.zig") != 0) {
+    if (strcmp(token->value.str_val, "ifj24.zig") != 0) {
         error_flag = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -372,7 +372,7 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
         token->type == TYPE_FLOAT_NULL || token->type == TYPE_STRING_NULL) {
 
         move_back(buffer); // token needed in TYPE
-        VarType type_void; // stores function return type
+        VAR_TYPE type_void; // stores function return type
         if (!syntax_type(buffer, &type_void)) { // TYPE
             return false;
         }
@@ -537,7 +537,7 @@ bool syntax_param(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
-    VarType type_void; // dummy variable
+    VAR_TYPE type_void; // dummy variable
     if (!syntax_type(buffer, &type_void)) { // TYPE
         return false;
     }
@@ -571,7 +571,7 @@ bool syntax_param(T_TOKEN_BUFFER *buffer) {
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_type(T_TOKEN_BUFFER *buffer, VarType *type) {
+bool syntax_type(T_TOKEN_BUFFER *buffer, VAR_TYPE *type) {
 
     T_TOKEN *token;
     // check whether token is one of the types
@@ -874,7 +874,7 @@ bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
     T_TOKEN *token;
     // Create new symbol data
     char *name = NULL;
-    SymbolData data;
+    T_SYMBOL_DATA data;
     data.var.is_const = false;
     data.var.modified = false;
     data.var.used = false;
@@ -998,7 +998,7 @@ bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_var_def_after_id(T_TOKEN_BUFFER *buffer, SymbolData *data) {
+bool syntax_var_def_after_id(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data) {
 
     T_TOKEN *token;
     // we have two branches, choose here
@@ -1006,7 +1006,7 @@ bool syntax_var_def_after_id(T_TOKEN_BUFFER *buffer, SymbolData *data) {
     // first branch -> : TYPE = ASSIGN
     if (token->type == COLON) { // :
 
-        VarType type = VAR_NONE; // store type definition here
+        VAR_TYPE type = VAR_NONE; // store type definition here
         if (!syntax_type(buffer, &type)) { // TYPE
             return false;
         }
@@ -1279,7 +1279,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             return false;
         }
 
-        SymbolData data;
+        T_SYMBOL_DATA data;
         // get type of nullable expression
         data.var.type = fc_nullable_convert_type((*tree)->result_type);
         if (data.var.type == VAR_NONE) {
@@ -1632,7 +1632,7 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
             return false;
         }
 
-        SymbolData data;
+        T_SYMBOL_DATA data;
         // get type of crearting non nullable expression
         data.var.type = fc_nullable_convert_type((*tree)->result_type);
         if (data.var.type == VAR_NONE) {
@@ -1831,7 +1831,7 @@ bool syntax_return_remaining(T_TOKEN_BUFFER *buffer) {
         move_back(buffer); // token needed in ASSIGN
 
         // Dummy for return type
-        SymbolData data;
+        T_SYMBOL_DATA data;
         data.var.type = VAR_NONE;
         data.var.is_const = false;
         data.var.modified = false;
@@ -1839,7 +1839,7 @@ bool syntax_return_remaining(T_TOKEN_BUFFER *buffer) {
         data.var.const_expr = false;
         
         // get symbol representing current function
-        Symbol *symbol = symtable_find_symbol(ST, get_fn_name(ST));
+        T_SYMBOL *symbol = symtable_find_symbol(ST, get_fn_name(ST));
         if (symbol == NULL) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false;
@@ -1912,7 +1912,7 @@ bool syntax_built_in_void_fn_call(T_TOKEN_BUFFER *buffer) {
     }
     sprintf(fn_name, "ifj.%s", token->lexeme);
 
-    Symbol *symbol = symtable_find_symbol(ST, fn_name);
+    T_SYMBOL *symbol = symtable_find_symbol(ST, fn_name);
     if (symbol == NULL || symbol->type != SYM_FUNC) {
         error_flag = RET_VAL_SEMANTIC_UNDEFINED_ERR;
         free(fn_name);
@@ -2000,7 +2000,7 @@ bool syntax_assign_expr_or_fn_call(T_TOKEN_BUFFER *buffer) {
     }
     
     // get symbol of currently read identifier
-    Symbol *symbol = symtable_find_symbol(ST, token->lexeme);
+    T_SYMBOL *symbol = symtable_find_symbol(ST, token->lexeme);
 
     // Check if the identifier is defined
     if (symbol == NULL) {
@@ -2052,7 +2052,7 @@ bool syntax_assign_discard_expr_or_fn_call(T_TOKEN_BUFFER *buffer) {
     }
 
     // Dummy for return type
-    SymbolData data;
+    T_SYMBOL_DATA data;
     data.var.type = VAR_NONE;
 
     // handling of expression
@@ -2086,7 +2086,7 @@ bool syntax_assign_discard_expr_or_fn_call(T_TOKEN_BUFFER *buffer) {
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_id_start(T_TOKEN_BUFFER *buffer, Symbol *symbol) {
+bool syntax_id_start(T_TOKEN_BUFFER *buffer, T_SYMBOL *symbol) {
 
     T_TOKEN *token;
     // we have two branches, choose here
@@ -2225,7 +2225,7 @@ bool syntax_function_arguments(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call) {
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
+bool syntax_assign(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data) {
     T_TOKEN *token;
 
     // set return flag for error handling based on previous token
@@ -2269,7 +2269,7 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         }
         sprintf(fn_name, "ifj.%s", token->lexeme);
 
-        Symbol *symbol = symtable_find_symbol(ST, fn_name);
+        T_SYMBOL *symbol = symtable_find_symbol(ST, fn_name);
         if (symbol == NULL || symbol->type != SYM_FUNC) {
             error_flag = RET_VAL_SEMANTIC_UNDEFINED_ERR;
             free(fn_name);
@@ -2367,38 +2367,38 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
 
         // tree->result_type
         // convert result_type to var_type
-        VarType exprRes = VAR_NONE;
+        VAR_TYPE expr_res = VAR_NONE;
         switch (tree->result_type) {
             case TYPE_NULL_RESULT:
-                exprRes = VAR_NULL;
+                expr_res = VAR_NULL;
                 break;
             case TYPE_BOOL_RESULT:
-                exprRes = VAR_BOOL;
+                expr_res = VAR_BOOL;
                 break;
             case TYPE_INT_RESULT:
-                exprRes = VAR_INT;
+                expr_res = VAR_INT;
                 break;
             case TYPE_FLOAT_RESULT:
-                exprRes = VAR_FLOAT;
+                expr_res = VAR_FLOAT;
                 if (data->var.is_const) {
                     data->var.const_expr = true;
-                    data->var.float_value = tree->token->value.floatVal;
+                    data->var.float_value = tree->token->value.float_val;
                 }
                 break;
             case TYPE_INT_NULL_RESULT:
-                exprRes = VAR_INT_NULL;
+                expr_res = VAR_INT_NULL;
                 break;
             case TYPE_FLOAT_NULL_RESULT:
-                exprRes = VAR_FLOAT_NULL;
+                expr_res = VAR_FLOAT_NULL;
                 break;
             case TYPE_STRING_RESULT:
-                exprRes = VAR_STRING;
+                expr_res = VAR_STRING;
                 break;
             case TYPE_STRING_NULL_RESULT:
-                exprRes = VAR_STRING_NULL;
+                expr_res = VAR_STRING_NULL;
                 break;
             case TYPE_STRING_LITERAL_RESULT:
-                exprRes = STRING_LITERAL;
+                expr_res = STRING_LITERAL;
                 break;
             case TYPE_NOTSET_RESULT:
             default:
@@ -2408,7 +2408,7 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         }
 
         // check type compatibility
-        error_flag = compare_var_types(&(data->var.type), &exprRes);
+        error_flag = compare_var_types(&(data->var.type), &expr_res);
         if (error_flag != RET_VAL_OK) {
             tree_dispose(&tree);
             // TODO: change following when doing returns
@@ -2462,7 +2462,7 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
+bool syntax_id_assign(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data, char *id_name) {
 
     T_TOKEN *token;
     // we have three branches, choose here
@@ -2476,7 +2476,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
         fn_call.name = id_name;
 
         // Check if the function is defined
-        Symbol *symbol = symtable_find_symbol(ST, fn_call.name);
+        T_SYMBOL *symbol = symtable_find_symbol(ST, fn_call.name);
         if (symbol == NULL || symbol->type != SYM_FUNC) {
             error_flag = RET_VAL_SEMANTIC_UNDEFINED_ERR;
             return false;
@@ -2534,38 +2534,38 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
 
         // tree->result_type
         // convert result type to var type
-        VarType exprRes = VAR_NONE;
+        VAR_TYPE expr_res = VAR_NONE;
         switch (tree->result_type) {
             case TYPE_NULL_RESULT:
-                exprRes = VAR_NULL;
+                expr_res = VAR_NULL;
                 break;
             case TYPE_BOOL_RESULT:
-                exprRes = VAR_BOOL;
+                expr_res = VAR_BOOL;
                 break;
             case TYPE_INT_RESULT:
-                exprRes = VAR_INT;
+                expr_res = VAR_INT;
                 break;
             case TYPE_FLOAT_RESULT:
-                exprRes = VAR_FLOAT;
+                expr_res = VAR_FLOAT;
                 if (data->var.is_const) {
                     data->var.const_expr = true;
-                    data->var.float_value = tree->token->value.floatVal;
+                    data->var.float_value = tree->token->value.float_val;
                 }
                 break;
             case TYPE_INT_NULL_RESULT:
-                exprRes = VAR_INT_NULL;
+                expr_res = VAR_INT_NULL;
                 break;
             case TYPE_FLOAT_NULL_RESULT:
-                exprRes = VAR_FLOAT_NULL;
+                expr_res = VAR_FLOAT_NULL;
                 break;
             case TYPE_STRING_RESULT:
-                exprRes = VAR_STRING;
+                expr_res = VAR_STRING;
                 break;
             case TYPE_STRING_NULL_RESULT:
-                exprRes = VAR_STRING_NULL;
+                expr_res = VAR_STRING_NULL;
                 break;
             case TYPE_STRING_LITERAL_RESULT:
-                exprRes = STRING_LITERAL;
+                expr_res = STRING_LITERAL;
                 break;
             case TYPE_NOTSET_RESULT:
             default:
@@ -2574,7 +2574,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
                 return false;
         }
         // check type compatibility
-        error_flag = compare_var_types(&(data->var.type), &exprRes);
+        error_flag = compare_var_types(&(data->var.type), &expr_res);
         if (error_flag != RET_VAL_OK) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             tree_dispose(&tree);
@@ -2618,38 +2618,38 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
         }
 
         // tree->result_type, convert result type
-        VarType exprRes = VAR_NONE;
+        VAR_TYPE expr_res = VAR_NONE;
         switch (tree->result_type) {
             case TYPE_NULL_RESULT:
-                exprRes = VAR_NULL;
+                expr_res = VAR_NULL;
                 break;
             case TYPE_BOOL_RESULT:
-                exprRes = VAR_BOOL;
+                expr_res = VAR_BOOL;
                 break;
             case TYPE_INT_RESULT:
-                exprRes = VAR_INT;
+                expr_res = VAR_INT;
                 break;
             case TYPE_FLOAT_RESULT:
-                exprRes = VAR_FLOAT;
+                expr_res = VAR_FLOAT;
                 if (data->var.is_const) {
                     data->var.const_expr = true;
-                    data->var.float_value = tree->token->value.floatVal;
+                    data->var.float_value = tree->token->value.float_val;
                 }
                 break;
             case TYPE_INT_NULL_RESULT:
-                exprRes = VAR_INT_NULL;
+                expr_res = VAR_INT_NULL;
                 break;
             case TYPE_FLOAT_NULL_RESULT:
-                exprRes = VAR_FLOAT_NULL;
+                expr_res = VAR_FLOAT_NULL;
                 break;
             case TYPE_STRING_RESULT:
-                exprRes = VAR_STRING;
+                expr_res = VAR_STRING;
                 break;
             case TYPE_STRING_NULL_RESULT:
-                exprRes = VAR_STRING_NULL;
+                expr_res = VAR_STRING_NULL;
                 break;
             case TYPE_STRING_LITERAL_RESULT:
-                exprRes = STRING_LITERAL;
+                expr_res = STRING_LITERAL;
                 break;
             case TYPE_NOTSET_RESULT:
             default:
@@ -2658,7 +2658,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
                 return false;
         }
         // check type compatibility
-        error_flag = compare_var_types(&(data->var.type), &exprRes);
+        error_flag = compare_var_types(&(data->var.type), &expr_res);
         if (error_flag != RET_VAL_OK) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             tree_dispose(&tree);

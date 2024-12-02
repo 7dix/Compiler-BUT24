@@ -35,7 +35,7 @@ bool is_empty(T_STACK_PTR stack){
  * @param type Type of item on stack
  * @return 99 = RET_VAL_INTERNAL_ERR if everything is ok, 0 = RET_VAL_OK if everything is ok
  */
-T_RET_VAL stack_push(T_STACK_PTR stack, T_TOKEN *token, STACK_ITEM_TYPE type){
+RET_VAL stack_push(T_STACK_PTR stack, T_TOKEN *token, STACK_ITEM_TYPE type){
 
     // Create new item of stack
     T_STACK_ITEM_PTR itemPush = (T_STACK_ITEM_PTR)malloc(sizeof(T_STACK_ITEM));
@@ -145,7 +145,7 @@ T_STACK_ITEM_PTR stack_top_terminal(T_STACK_PTR stack) {
  * @param terminal Pointer on terminal item where will be inserted less
  * @return 99 = RET_VAL_INTERNAL_ERR if everything is ok, 0 = RET_VAL_OK if everything is ok
  */
-T_RET_VAL stack_insert_less(T_STACK_PTR stack, T_STACK_ITEM_PTR terminal){
+RET_VAL stack_insert_less(T_STACK_PTR stack, T_STACK_ITEM_PTR terminal){
 
 
     // Create new item of stack

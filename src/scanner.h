@@ -70,8 +70,8 @@ typedef struct T_TOKEN {
     int length;          // Length of the lexeme
     union {
         int intVal;      // Integer value for INT tokens
-        float floatVal;  // Float value for FLOAT tokens
-        char *stringVal; // String value for STRING tokens
+        float float_val;  // Float value for FLOAT tokens
+        char *str_val; // String value for STRING tokens
     } value;             // Union to hold the token's value
 } T_TOKEN;
 

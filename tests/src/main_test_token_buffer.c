@@ -78,11 +78,11 @@ void print_token_json(T_TOKEN *token, int is_first) {
             snprintf(value_str, sizeof(value_str), "%d", token->value.intVal);
             break;
         case FLOAT:
-            snprintf(value_str, sizeof(value_str), "%f", token->value.floatVal);
+            snprintf(value_str, sizeof(value_str), "%f", token->value.float_val);
             break;
         case STRING:
             {
-                char *escaped_str = json_escape_string(token->value.stringVal);
+                char *escaped_str = json_escape_string(token->value.str_val);
                 snprintf(value_str, sizeof(value_str), "%s", escaped_str);
                 free(escaped_str);
             }

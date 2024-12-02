@@ -52,8 +52,7 @@ int main(void)
 
     set_current_to_first(buffer);
     
-    //printf("Precedence syntax analysis\n");
-    T_RET_VAL ret = precedence_syntax_main(buffer, &tree, ASS_END);
+    RET_VAL ret = precedence_syntax_main(buffer, &tree, ASS_END);
     
     if(ret == 0){
         printf("OK\n");

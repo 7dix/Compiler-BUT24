@@ -16,12 +16,12 @@
  * 
  * @param table Pointer to the symbol table
  * @param fn_call Pointer to the function call
- * @return int as defined in `T_RET_VAL` `return_values.h`
+ * @return int as defined in `RET_VAL` `return_values.h`
  * @retval 0=RET_VAL_OK if the function call is valid
  * @retval 1-9 if the function call is invalid
  */
 int check_function_call(T_SYM_TABLE *table, T_FN_CALL *fn_call) {
-    Symbol *fn = symtable_find_symbol(table, fn_call->name);
+    T_SYMBOL *fn = symtable_find_symbol(table, fn_call->name);
     if (fn == NULL || fn->type != SYM_FUNC) {
         return RET_VAL_SEMANTIC_UNDEFINED_ERR;
     }
@@ -40,13 +40,13 @@ int check_function_call(T_SYM_TABLE *table, T_FN_CALL *fn_call) {
             case IDENTIFIER:
             {
                 // check if the identifier is in the symbol table
-                Symbol *symbol = symtable_find_symbol(table, fn_call->argv[i]->lexeme);
+                T_SYMBOL *symbol = symtable_find_symbol(table, fn_call->argv[i]->lexeme);
                 if (symbol == NULL) {
                     return RET_VAL_SEMANTIC_UNDEFINED_ERR;
                 }
                 // check if the identifier is a variable
                 if (symbol->type != SYM_VAR) {
-                    return RET_VAL_SEMANTIC_FUNCTION_ERR; //TODO: correct return value?
+                    return RET_VAL_SEMANTIC_FUNCTION_ERR;
                 }
 
                 if (fn->data.func.argv[i].type == STRING_VAR_STRING &&
@@ -110,7 +110,7 @@ int check_function_call(T_SYM_TABLE *table, T_FN_CALL *fn_call) {
  * 
  * @param fn_call Pointer to the function call
  * @param arg Pointer to the argument
- * @return int as defined in `T_RET_VAL` `return_values.h`
+ * @return int as defined in `RET_VAL` `return_values.h`
  * @retval 0=RET_VAL_OK if the argument was added successfully
  * @retval 1=RET_VAL_INTERNAL_ERR if the memory allocation failed
  */
@@ -147,11 +147,11 @@ void free_fn_call_args(T_FN_CALL *fn_call) {
  * 
  * @param existing Pointer to the existing variable type (left side)
  * @param new Pointer to the new variable type (right side)
- * @return int as defined in `T_RET_VAL` `return_values.h`
+ * @return int as defined in `RET_VAL` `return_values.h`
  * @retval 0=RET_VAL_OK if the types are compatible
  * @retval 1-9 if incompatible
  */
-int compare_var_types(VarType *existing, VarType *new) {
+int compare_var_types(VAR_TYPE *existing, VAR_TYPE *new) {
     if (*existing == *new) {
         return RET_VAL_OK;
     }
@@ -203,7 +203,7 @@ int compare_var_types(VarType *existing, VarType *new) {
  * @param tree Pointer to the root of the tree
  * @return 0=RET_VAL_OK if the expression is valid, otherwise return one of semnatic errors
  */
-T_RET_VAL check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
+RET_VAL check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
 
     // Create and initialize list for postfix notation
     T_LIST_PTR list_postfix = list_init();
@@ -211,7 +211,8 @@ T_RET_VAL check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
     // Check if list was created
     if(list_postfix == NULL) return RET_VAL_INTERNAL_ERR;
     // Postorder traversal, get list of nodes in postfix notation
-    T_RET_VAL err_expr = postorder(tree, list_postfix);
+
+    RET_VAL err_expr = postorder(tree, list_postfix);
 
     // Check if postorder traversal and creating list was successful
     if(err_expr){
@@ -539,7 +540,7 @@ T_RET_VAL check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
  * @brief Function for adding function parameters to the symbol table
  * 
  * @param name Name of the function
- * @return int as defined in `T_RET_VAL` `return_values.h`
+ * @return int as defined in `RET_VAL` `return_values.h`
  * @retval 0=RET_VAL_OK added successfully
  * @retval 1=RET_VAL_INTERNAL_ERR failed
  */
@@ -548,18 +549,18 @@ int put_param_to_symtable(char *name) {
         return RET_VAL_INTERNAL_ERR;
     }
     
-    Symbol *symbol = symtable_find_symbol(ST, name);
+    T_SYMBOL *symbol = symtable_find_symbol(ST, name);
     if (symbol == NULL) {
         return RET_VAL_INTERNAL_ERR;
     }
 
-    SymbolData data = symbol->data;
+    T_SYMBOL_DATA data = symbol->data;
 
     if (data.func.argc == 0) {
         return RET_VAL_OK;
     } else {
         for (int i = 0; i < data.func.argc; i++) {
-            SymbolData sym_data;
+            T_SYMBOL_DATA sym_data;
             sym_data.var.type = data.func.argv[i].type;
             sym_data.var.is_const = true;
             sym_data.var.modified = true;
@@ -590,9 +591,9 @@ bool is_result_type_nullable(RESULT_TYPE type) {
  * @brief Function for converting nullable result type to non-nullable
  * 
  * @param type Result type
- * @return VarType
+ * @return VAR_TYPE
  */
-VarType fc_nullable_convert_type(RESULT_TYPE type) {
+VAR_TYPE fc_nullable_convert_type(RESULT_TYPE type) {
     switch (type) {
         case TYPE_NULL_RESULT:
             return VAR_NULL;

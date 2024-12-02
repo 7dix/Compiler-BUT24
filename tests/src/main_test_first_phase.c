@@ -6,7 +6,7 @@
 
 T_SYM_TABLE *ST;
 
-void print_type(VarType type) {
+void print_type(VAR_TYPE type) {
     switch (type) {
         case VAR_INT:
             printf("i32");
@@ -35,7 +35,7 @@ void print_type(VarType type) {
     }
 }
 
-void print_function_signature(const char* name, const SymbolData* data) {
+void print_function_signature(const char* name, const T_SYMBOL_DATA* data) {
     printf("pub fn %s(", name);
     
     // Print parameters
@@ -67,7 +67,7 @@ void print_all_functions(T_SYM_TABLE *table) {
                 &table->top->ht->table[i].data
             );
         } else if (table->top->ht->table[i].occupied) {
-            printf("Symbol %s is not a function\n", table->top->ht->table[i].name);
+            printf("T_SYMBOL %s is not a function\n", table->top->ht->table[i].name);
         }
     }
 }

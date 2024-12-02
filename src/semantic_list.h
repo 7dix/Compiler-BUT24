@@ -71,13 +71,13 @@ T_LIST_PTR list_init();
 OPERATOR_TYPE_OF_RULE get_operator_type(T_LIST_ELEMENT_PTR operator);
 
 // Function declaration for insert element to end of list
-T_RET_VAL list_insert_last(T_LIST_PTR list, T_TREE_NODE_PTR node);
+RET_VAL list_insert_last(T_LIST_PTR list, T_TREE_NODE_PTR node);
 
 // Function declaration for postorder tree traversal
-T_RET_VAL postorder( T_TREE_NODE_PTR *tree, T_LIST_PTR list);
+RET_VAL postorder( T_TREE_NODE_PTR *tree, T_LIST_PTR list);
 
 // Function declaration for set types of operands
-T_RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table);
+RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table);
 
 // Function declaration for set first element as active
 void list_first(T_LIST_PTR list);

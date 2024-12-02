@@ -21,7 +21,7 @@
 
 typedef struct FN_CALL {
     char *name;
-    VarType ret_type;
+    VAR_TYPE ret_type;
     int argc;
     T_TOKEN **argv;
 } T_FN_CALL;
@@ -31,13 +31,13 @@ typedef struct FN_CALL {
 int check_function_call(T_SYM_TABLE *table, T_FN_CALL *fn_call);
 int add_arg_to_fn_call(T_FN_CALL *fn_call, T_TOKEN *arg);
 void free_fn_call_args(T_FN_CALL *fn_call);
-Symbol *get_var(T_SYM_TABLE *table, const char *name);
-T_RET_VAL check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR * tree);
+T_SYMBOL *get_var(T_SYM_TABLE *table, const char *name);
+RET_VAL check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR * tree);
 int put_param_to_symtable(char *name);
 
 // compare variable types
-int compare_var_types(VarType *existing, VarType *new);
+int compare_var_types(VAR_TYPE *existing, VAR_TYPE *new);
 bool is_result_type_nullable(RESULT_TYPE type);
-VarType fc_nullable_convert_type(RESULT_TYPE type);
+VAR_TYPE fc_nullable_convert_type(RESULT_TYPE type);
 
 #endif // H_SEMANTIC

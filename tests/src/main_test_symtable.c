@@ -16,13 +16,13 @@ int main() {
         return 1;
     }
     char *test = strdup("test");
-    SymbolData data = {
+    T_SYMBOL_DATA data = {
         .var = { 
             .is_const = false,
             .type = VAR_INT,
              }
         };
-    Symbol *symbol = symtable_add_symbol(table, test, SYM_VAR, data);
+    T_SYMBOL *symbol = symtable_add_symbol(table, test, SYM_VAR, data);
     if (symbol == NULL) {
         fprintf(stderr, "Error: Memory allocation failed in symtable_add_symbol\n");
         return 1;
@@ -30,12 +30,12 @@ int main() {
 
     symbol = symtable_find_symbol(table, test);
     if (symbol == NULL) {
-        fprintf(stderr, "Error: Symbol that should exist was not found\n");
+        fprintf(stderr, "Error: T_SYMBOL that should exist was not found\n");
         return 1;
     }
     symbol = symtable_find_symbol(table, "nonexistent");
     if (symbol != NULL) {
-        fprintf(stderr, "Error: Symbol that should not exist was found\n");
+        fprintf(stderr, "Error: T_SYMBOL that should not exist was found\n");
         return 1;
     }
 
@@ -45,7 +45,7 @@ int main() {
     }
 
     test = strdup("test2");
-    data = (SymbolData) {
+    data = (T_SYMBOL_DATA) {
         .var = { 
             .is_const = false,
             .type = VAR_INT,
@@ -59,19 +59,19 @@ int main() {
 
     symbol = symtable_find_symbol(table, test);
     if (symbol == NULL) {
-        fprintf(stderr, "Error: Symbol that should exist was not found\n");
+        fprintf(stderr, "Error: T_SYMBOL that should exist was not found\n");
         return 1;
     }
 
     symbol = symtable_find_symbol(table, "nonexistent");
     if (symbol != NULL) {
-        fprintf(stderr, "Error: Symbol that should not exist was found\n");
+        fprintf(stderr, "Error: T_SYMBOL that should not exist was found\n");
         return 1;
     }
 
     symbol = symtable_find_symbol(table, "test2");
     if (symbol == NULL) {
-        fprintf(stderr, "Error: Symbol that should exist was not found\n");
+        fprintf(stderr, "Error: T_SYMBOL that should exist was not found\n");
         return 1;
     }
 
@@ -85,7 +85,7 @@ int main() {
     for (int i = 0; i < HASHTABLE_SIZE; i++) {
         char key[10];
         sprintf(key, "key%d", i);
-        data = (SymbolData) {
+        data = (T_SYMBOL_DATA) {
             .var = { 
                 .is_const = false,
                 .type = VAR_INT,

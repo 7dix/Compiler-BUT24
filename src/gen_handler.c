@@ -91,7 +91,7 @@ void generateUniqueIdentifier(char *name, char **uniq_name) {
 void createFnHeader(char *name) {
     if (name == NULL)
         return;
-    Symbol *symbol = symtable_find_symbol(ST, name);
+    T_SYMBOL *symbol = symtable_find_symbol(ST, name);
     generateLabel(name);
     generateCreateFrame();
     generatePushFrame();
@@ -128,10 +128,10 @@ void callFunction(T_FN_CALL *fn) {
             generatePushsInt(fn->argv[i]->value.intVal);
         }
         else if (fn->argv[i]->type == FLOAT) {
-            generatePushsFloat(fn->argv[i]->value.floatVal);
+            generatePushsFloat(fn->argv[i]->value.float_val);
         }
         else if (fn->argv[i]->type == STRING) {
-            generatePushsString(fn->argv[i]->value.stringVal);
+            generatePushsString(fn->argv[i]->value.str_val);
         }
     }
 
@@ -210,7 +210,7 @@ void createStackByPostorder(T_TREE_NODE *tree) {
 
     }
     else if (tree->token->type == FLOAT) {
-        generatePushsFloat(tree->token->value.floatVal);
+        generatePushsFloat(tree->token->value.float_val);
         if (tree->convert_to_int) {
             generateFloat2Ints();
         }
@@ -423,7 +423,7 @@ void callBIFloat2Int(T_TOKEN *var) {
         free(uniq);
     }
     else if (var->type == FLOAT) {
-        generatePushsFloat(var->value.floatVal);
+        generatePushsFloat(var->value.float_val);
     }
     generateFloat2Ints();
 }
@@ -444,7 +444,7 @@ void callBIString(T_TOKEN *var) {
         free(uniq);
     }
     else if (var->type == STRING) {
-        generatePushsString(var->value.stringVal);
+        generatePushsString(var->value.str_val);
     }
 }
 
@@ -756,11 +756,11 @@ void callBIWrite(T_TOKEN *var) {
         printf("WRITE int@%d\n", var->value.intVal);
     }
     else if (var->type == FLOAT) {
-        printf("WRITE float@%a\n", var->value.floatVal);
+        printf("WRITE float@%a\n", var->value.float_val);
     }
     else if (var->type == STRING) {
         char *out = NULL;
-        handleCorrectStringFormat(var->value.stringVal, &out);
+        handleCorrectStringFormat(var->value.str_val, &out);
         generateWrite("string", out);
         free(out);
     }

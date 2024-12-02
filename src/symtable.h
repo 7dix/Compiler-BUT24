@@ -36,19 +36,19 @@ typedef enum {
     STRING_LITERAL,
     VAR_VOID,
     VAR_NONE,
-} VarType;
+} VAR_TYPE;
 
 // Parameter structure
 typedef struct {
     char *name;
-    VarType type;
-} Param;
+    VAR_TYPE type;
+} T_PARAM;
 
-// Symbol types
+// T_SYMBOL types
 typedef enum {
     SYM_VAR,
     SYM_FUNC
-} SymbolType;
+} SYMBOL_TYPE;
 
 typedef union
 {
@@ -58,45 +58,45 @@ typedef union
         bool used;
         bool const_expr;
         float float_value;
-        VarType type;
+        VAR_TYPE type;
         int id;
     } var;
     struct {
-        VarType return_type;
+        VAR_TYPE return_type;
         int argc;
-        Param *argv;
+        T_PARAM *argv;
     } func;
-} SymbolData;
+} T_SYMBOL_DATA;
 
-int add_param_to_symbol_data(SymbolData *data, Param param);
+int add_param_to_symbol_data(T_SYMBOL_DATA *data, T_PARAM param);
 
 
-// Symbol structure
-typedef struct Symbol {
+// T_SYMBOL structure
+typedef struct T_SYMBOL {
     char *name;
-    SymbolType type;
-    SymbolData data;
-    struct Symbol *next; // For handling collisions in the hashtable
+    SYMBOL_TYPE type;
+    T_SYMBOL_DATA data;
+    struct T_SYMBOL *next; // For handling collisions in the hashtable
     bool occupied; // Marks if this slot is occupied
     bool deleted; // Marks if this slot was deleted
-} Symbol;
+} T_SYMBOL;
 
 //-----------------------------------HASH TABLE-----------------------------------//
 
 #define HASHTABLE_SIZE 1999
 
-// Hashtable structure
+// T_HASHTABLE structure
 typedef struct {
-    Symbol table[HASHTABLE_SIZE]; // Array of entry pointers
+    T_SYMBOL table[HASHTABLE_SIZE]; // Array of entry pointers
     int count; // Tracks number of entries
-} Hashtable;
+} T_HASHTABLE;
 
-// Hashtable functions
-Hashtable *hashtable_init();
-void hashtable_free(Hashtable *ht);
-Symbol *hashtable_insert(Hashtable *ht, const char *key, SymbolType type, SymbolData data);
-Symbol *hashtable_find(Hashtable *ht, const char *key);
-void hashtable_remove(Hashtable *ht, const char *key);
+// T_HASHTABLE functions
+T_HASHTABLE *hashtable_init();
+void hashtable_free(T_HASHTABLE *ht);
+T_SYMBOL *hashtable_insert(T_HASHTABLE *ht, const char *key, SYMBOL_TYPE type, T_SYMBOL_DATA data);
+T_SYMBOL *hashtable_find(T_HASHTABLE *ht, const char *key);
+void hashtable_remove(T_HASHTABLE *ht, const char *key);
 
 
 
@@ -104,7 +104,7 @@ void hashtable_remove(Hashtable *ht, const char *key);
 
 // Scope structure for symtable stack
 typedef struct T_SCOPE {
-    Hashtable *ht;
+    T_HASHTABLE *ht;
     struct T_SCOPE *parent;
     int fc_defined_id;
 } T_SCOPE;
@@ -124,15 +124,15 @@ typedef struct T_SYM_TABLE {
 T_SYM_TABLE *symtable_init();
 bool symtable_add_scope(T_SYM_TABLE *table, bool is_while);
 int symtable_remove_scope(T_SYM_TABLE *table, bool check_unused_vars);
-Symbol *symtable_add_symbol(T_SYM_TABLE *table, const char *key, SymbolType type, SymbolData data);
-Symbol *symtable_find_symbol(T_SYM_TABLE *table, const char *key);
+T_SYMBOL *symtable_add_symbol(T_SYM_TABLE *table, const char *key, SYMBOL_TYPE type, T_SYMBOL_DATA data);
+T_SYMBOL *symtable_find_symbol(T_SYM_TABLE *table, const char *key);
 void symtable_free(T_SYM_TABLE *table);
 
 
 // Secondary symtable functions
 
 int get_var_id(T_SYM_TABLE *table, const char *key);
-Symbol *get_var(T_SYM_TABLE *table, const char *name);
+T_SYMBOL *get_var(T_SYM_TABLE *table, const char *name);
 int check_for_unused_vars(T_SYM_TABLE *table);
 bool generate_labels(T_SYM_TABLE *table, char **label1, char **label2);
 int is_in_fc(T_SYM_TABLE *table);

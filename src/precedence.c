@@ -323,7 +323,7 @@ bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool make_tree_f
  * @parammake_tree_flag Flag for create tree
  * @return 0 if analysis is successful, 2 if syntax error, 99 if internal error (malloc for example)
 */
-T_RET_VAL precedence_syntax_main(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_END typeEnd){
+RET_VAL precedence_syntax_main(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_END typeEnd){
 
     // Create and init stack
     T_STACK stack;

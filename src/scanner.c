@@ -229,7 +229,7 @@ TOKEN_TYPE get_nullable_type_identifier_token_type(const char *lexeme) {
 }
 
 int clean_multiline_string(T_TOKEN *token) {
-    char *str = token->value.stringVal;
+    char *str = token->value.str_val;
     if (str == NULL) {
         return RET_VAL_INTERNAL_ERR;  // Ensure the string value exists
     }
@@ -263,8 +263,8 @@ int clean_multiline_string(T_TOKEN *token) {
     *dest = '\0';  // Null-terminate the cleaned string
 
     // Free the old string and assign the cleaned string
-    free(token->value.stringVal);
-    token->value.stringVal = cleaned_str;
+    free(token->value.str_val);
+    token->value.str_val = cleaned_str;
 
     return RET_VAL_OK;
 }
@@ -551,7 +551,7 @@ int get_token(T_TOKEN *token) {
                     token->type = STRING;
                     token->lexeme = strdup(lexeme);
                     token->length = lexeme_length;
-                    token->value.stringVal = strdup(lexeme);
+                    token->value.str_val = strdup(lexeme);
                     free(lexeme);
                     return RET_VAL_OK;
                 } else if (c == '\\') {
@@ -704,7 +704,7 @@ int get_token(T_TOKEN *token) {
                     token->type = FLOAT;
                     token->lexeme = strdup(lexeme);
                             token->length = lexeme_length;
-                    token->value.floatVal = atof(lexeme);
+                    token->value.float_val = atof(lexeme);
                     free(lexeme);
                     return RET_VAL_OK;
                 }
@@ -792,7 +792,7 @@ int get_token(T_TOKEN *token) {
                     token->type = FLOAT;
                     token->lexeme = strdup(lexeme);
                             token->length = lexeme_length;
-                    token->value.floatVal = atof(lexeme);
+                    token->value.float_val = atof(lexeme);
                     free(lexeme);
                     return RET_VAL_OK;
                 }
@@ -1009,7 +1009,7 @@ int get_token(T_TOKEN *token) {
                     // End of string
                     lexeme[lexeme_length] = '\0';
                     token->lexeme = strdup(lexeme);
-                    token->value.stringVal = strdup(lexeme);
+                    token->value.str_val = strdup(lexeme);
                     int multiline_cleared = clean_multiline_string(token);
                     if (multiline_cleared != 0){
                         return multiline_cleared;

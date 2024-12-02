@@ -44,7 +44,7 @@ OPERATOR_TYPE_OF_RULE get_operator_type(T_LIST_ELEMENT_PTR operator){
  * @param data Pointer to the data
  * @return 0=RET_VAL_OK if the element was inserted, else return 99=RET_VAL_INTERNAL_ERR if malloc fails
  */
-T_RET_VAL list_insert_last(T_LIST_PTR list, T_TREE_NODE_PTR node){
+RET_VAL list_insert_last(T_LIST_PTR list, T_TREE_NODE_PTR node){
     // Check if list is empty
     if(list == NULL) return RET_VAL_INTERNAL_ERR;
 
@@ -82,7 +82,7 @@ T_RET_VAL list_insert_last(T_LIST_PTR list, T_TREE_NODE_PTR node){
  * @param list Pointer to the list, where be stored nodes
  * @return 0=RET_VAL_OK if the tree was traversed, else return 99=RET_VAL_INTERNAL_ERR if malloc fails
  */
-T_RET_VAL postorder(T_TREE_NODE_PTR *tree, T_LIST_PTR list){
+RET_VAL postorder(T_TREE_NODE_PTR *tree, T_LIST_PTR list){
     
     if(*tree == NULL) return RET_VAL_OK;
 
@@ -122,7 +122,7 @@ void list_next(T_LIST_PTR list){
  * @param table Pointer to the symbol table
  * @return 0=RET_VAL_OK if the types was set, else return 99=RET_VAL_INTERNAL_ERR if malloc fails
  */
-T_RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table){
+RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table){
 
     
     list_first(list);
@@ -131,7 +131,7 @@ T_RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table){
         // IDENTIFIER
         if(list->active->node->token->type == IDENTIFIER){
             // Find symbol in the symbol table
-            Symbol *symbol = symtable_find_symbol(table, list->active->node->token->lexeme);
+            T_SYMBOL *symbol = symtable_find_symbol(table, list->active->node->token->lexeme);
 
             // Check if symbol is in the symbol table, else return error of undefined variable
             if(symbol == NULL) return RET_VAL_SEMANTIC_UNDEFINED_ERR;
@@ -148,7 +148,7 @@ T_RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table){
                 case VAR_FLOAT:{ // const :f64
                     list->active->literal_type = LITERAL_FLOAT;
                     if (symbol->data.var.const_expr) list->active->value = symbol->data.var.float_value;
-                    //else if (list->active->node->token->type == FLOAT) list->active->value = list->active->node->token->value.floatVal;
+                    //else if (list->active->node->token->type == FLOAT) list->active->value = list->active->node->token->value.float_val;
                     break;
                 }
                 default:{
@@ -208,7 +208,7 @@ T_RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table){
         // LITERAL FLOAT
         if(list->active->node->token->type == FLOAT){
             list->active->literal_type = LITERAL_FLOAT;
-            list->active->value = list->active->node->token->value.floatVal;
+            list->active->value = list->active->node->token->value.float_val;
             list_next(list);
             continue;
         }

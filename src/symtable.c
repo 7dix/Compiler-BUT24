@@ -16,8 +16,8 @@
 #include "semantic.h"
 
 // Initialize hashtable
-Hashtable *hashtable_init() {
-    Hashtable *ht = (Hashtable *)malloc(sizeof(Hashtable));
+T_HASHTABLE *hashtable_init() {
+    T_HASHTABLE *ht = (T_HASHTABLE *)malloc(sizeof(T_HASHTABLE));
     if (!ht) return NULL;
     for (int i = 0; i < HASHTABLE_SIZE; i++) {
         ht->table[i].occupied = false; // Mark all slots as unoccupied initially
@@ -32,7 +32,7 @@ Hashtable *hashtable_init() {
 }
 
 // Free hashtable
-void hashtable_free(Hashtable *ht) {
+void hashtable_free(T_HASHTABLE *ht) {
     if (!ht) return;
     for (int i = 0; i < HASHTABLE_SIZE; i++) {
         if (ht->table[i].occupied) { // Only free if slot is occupied
@@ -64,14 +64,14 @@ unsigned int secondary_hash(const char *key) {
 }
 
 // Insert into hashtable using open addressing with Brent's optimization
-Symbol *hashtable_insert(Hashtable *ht, const char *key, SymbolType type, SymbolData data) {
+T_SYMBOL *hashtable_insert(T_HASHTABLE *ht, const char *key, SYMBOL_TYPE type, T_SYMBOL_DATA data) {
     if (!ht || ht->count >= HASHTABLE_SIZE) return NULL;
 
     unsigned int index = hash_function(key);
     unsigned int step = secondary_hash(key);
     int probe_count = 0;
 
-    Symbol new_symbol = { .name = strdup(key), .type = type, .data = data, .occupied = true };
+    T_SYMBOL new_symbol = { .name = strdup(key), .type = type, .data = data, .occupied = true };
 
     while (ht->table[index].occupied) {
         if (strcmp(ht->table[index].name, key) == 0) {
@@ -88,7 +88,7 @@ Symbol *hashtable_insert(Hashtable *ht, const char *key, SymbolType type, Symbol
         int alt_index = (index + step) % HASHTABLE_SIZE;
         if (!ht->table[alt_index].occupied || probe_count + 1 < alt_index) {
             // Swap the entries to minimize probe length
-            Symbol temp = ht->table[index];
+            T_SYMBOL temp = ht->table[index];
             ht->table[index] = new_symbol;
             new_symbol = temp;
             index = alt_index;
@@ -106,7 +106,7 @@ Symbol *hashtable_insert(Hashtable *ht, const char *key, SymbolType type, Symbol
 }
 
 // Find an entry in the hashtable
-Symbol *hashtable_find(Hashtable *ht, const char *key) {
+T_SYMBOL *hashtable_find(T_HASHTABLE *ht, const char *key) {
     if (!ht) return NULL;
 
     unsigned int index = hash_function(key);
@@ -126,7 +126,7 @@ Symbol *hashtable_find(Hashtable *ht, const char *key) {
 }
 
 // Remove an entry from the hashtable
-void hashtable_remove(Hashtable *ht, const char *key) {
+void hashtable_remove(T_HASHTABLE *ht, const char *key) {
     if (!ht) return;
 
     unsigned int index = hash_function(key);
@@ -245,9 +245,9 @@ int symtable_remove_scope(T_SYM_TABLE *table, bool check_unused_vars) {
  * @param key Symbols name
  * @param type Symbols type
  * @param data Symbols data
- * @return Symbol* Pointer to the symbol, or null if operation failed
+ * @return T_SYMBOL* Pointer to the symbol, or null if operation failed
  */
-Symbol *symtable_add_symbol(T_SYM_TABLE *table, const char *key, SymbolType type, SymbolData data) {
+T_SYMBOL *symtable_add_symbol(T_SYM_TABLE *table, const char *key, SYMBOL_TYPE type, T_SYMBOL_DATA data) {
     if (table == NULL || table->top == NULL) {
         return NULL;
     }
@@ -263,16 +263,16 @@ Symbol *symtable_add_symbol(T_SYM_TABLE *table, const char *key, SymbolType type
  * 
  * @param table Pointer to the symbol table
  * @param key Symbols name
- * @return Symbol* Pointer to the symbol, or null if not found
+ * @return T_SYMBOL* Pointer to the symbol, or null if not found
  */
-Symbol *symtable_find_symbol(T_SYM_TABLE *table, const char *key) {
+T_SYMBOL *symtable_find_symbol(T_SYM_TABLE *table, const char *key) {
     if (table == NULL || table->top == NULL) {
         return NULL;
     }
     
     T_SCOPE *current_scope = table->top;
     while (current_scope != NULL) {
-        Symbol *symbol = hashtable_find(current_scope->ht, key);
+        T_SYMBOL *symbol = hashtable_find(current_scope->ht, key);
         if (symbol != NULL) {
             return symbol;
         }
@@ -309,17 +309,17 @@ void symtable_free(T_SYM_TABLE *table) {
  * @return int RET_VAL_OK if operation was successful
  * @return int RET_VAL_INTERNAL_ERR if operation failed
  */
-int add_param_to_symbol_data(SymbolData *data, Param param) {
+int add_param_to_symbol_data(T_SYMBOL_DATA *data, T_PARAM param) {
     if (data == NULL) {
         return RET_VAL_INTERNAL_ERR;
     }
     if (data->func.argc == 0) {
-        data->func.argv = (Param *) malloc(sizeof(Param));
+        data->func.argv = (T_PARAM *) malloc(sizeof(T_PARAM));
         if (data->func.argv == NULL) {
             return RET_VAL_INTERNAL_ERR;
         }
     } else {
-        Param *new_argv = (Param *) realloc(data->func.argv, (data->func.argc + 1) * sizeof(Param));
+        T_PARAM *new_argv = (T_PARAM *) realloc(data->func.argv, (data->func.argc + 1) * sizeof(T_PARAM));
         if (new_argv == NULL) {
             return RET_VAL_INTERNAL_ERR;
         }
@@ -337,7 +337,7 @@ int add_param_to_symbol_data(SymbolData *data, Param param) {
  * @return int Variable id, or -1 if not found
  */
 int get_var_id(T_SYM_TABLE *table, const char *key) {
-    Symbol *symbol = symtable_find_symbol(table, key);
+    T_SYMBOL *symbol = symtable_find_symbol(table, key);
     if (symbol == NULL) {
         return -1;
     }
@@ -349,10 +349,10 @@ int get_var_id(T_SYM_TABLE *table, const char *key) {
  * 
  * @param table Pointer to the symbol table
  * @param key Variable name
- * @return Symbol* Pointer to the symbol, or null if not found or not a variable (fn)
+ * @return T_SYMBOL* Pointer to the symbol, or null if not found or not a variable (fn)
  */
-Symbol *get_var(T_SYM_TABLE *table, const char *name) {
-    Symbol *symbol = symtable_find_symbol(table, name);
+T_SYMBOL *get_var(T_SYM_TABLE *table, const char *name) {
+    T_SYMBOL *symbol = symtable_find_symbol(table, name);
     if (symbol == NULL) {
         return NULL;
     }
@@ -377,7 +377,7 @@ int check_for_unused_vars(T_SYM_TABLE *table) {
         return RET_VAL_INTERNAL_ERR;
     }
 
-    Hashtable *ht = table->top->ht;
+    T_HASHTABLE *ht = table->top->ht;
     for (int i = 0; i < HASHTABLE_SIZE; i++) {
         if (ht->table[i].occupied && ht->table[i].type == SYM_VAR) {
             if (!ht->table[i].data.var.used || !ht->table[i].data.var.modified) {

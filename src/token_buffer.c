@@ -33,7 +33,7 @@ T_TOKEN_BUFFER *init_token_buffer() {
     // Initialize the buffer
     buffer->head = NULL;
     buffer->tail = NULL;
-    buffer->current = NULL;
+    buffer->curr = NULL;
 
     // Allocate memory for the dummy EOF token
     buffer->dummy_eof_token = (T_TOKEN *) malloc(sizeof(T_TOKEN));
@@ -69,8 +69,8 @@ void free_token_buffer(T_TOKEN_BUFFER **buffer) {
         if (current->token->lexeme != NULL) {
             free(current->token->lexeme);
         }
-        if (current->token->type == STRING && current->token->value.stringVal != NULL) {
-            free(current->token->value.stringVal);
+        if (current->token->type == STRING && current->token->value.str_val != NULL) {
+            free(current->token->value.str_val);
         }
         free(current->token);
         free(current);
@@ -126,8 +126,8 @@ bool add_token_as_last(T_TOKEN_BUFFER *buffer, T_TOKEN *token) {
  */
 void move_back(T_TOKEN_BUFFER *buffer) {
     // Move the current pointer back, if possible
-    if (buffer->current != NULL && buffer->current->prev != NULL) {
-        buffer->current = buffer->current->prev;
+    if (buffer->curr != NULL && buffer->curr->prev != NULL) {
+        buffer->curr = buffer->curr->prev;
     }
 }
 
@@ -139,12 +139,12 @@ void move_back(T_TOKEN_BUFFER *buffer) {
  */
 void next_token(T_TOKEN_BUFFER *buffer, T_TOKEN **token) {
     // Get the current token and move the current pointer forward
-    if (buffer->current != NULL) { // Check if the current pointer is not NULL
-        *token = buffer->current->token;
+    if (buffer->curr != NULL) { // Check if the current pointer is not NULL
+        *token = buffer->curr->token;
 
-        // Move the current pointer forward, if possible
-        if (buffer->current->next != NULL) {
-            buffer->current = buffer->current->next;
+        // Move the curr pointer forward, if possible
+        if (buffer->curr->next != NULL) {
+            buffer->curr = buffer->curr->next;
         }
     } else { // If the current pointer is NULL, always return EOF token
         *token = buffer->dummy_eof_token;
@@ -157,7 +157,7 @@ void next_token(T_TOKEN_BUFFER *buffer, T_TOKEN **token) {
  * @param *buffer The token buffer.
  */
 void set_current_to_first(T_TOKEN_BUFFER *buffer) {
-    buffer->current = buffer->head;
+    buffer->curr = buffer->head;
 }
 
 /**

@@ -18,17 +18,17 @@
 //-------------- DATA STRUCTURES -----------------//
 
 // Node of the token buffer
-typedef struct token_buffer_node {
+typedef struct T_TOKEN_BUFFER_NODE {
     T_TOKEN *token;
-    struct token_buffer_node *next;
-    struct token_buffer_node *prev;
+    struct T_TOKEN_BUFFER_NODE *next;
+    struct T_TOKEN_BUFFER_NODE *prev;
 } T_TOKEN_BUFFER_NODE;
 
 // Token buffer structure
-typedef struct token_buffer {
+typedef struct T_TOKEN_BUFFER {
     T_TOKEN_BUFFER_NODE *head;
     T_TOKEN_BUFFER_NODE *tail;
-    T_TOKEN_BUFFER_NODE *current;
+    T_TOKEN_BUFFER_NODE *curr;
     T_TOKEN *dummy_eof_token;
 } T_TOKEN_BUFFER;
 

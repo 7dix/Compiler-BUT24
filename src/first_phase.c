@@ -24,7 +24,7 @@
 //--------------------------- GLOBAL VARIABLES ----------------------------//
 
 // Stores any error generated during this phase, see `return_values.h`
-T_RET_VAL error_flag_fp = RET_VAL_OK;
+RET_VAL error_flag_fp = RET_VAL_OK;
 
 // Flag indicating whether get_save_token() should return the last token
 // that is already in the buffer, or ask lexer for a new one and return that one 
@@ -38,12 +38,12 @@ bool syntax_fp_start(T_TOKEN_BUFFER *buffer);
 bool syntax_fp_prolog(T_TOKEN_BUFFER *buffer);
 bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer);
 bool syntax_fp_fn_def_next(T_TOKEN_BUFFER *buffer);
-bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer, SymbolData *data);
-bool syntax_fp_type(T_TOKEN_BUFFER *buffer, VarType *type);
-bool syntax_fp_params(T_TOKEN_BUFFER *buffer, SymbolData *data);
-bool syntax_fp_param(T_TOKEN_BUFFER *buffer, SymbolData *data);
-bool syntax_fp_param_next(T_TOKEN_BUFFER *buffe, SymbolData *data);
-bool syntax_fp_param_after_comma(T_TOKEN_BUFFER *buffer, SymbolData *data);
+bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data);
+bool syntax_fp_type(T_TOKEN_BUFFER *buffer, VAR_TYPE *type);
+bool syntax_fp_params(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data);
+bool syntax_fp_param(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data);
+bool syntax_fp_param_next(T_TOKEN_BUFFER *buffe, T_SYMBOL_DATA *data);
+bool syntax_fp_param_after_comma(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data);
 bool syntax_fp_end(T_TOKEN_BUFFER *buffer);
 bool simulate_fn_body(T_TOKEN_BUFFER *buffer);
 
@@ -56,8 +56,8 @@ bool simulate_fn_body(T_TOKEN_BUFFER *buffer);
  * @retval `false` - internal error occurred
  */
 bool add_built_in_functions() {
-    SymbolData data;
-    Symbol *symbol;
+    T_SYMBOL_DATA data;
+    T_SYMBOL *symbol;
     
     // ifj.readstr() ?[]u8
     data.func.return_type = VAR_STRING_NULL;
@@ -84,7 +84,7 @@ bool add_built_in_functions() {
 
     // ifj.write(term: any) void
     data.func.return_type = VAR_VOID;
-    error_flag_fp = add_param_to_symbol_data(&data, (Param){"term", VAR_ANY});
+    error_flag_fp = add_param_to_symbol_data(&data, (T_PARAM){"term", VAR_ANY});
     if (error_flag_fp != RET_VAL_OK)
         return false;
     if ((symbol = symtable_add_symbol(ST, "ifj.write", SYM_FUNC, data)) == NULL) {
@@ -96,7 +96,7 @@ bool add_built_in_functions() {
 
     // ifj.i2f(term: i32) f64
     data.func.return_type = VAR_FLOAT;
-    error_flag_fp = add_param_to_symbol_data(&data, (Param){"term", VAR_INT});
+    error_flag_fp = add_param_to_symbol_data(&data, (T_PARAM){"term", VAR_INT});
     if (error_flag_fp != RET_VAL_OK)
         return false;
     if ((symbol = symtable_add_symbol(ST, "ifj.i2f", SYM_FUNC, data)) == NULL) {
@@ -108,7 +108,7 @@ bool add_built_in_functions() {
 
     // ifj.f2i(term: f64) i32
     data.func.return_type = VAR_INT;
-    error_flag_fp = add_param_to_symbol_data(&data, (Param){"term", VAR_FLOAT});
+    error_flag_fp = add_param_to_symbol_data(&data, (T_PARAM){"term", VAR_FLOAT});
     if (error_flag_fp != RET_VAL_OK)
         return false;
     if ((symbol = symtable_add_symbol(ST, "ifj.f2i", SYM_FUNC, data)) == NULL) {
@@ -120,7 +120,7 @@ bool add_built_in_functions() {
 
     // ifj.string(term: str_u8) []u8
     data.func.return_type = VAR_STRING;
-    error_flag_fp = add_param_to_symbol_data(&data, (Param){"term", STRING_VAR_STRING});
+    error_flag_fp = add_param_to_symbol_data(&data, (T_PARAM){"term", STRING_VAR_STRING});
     if (error_flag_fp != RET_VAL_OK)
         return false;
     if ((symbol = symtable_add_symbol(ST, "ifj.string", SYM_FUNC, data)) == NULL) {
@@ -132,7 +132,7 @@ bool add_built_in_functions() {
 
     // ifj.length(s: []u8) i32
     data.func.return_type = VAR_INT;
-    error_flag_fp = add_param_to_symbol_data(&data, (Param){"s", VAR_STRING});
+    error_flag_fp = add_param_to_symbol_data(&data, (T_PARAM){"s", VAR_STRING});
     if (error_flag_fp != RET_VAL_OK)
         return false;
     if ((symbol = symtable_add_symbol(ST, "ifj.length", SYM_FUNC, data)) == NULL) {
@@ -144,10 +144,10 @@ bool add_built_in_functions() {
 
     // ifj.concat(s1: []u8, s2: []u8) []u8
     data.func.return_type = VAR_STRING;
-    error_flag_fp = add_param_to_symbol_data(&data, (Param){"s1", VAR_STRING});
+    error_flag_fp = add_param_to_symbol_data(&data, (T_PARAM){"s1", VAR_STRING});
     if (error_flag_fp != RET_VAL_OK)
         return false;
-    error_flag_fp = add_param_to_symbol_data(&data, (Param){"s2", VAR_STRING});
+    error_flag_fp = add_param_to_symbol_data(&data, (T_PARAM){"s2", VAR_STRING});
     if (error_flag_fp != RET_VAL_OK)
         return false;
     if ((symbol = symtable_add_symbol(ST, "ifj.concat", SYM_FUNC, data)) == NULL) {
@@ -159,13 +159,13 @@ bool add_built_in_functions() {
 
     // ifj.substr(s: []u8, i: i32, j: i32) ?[]u8
     data.func.return_type = VAR_STRING_NULL;
-    error_flag_fp = add_param_to_symbol_data(&data, (Param){"s", VAR_STRING});
+    error_flag_fp = add_param_to_symbol_data(&data, (T_PARAM){"s", VAR_STRING});
     if (error_flag_fp != RET_VAL_OK)
         return false;
-    error_flag_fp = add_param_to_symbol_data(&data, (Param){"i", VAR_INT});
+    error_flag_fp = add_param_to_symbol_data(&data, (T_PARAM){"i", VAR_INT});
     if (error_flag_fp != RET_VAL_OK)
         return false;
-    error_flag_fp = add_param_to_symbol_data(&data, (Param){"j", VAR_INT});
+    error_flag_fp = add_param_to_symbol_data(&data, (T_PARAM){"j", VAR_INT});
     if (error_flag_fp != RET_VAL_OK)
         return false;
     if ((symbol = symtable_add_symbol(ST, "ifj.substring", SYM_FUNC, data)) == NULL) {
@@ -177,10 +177,10 @@ bool add_built_in_functions() {
 
     // ifj.strcmp(s1: []u8, s2: []u8) i32
     data.func.return_type = VAR_INT;
-    error_flag_fp = add_param_to_symbol_data(&data, (Param){"s1", VAR_STRING});
+    error_flag_fp = add_param_to_symbol_data(&data, (T_PARAM){"s1", VAR_STRING});
     if (error_flag_fp != RET_VAL_OK)
         return false;
-    error_flag_fp = add_param_to_symbol_data(&data, (Param){"s2", VAR_STRING});
+    error_flag_fp = add_param_to_symbol_data(&data, (T_PARAM){"s2", VAR_STRING});
     if (error_flag_fp != RET_VAL_OK)
         return false;
     if ((symbol = symtable_add_symbol(ST, "ifj.strcmp", SYM_FUNC, data)) == NULL) {
@@ -192,10 +192,10 @@ bool add_built_in_functions() {
 
     // ifj.ord(s: []u8, i: i32) i32
     data.func.return_type = VAR_INT;
-    error_flag_fp = add_param_to_symbol_data(&data, (Param){"s", VAR_STRING});
+    error_flag_fp = add_param_to_symbol_data(&data, (T_PARAM){"s", VAR_STRING});
     if (error_flag_fp != RET_VAL_OK)
         return false;
-    error_flag_fp = add_param_to_symbol_data(&data, (Param){"i", VAR_INT});
+    error_flag_fp = add_param_to_symbol_data(&data, (T_PARAM){"i", VAR_INT});
     if (error_flag_fp != RET_VAL_OK)
         return false;
     if ((symbol = symtable_add_symbol(ST, "ifj.ord", SYM_FUNC, data)) == NULL) {
@@ -207,7 +207,7 @@ bool add_built_in_functions() {
     
     // ifj.chr(i: i32) []u8
     data.func.return_type = VAR_STRING;
-    error_flag_fp = add_param_to_symbol_data(&data, (Param){"i", VAR_INT});
+    error_flag_fp = add_param_to_symbol_data(&data, (T_PARAM){"i", VAR_INT});
     if (error_flag_fp != RET_VAL_OK)
         return false;
     if ((symbol = symtable_add_symbol(ST, "ifj.chr", SYM_FUNC, data)) == NULL){
@@ -226,7 +226,7 @@ bool add_built_in_functions() {
  * @retval `false` - main function does not exist
  */
 bool check_main_exists() {
-    Symbol *symbol;
+    T_SYMBOL *symbol;
     // exists main
     if ((symbol = symtable_find_symbol(ST, "main")) == NULL) {
         error_flag_fp = RET_VAL_SEMANTIC_UNDEFINED_ERR;
@@ -274,7 +274,7 @@ bool get_save_token(T_TOKEN_BUFFER *token_buffer, T_TOKEN **token) {
             return false;
         }
         (*token)->lexeme = NULL;
-        (*token)->value.stringVal = NULL;
+        (*token)->value.str_val = NULL;
 
         error_flag_fp = get_token(*token);
         if (error_flag_fp != RET_VAL_OK) {
@@ -314,7 +314,7 @@ bool get_save_token(T_TOKEN_BUFFER *token_buffer, T_TOKEN **token) {
  * @retval RET_VAL_SYNTAX_ERR - syntax error
  * @retval RET_VAL_INTERNAL_ERR - internal error
  */
-T_RET_VAL first_phase(T_TOKEN_BUFFER *token_buffer) {
+RET_VAL first_phase(T_TOKEN_BUFFER *token_buffer) {
 
     // Run simplified parser to obtain function signatures
     if (!syntax_fp_start(token_buffer)) {
@@ -426,7 +426,7 @@ bool syntax_fp_prolog(T_TOKEN_BUFFER *buffer) {
     }
 
     // check that string is equal to "ifj24.zig"
-    if (strcmp(token->value.stringVal, "ifj24.zig") != 0) {
+    if (strcmp(token->value.str_val, "ifj24.zig") != 0) {
         error_flag_fp = RET_VAL_SYNTAX_ERR;
         return false;
     }
@@ -469,7 +469,7 @@ bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer) {
     
     T_TOKEN *token;
     // Create new symbol data
-    SymbolData data;
+    T_SYMBOL_DATA data;
     data.func.return_type = VAR_VOID;
     data.func.argc = 0;
     data.func.argv = NULL;
@@ -620,7 +620,7 @@ bool syntax_fp_fn_def_next(T_TOKEN_BUFFER *buffer) {
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer, SymbolData *data) {
+bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data) {
 
     T_TOKEN *token;
     // we have two branches, choose here
@@ -695,7 +695,7 @@ bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_fp_params(T_TOKEN_BUFFER *buffer, SymbolData *data) {
+bool syntax_fp_params(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data) {
     T_TOKEN *token;
     
     // we have two branches, choose here
@@ -738,9 +738,9 @@ bool syntax_fp_params(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_fp_param(T_TOKEN_BUFFER *buffer, SymbolData *data) {
+bool syntax_fp_param(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data) {
     T_TOKEN *token;
-    Param param;
+    T_PARAM param;
     param.name = NULL;
     param.type = VAR_VOID;
 
@@ -799,7 +799,7 @@ bool syntax_fp_param(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_fp_type(T_TOKEN_BUFFER *buffer, VarType *type) {
+bool syntax_fp_type(T_TOKEN_BUFFER *buffer, VAR_TYPE *type) {
     T_TOKEN *token;
 
     // check whether token is one of the types
@@ -860,7 +860,7 @@ bool syntax_fp_type(T_TOKEN_BUFFER *buffer, VarType *type) {
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_fp_param_next(T_TOKEN_BUFFER *buffer, SymbolData *data) {
+bool syntax_fp_param_next(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data) {
     
     T_TOKEN *token;
     // we have two branches, choose here
@@ -905,7 +905,7 @@ bool syntax_fp_param_next(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool syntax_fp_param_after_comma(T_TOKEN_BUFFER *buffer, SymbolData *data) {
+bool syntax_fp_param_after_comma(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data) {
     
     T_TOKEN *token;
     // we have two branches, choose here
