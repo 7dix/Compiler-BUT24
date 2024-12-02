@@ -272,6 +272,7 @@ bool get_save_token(T_TOKEN_BUFFER *token_buffer, T_TOKEN **token) {
         }
         error_flag_fp = get_token(*token);
         if (error_flag_fp != 0) {
+            free((*token));
             return false;
         }
 
