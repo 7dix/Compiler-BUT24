@@ -75,6 +75,9 @@ test_token_buffer: debug_token_buffer
 test_parser_retcode: debug
 	cd tests/parser &&  python3 test_parser.py -retcode
 
+test_parser_valgrind: debug
+	cd tests/parser &&  python3 test_parser_valgrind.py -retcode
+
 test_precedence: debug_precedence 
 	cd tests/precedence && python3 test_precedence.py
 
@@ -100,6 +103,7 @@ clean:
 	rm -rf temp
 	rm -rf IFJ24-tests-master/out
 	rm -rf tests/IFJ24-tests-master/out
+	rm -rf tests/parser/valgrind_output.txt
 
 .PHONY: all debug clean bin test pack test_scanner test_token_buffer test_parser_retcode test_precedence test_symtable test_first_phase test debug_from_file debug_scanner debug_token_buffer debug_precedence debug_symtable debug_first_phase
 
