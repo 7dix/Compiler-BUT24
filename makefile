@@ -78,6 +78,9 @@ test_parser_retcode: debug
 test_parser_valgrind: debug
 	cd tests/parser &&  python3 test_parser_valgrind.py -retcode
 
+test_interpret: debug
+	cd tests/parser &&  python3 test_interpret_interactive.py -retcode
+
 test_precedence: debug_precedence 
 	cd tests/precedence && python3 test_precedence.py
 
@@ -91,6 +94,9 @@ test: test_scanner test_token_buffer test_precedence test_symtable test_parser_r
 
 test_fit: debug
 	./tests/IFJ24-tests-master/test.sh ./tests/IFJ24-tests-master ./bin/ifj24debug ic24int																																																						
+
+test_martin_valgrind: debug
+	cd tests/integration && ./integration_tests_valgrind.sh "../../bin/ifj24debug" -1 true true
 
 test_martin: debug
 	cd tests/integration && ./integration_tests.sh "../../bin/ifj24debug" -1 true true
