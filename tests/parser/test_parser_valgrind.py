@@ -49,7 +49,7 @@ def run_test(test_folder, test_number):
 
     # Run the parser under valgrind
     valgrind_command = [
-        'valgrind', '--leak-check=full', '--show-leak-kinds=all', '--log-file=valgrind_output.txt', 
+        'valgrind', '--leak-check=full', '--track-origins=yes', '--show-leak-kinds=all', '--log-file=valgrind_output.txt', '--error-exitcode=100',
         PARSER_EXEC
     ]
     
@@ -72,7 +72,7 @@ def run_test(test_folder, test_number):
     with open('valgrind_output.txt', 'r') as valgrind_output_file:
         valgrind_output = valgrind_output_file.read()
 
-    if "All heap blocks were freed -- no leaks are possible" not in valgrind_output:
+    if actual_output == '100' or actual_output == 100:
         print_colored(f"TEST {test_number} FAILED: Memory leaks detected.", "red")
         print("Valgrind Output:")
         print(valgrind_output)

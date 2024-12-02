@@ -82,7 +82,7 @@ if [ "$testcase" == "-1" ]; then
 
     # Find all test files, sort them numerically by test number
     for file in $(find ./test_inputs/integration -type f | sort -V); do
-        eval "./$binary < \"$file\" $redirect_output"
+        valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all --error-exitcode=100 ./$binary < "$file"
         rc=$?
 
         all_tests=$((all_tests + 1))
@@ -92,51 +92,54 @@ if [ "$testcase" == "-1" ]; then
         test_num=$(echo "$filename" | cut -d'_' -f2)
         expected_rc=$(echo "$filename" | cut -d'_' -f3 | cut -d'.' -f1)
 
-        testName="Test $filename"
-        passMsg="Expected $expected_rc and got $rc"
-        failMsg="Expected $expected_rc but got $rc"
-
-        if [ "$rc" -eq "$expected_rc" ]; then
-            testCase "$all_tests" "$testName" 1 "$passMsg" "$failMsg"
-            passed_tests=$((passed_tests + 1))
-        else
+        # if rc = 100 report as mem leak
+        if [ "$rc" -eq "100" ]; then
+            testName="Test $filename"
+            passMsg="Expected $expected_rc and got $rc"
+            failMsg="Memory leak detected"
             testCase "$all_tests" "$testName" 0 "$passMsg" "$failMsg"
+        else
+            testName="Test $filename"
+            passMsg="Expected $expected_rc and got $rc"
+            failMsg="Expected $expected_rc but got $rc"
+            if [ "$rc" -eq "$expected_rc" ]; then
+                testCase "$all_tests" "$testName" 1 "$passMsg" "$failMsg"
+                passed_tests=$((passed_tests + 1))
+            else
+                testCase "$all_tests" "$testName" 0 "$passMsg" "$failMsg"
+            fi
         fi
     done
 else
     # Run a specific test case
     file=$(find ./test_inputs/integration -type f -name "test_${testcase}_*.zig")
     if [ -f "$file" ]; then
-        if [ "$valgrind" == "true" ]; then
-            if [ "$(uname)" = "Darwin" ]; then
-                echo -e "\033[1;32mUsing leaks on macOS...\033[0m"
-                leaks --atExit --fullStacks -- ./$binary < "$file"
-                rc=$?
-            else
-                echo -e "\033[1;32mUsing valgrind on non-macOS system...\033[0m"
-                valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all ./$binary < "$file"
-                rc=$?
-            fi
-        else
-            ./$binary < "$file"
-        fi
-        rc=$?
 
+        valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all --error-exitcode=100 ./$binary < "$file"
+        rc=$?
+        
         all_tests=1
         filename=$(basename "$file")
         
         # Correctly parse the expected return code
         expected_rc=$(echo "$filename" | awk -F'_' '{print $3}' | cut -d'.' -f1)
-
-        testName="Test $filename"
-        passMsg="Expected $expected_rc and got $rc"
-        failMsg="Expected $expected_rc but got $rc"
         
-        if [ "$rc" -eq "$expected_rc" ]; then
-            testCase "$all_tests" "$testName" 1 "$passMsg" "$failMsg"
-            passed_tests=$((passed_tests + 1))
-        else
+        # if rc = 100 report as mem leak
+        if [ "$rc" -eq "100" ]; then
+            testName="Test $filename"
+            passMsg="Expected $expected_rc and got $rc"
+            failMsg="Memory leak detected"
             testCase "$all_tests" "$testName" 0 "$passMsg" "$failMsg"
+        else
+            testName="Test $filename"
+            passMsg="Expected $expected_rc and got $rc"
+            failMsg="Expected $expected_rc but got $rc"
+            if [ "$rc" -eq "$expected_rc" ]; then
+                testCase "$all_tests" "$testName" 1 "$passMsg" "$failMsg"
+                passed_tests=$((passed_tests + 1))
+            else
+                testCase "$all_tests" "$testName" 0 "$passMsg" "$failMsg"
+            fi
         fi
     else
         echo -e "${COLOR_FAIL}Testcase $testcase not found.${COLOR_RESET}"

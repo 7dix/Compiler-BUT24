@@ -1,0 +1,7 @@
+const ifj = @import("ifj24.zig");
+
+pub fn main() void {
+    var str = ifj.string("gaga");
+    str = ifj.stringo("ahoj");
+    ifj.write("Invalid function call | Function: stringo does not exist");
+}
