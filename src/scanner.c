@@ -12,7 +12,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "scanner.h"
-#include "shared.h"
+#include "return_values.h"
 
 // Global variables
 static int line_number = 1;       // Current line number in the source file
@@ -24,6 +24,8 @@ int is_type_identifier(const char *lexeme);
 TOKEN_TYPE get_type_identifier_token_type(const char *lexeme);
 void unget_char(int c);
 int get_next_char();
+int is_nullable_type_identifier(const char *lexeme);
+TOKEN_TYPE get_nullable_type_identifier_token_type(const char *lexeme);
 
 // Buffer for lexeme construction
 #define INITIAL_LEXEME_SIZE 128
@@ -79,6 +81,7 @@ const char* tt_to_str(TOKEN_TYPE type) {
         case WHILE: return "WHILE";
         case VOID: return "VOID";
         case IFJ: return "IFJ";
+        case EOF_TOKEN: return "EOF";
         default: return "UNKNOWN";
     }
 }
@@ -225,6 +228,47 @@ TOKEN_TYPE get_nullable_type_identifier_token_type(const char *lexeme) {
     return IDENTIFIER;  // Default case (should not reach here if validation is correct)
 }
 
+int clean_multiline_string(T_TOKEN *token) {
+    char *str = token->value.stringVal;
+    if (str == NULL) {
+        return RET_VAL_INTERNAL_ERR;  // Ensure the string value exists
+    }
+
+    // Step 1: Remove all leading backslashes
+    while (*str == '\\') {
+        str++;
+    }
+
+    // Allocate a new buffer to store the cleaned string
+    char *cleaned_str = malloc(strlen(str) + 1);
+    if (cleaned_str == NULL) {
+        return RET_VAL_INTERNAL_ERR;  // Memory allocation error
+    }
+
+    char *dest = cleaned_str;
+    for (char *src = str; *src != '\0'; ++src) {
+        // Step 2: Replace "\n\\" with "\n"
+        if (*src == '\n' && *(src + 1) == '\\' && *(src + 2) == '\\') {
+            *dest++ = '\n';
+            src += 2;  // Skip over the next 2 characters (backslash)
+        } else {
+            *dest++ = *src;
+        }
+    }
+    
+    // Step 3: Remove the final newline, if it exists
+    if (dest > cleaned_str && *(dest - 1) == '\n') {
+        dest--;  // Move back to overwrite the last newline
+    }
+    *dest = '\0';  // Null-terminate the cleaned string
+
+    // Free the old string and assign the cleaned string
+    free(token->value.stringVal);
+    token->value.stringVal = cleaned_str;
+
+    return RET_VAL_OK;
+}
+
 /**
  * @brief The main function to get the next token from the source file.
  *
@@ -243,12 +287,18 @@ int get_token(T_TOKEN *token) {
         // Memory allocation error
         return RET_VAL_INTERNAL_ERR;
     }
-    token->line = line_number;
     token->length = 0;
 
     while (1) {
         c = get_next_char();
-        if (c == EOF) {
+
+        // Update token line number
+        token->line = line_number;
+        if (line_number == 29) {
+            line_number = 29;
+        }
+
+        if (c == EOF || c == '\0') {
             // End of file
             free(lexeme);
             // Set EOF token
@@ -256,6 +306,7 @@ int get_token(T_TOKEN *token) {
             token->lexeme = NULL;
             return RET_VAL_OK;
         }
+
 
         switch (state) {
             case 0:  // State S
@@ -308,6 +359,7 @@ int get_token(T_TOKEN *token) {
                     }
                 } else if (c == '\\') {
                     // Start of multiline string
+                    lexeme[lexeme_length++] = c;
                     state = 6;  // Transition to backslash
                 } else if (c == '"') {
                     // Start of string
@@ -330,7 +382,7 @@ int get_token(T_TOKEN *token) {
                     lexeme[lexeme_length++] = c;
                     lexeme[lexeme_length] = '\0';
                     token->lexeme = strdup(lexeme);
-                            token->length = lexeme_length;
+                    token->length = lexeme_length;
 
                     free(lexeme);
                     return RET_VAL_OK;
@@ -340,7 +392,8 @@ int get_token(T_TOKEN *token) {
                     lexeme[lexeme_length++] = c;
                     lexeme[lexeme_length] = '\0';
                     token->lexeme = strdup(lexeme);
-                            token->length = lexeme_length;
+                    token->length = lexeme_length;
+                    
                     free(lexeme);
                     return RET_VAL_OK;
                 } else if (c == '[') {
@@ -481,9 +534,14 @@ int get_token(T_TOKEN *token) {
                 }
                 break;
 
-            case 6:  // State backslash (multiline string)
-                // Implement multiline string handling based on FSM
-                // ...
+            case 6:  // State '\'
+                if (c == '\\') {
+                    // Going to mlStr01
+                    lexeme[lexeme_length++] = c;
+                    state = 20;                
+                } else {
+                    return RET_VAL_LEXICAL_ERR;
+                }
                 break;
 
             case 7:  // State quote_start (string)
@@ -492,7 +550,8 @@ int get_token(T_TOKEN *token) {
                     lexeme[lexeme_length] = '\0';
                     token->type = STRING;
                     token->lexeme = strdup(lexeme);
-                            token->length = lexeme_length;
+                    token->length = lexeme_length;
+                    token->value.stringVal = strdup(lexeme);
                     free(lexeme);
                     return RET_VAL_OK;
                 } else if (c == '\\') {
@@ -575,12 +634,20 @@ int get_token(T_TOKEN *token) {
                 } else if (c == '.') {
                     // Transition to decimal point
                     lexeme[lexeme_length++] = c;
-                    state = 11;  // Transition to float_node
+                    state = 23;  // Transition to float_node
                 } else if (c == 'e' || c == 'E') {
                     // Transition to exponent
                     lexeme[lexeme_length++] = c;
                     state = 14;  // Transition to exponent state
                 } else {
+                    // Check for invalid ending characters
+                    if (isalpha(c) || c == '_') {
+                        // Invalid character in integer
+                        fprintf(stderr, "Lexical error at line %d: Invalid character '%c' in integer\n", line_number, c);
+                        free(lexeme);
+                        return RET_VAL_LEXICAL_ERR;
+                    }
+
                     // End of integer
                     unget_char(c);
                     lexeme[lexeme_length] = '\0';
@@ -597,7 +664,7 @@ int get_token(T_TOKEN *token) {
                 if (c == '.') {
                     // Transition to decimal point
                     lexeme[lexeme_length++] = c;
-                    state = 11;  // Transition to float_node
+                    state = 23;  // Transition to float_node
                 } else if (c == 'e' || c == 'E') {
                     // Transition to exponent
                     lexeme[lexeme_length++] = c;
@@ -674,7 +741,7 @@ int get_token(T_TOKEN *token) {
                 break;
 
             case 13:  // State escape sequence in string
-                if (c == 'n' || c == 'r' || c == 't' || c == '\\' || c == '"' || c == '\'') {
+                if (c == 'n' || c == 'r' || c == 't' || c == '\\' || c == '"' || c == '\'' || isspace(c)) {
                     // Valid escape sequence
                     lexeme[lexeme_length++] = c;
                     state = 7;  // Return to string state
@@ -694,7 +761,7 @@ int get_token(T_TOKEN *token) {
                 if (c == '+' || c == '-') {
                     // Exponent sign
                     lexeme[lexeme_length++] = c;
-                    state = 15;  // Transition to exponent digits
+                    state = 22;  // Transition to must-be exponent digit
                 } else if (isdigit(c)) {
                     // Exponent digit
                     lexeme[lexeme_length++] = c;
@@ -831,6 +898,131 @@ int get_token(T_TOKEN *token) {
                     return RET_VAL_LEXICAL_ERR;
                 }
                 break;
+            case 20: // mlStr01
+                token->type = STRING;
+                if (c == '\\'){
+                    state = 21;
+                } else if (c >= 32 || c == '\"' || c == '\r' || c == '\t'){
+                    state = 20;
+                } else if (c == '\n'){
+                    state = 25;
+                } else {
+                    return RET_VAL_LEXICAL_ERR;
+                }
+                lexeme[lexeme_length++] = c;
+                if (lexeme_length >= lexeme_size) {
+                    lexeme_size *= 2;
+                    lexeme = realloc(lexeme, lexeme_size);
+                    if (lexeme == NULL) {
+                        return RET_VAL_INTERNAL_ERR;
+                    }
+                }
+                break;
+            case 21: // mlStr02
+                if (c == '\\') {
+                    state = 20;
+                } else {
+                    return RET_VAL_LEXICAL_ERR;
+                }
+                lexeme[lexeme_length++] = c;
+                if (lexeme_length >= lexeme_size) {
+                    lexeme_size *= 2;
+                    lexeme = realloc(lexeme, lexeme_size);
+                    if (lexeme == NULL) {
+                        return RET_VAL_INTERNAL_ERR;
+                    }
+                }
+                break;
+            case 22: // must-be exponent digit
+                if (isdigit(c)) {
+                    // Continue exponent digits
+                    lexeme[lexeme_length++] = c;
+                    if (lexeme_length >= lexeme_size) {
+                        lexeme_size *= 2;
+                        lexeme = realloc(lexeme, lexeme_size);
+                        if (lexeme == NULL) {
+                            return RET_VAL_INTERNAL_ERR;
+                        }
+                    }
+                    state = 15;
+                } else {
+                    // Invalid exponent
+                    fprintf(stderr, "Lexical error at line %d: Invalid exponent in number\n", line_number);
+                    free(lexeme);
+                    return RET_VAL_LEXICAL_ERR;
+                }
+                break;
+            case 23: // must-be float digit
+                if (isdigit(c)) {
+                    // Continue building float
+                    lexeme[lexeme_length++] = c;
+                    if (lexeme_length >= lexeme_size) {
+                        lexeme_size *= 2;
+                        lexeme = realloc(lexeme, lexeme_size);
+                        if (lexeme == NULL) {
+                            return RET_VAL_INTERNAL_ERR;
+                        }
+                    }
+                    state = 11;
+                } else if (c == 'e' || c == 'E') {
+                    // Transition to exponent
+                    lexeme[lexeme_length++] = c;
+                    state = 14;  // Transition to exponent state
+                } else {
+                    // Invalid float
+                    fprintf(stderr, "Lexical error at line %d: Invalid float number\n", line_number);
+                    free(lexeme);
+                    return RET_VAL_LEXICAL_ERR;
+                }
+                break;
+            case 24: // '\' 2
+                if (c == '\\'){
+                    state = 20;
+                } else {
+                    return RET_VAL_LEXICAL_ERR;
+                }
+                lexeme[lexeme_length++] = c;
+                if (lexeme_length >= lexeme_size) {
+                    lexeme_size *= 2;
+                    lexeme = realloc(lexeme, lexeme_size);
+                    if (lexeme == NULL) {
+                        return RET_VAL_INTERNAL_ERR;
+                    }
+                }
+                break;
+            case 25: // mlStr
+                if (c == '\\'){
+                    state = 24;
+                    lexeme[lexeme_length++] = c;
+                    if (lexeme_length >= lexeme_size) {
+                        lexeme_size *= 2;
+                        lexeme = realloc(lexeme, lexeme_size);
+                        if (lexeme == NULL) {
+                            return RET_VAL_INTERNAL_ERR;
+                        }
+                    }
+                } else if (isspace(c)){
+                    // ignore white space
+                    break;
+                }
+                else {
+                    // End of string
+                    lexeme[lexeme_length] = '\0';
+                    token->lexeme = strdup(lexeme);
+                    token->value.stringVal = strdup(lexeme);
+                    int multiline_cleared = clean_multiline_string(token);
+                    if (multiline_cleared != 0){
+                        return multiline_cleared;
+                    }
+
+                    token->length = lexeme_length;
+                    token->line = line_number - 1;
+                    free(lexeme);
+                    unget_char(c);
+                    return RET_VAL_OK;
+                }
+                break;
+
 
             default:
                 // Invalid state

@@ -1,0 +1,15 @@
+const ifj = @import("ifj24.zig");
+
+
+pub fn main() void {
+    const a = 1;
+    const b = 2;
+    const res1 = a / b;
+    ifj.write(res1);
+    ifj.write("\n");
+    const c = 1.4;
+    const d = 2.8;
+    const res2 = c / d;
+    ifj.write(res2);
+    ifj.write("\n");
+}

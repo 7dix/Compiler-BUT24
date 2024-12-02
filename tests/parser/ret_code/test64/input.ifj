@@ -1,0 +1,8 @@
+const ifj = @import("ifj24.zig");
+pub fn main() void {
+    const a = 12;
+    const b = ifj.string("12");
+
+    const result = a + b;
+    ifj.write("Invalid operation | Expected: SEMNATIC COMPATIBILITY ERROR");
+}

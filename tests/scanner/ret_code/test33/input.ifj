@@ -1,0 +1,1 @@
+var str: []u8 = ifj.concat("Hello", "World");

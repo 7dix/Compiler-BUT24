@@ -21,7 +21,7 @@
 
 
 
-START -> PROLOG FN_DEFS END
+START -> PROLOG FN_DEF_NEXT END
 
 END -> eof_token
 
@@ -29,7 +29,6 @@ PROLOG -> const ifj = import ( string ) ;
 # string musi konkretne obsahovat "ifj24.zig"
 
 
-FN_DEFS -> FN_DEF FN_DEF_NEXT
 FN_DEF_NEXT -> epsilon
 FN_DEF_NEXT -> FN_DEF FUNC_DEF_NEXT
 
@@ -108,7 +107,7 @@ ASSIGN_DISCARD_EXPR_OR_FN_CALL -> discard_identifier = ASSIGN
 ID_START -> = ASSIGN
 ID_START -> FUNCTION_ARGUMENTS
 
-
+ASSIGN -> null ;
 ASSIGN -> EXPRESSION ;
 # cokoli z EXPRESSION krome identifier,
 # v tuto chvili do EXPRESSION spada i ";", pro osetreni jednoprvkovych vyrazu
@@ -124,6 +123,7 @@ ASSIGN -> ifj . identifier ( ARGUMENTS ) ;
 # semantika -> identifier musi spadat do mnoziny vestavenych funkci
 
 ID_ASSIGN -> EXPRESSION ;
+ID_ASSIGN -> ; # vrat zpet a EXPRESSION
 ID_ASSIGN -> FUNCTION_ARGUMENTS
 # cokoli z EXPRESSION krome "(",
 # v tuto chvili do EXPRESSION spada i ";", pro osetreni jednoprvkovych vyrazu

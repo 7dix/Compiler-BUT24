@@ -1,0 +1,27 @@
+const ifj = @import("ifj24.zig");
+
+pub fn reverseString(s: []u8) []u8 {
+    const len = ifj.length(s);
+    var reversed = ifj.string("");
+    var i: i32 = len - 1;
+    while (i >= 0) {
+        const i_inc = i + 1;
+        const charSlice = ifj.substring(s, i, i_inc);
+        if (charSlice) |slice| {
+            reversed = ifj.concat(reversed, slice);
+        } else {
+            ifj.write("Error");
+        }
+        
+        i = i - 1;
+    }
+    return reversed;
+}
+
+pub fn main() void {
+    const original = ifj.string("hello");
+    const reversed = reverseString(original);
+    ifj.write("Reversed string\nExp: |olleh|\nRes: |");
+    ifj.write(reversed);
+    ifj.write("|\n");
+}

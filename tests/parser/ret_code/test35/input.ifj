@@ -1,0 +1,18 @@
+const ifj = @import("ifj24.zig");
+
+pub fn main() void {
+    var x = ifj.readi32();
+    if (x) |y| {
+        ifj.write("if ok");
+        ifj.write(y);
+    } else {
+        ifj.write("after if");
+    }
+    x = ifj.readi32();
+    while (x) |y| {
+        ifj.write("while ok");
+        ifj.write(y);
+        x = null;
+    }
+    ifj.write("after while");
+}

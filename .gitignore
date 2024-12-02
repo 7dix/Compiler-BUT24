@@ -58,3 +58,16 @@ dkms.conf
 .vscode/
 
 /bin
+
+*.zip
+*vgcore.*
+
+compose-dev.yaml
+
+
+tests/IFJ24-tests-master/out
+IFJ24-tests-master/out
+
+*.out
+*.log
+*valgrind_output.txt

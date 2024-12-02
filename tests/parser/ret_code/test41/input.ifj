@@ -1,0 +1,48 @@
+const ifj = @import("ifj24.zig");
+
+pub fn main() void {
+    ifj.write("TEST IFJ.I2F|F2I\n");
+
+    const a = 5;
+    ifj.write("Input ");
+    ifj.write(a); ifj.write(" conversion ");
+    const b = ifj.i2f(a);
+    ifj.write(b); ifj.write("\n\n");
+
+    ifj.write("Input ");
+    ifj.write(5); ifj.write(" conversion ");
+    const c = ifj.i2f(5);
+    ifj.write(c); ifj.write("\n\n");
+
+    const d = ifj.readi32();
+    ifj.write("Your input ");
+    ifj.write(d);
+    if (d) |dplus| {
+        const e = ifj.i2f(dplus);
+        ifj.write(" conversion ");
+        ifj.write(e); ifj.write("\n\n");
+    } else {
+        ifj.write("\n\n");
+    }
+
+
+    const e = 6.7;
+    ifj.write("Input ");
+    ifj.write(e); ifj.write(" conversion ");
+    const f = ifj.f2i(e);
+    ifj.write(f); ifj.write("\n\n");
+
+    ifj.write("Input ");
+    ifj.write(6.7); ifj.write(" conversion ");
+    const g = ifj.f2i(6.7);
+    ifj.write(g); ifj.write("\n\n");
+
+    const h = ifj.readf64();
+    ifj.write("Your input ");
+    ifj.write(h);
+    if (h) |hplus| {
+        const i = ifj.f2i(hplus);
+        ifj.write(" conversion ");
+        ifj.write(i); ifj.write("\n\n");
+    } else {}
+}

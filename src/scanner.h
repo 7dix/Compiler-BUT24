@@ -13,10 +13,6 @@
 // TYPE DEFINITIONS
 
 typedef enum TOKEN_TYPE{
-    /*
-    trochu detailneji jsem prepsal typy tokenu podle automatu,
-    dal by to chtelo jeste probrat (aspon call) 
-    */
     IMPORT,
     NOT_EQUAL,
     STRING, // MULTILINE_STRING by spadal pod string
@@ -61,6 +57,7 @@ typedef enum TOKEN_TYPE{
     VOID,
     IFJ,
     EOF_TOKEN,
+    VOID_TOKEN // Special token used in token buffer to return when no token is found
 } TOKEN_TYPE;
 
 /**
@@ -74,6 +71,7 @@ typedef struct T_TOKEN {
     union {
         int intVal;      // Integer value for INT tokens
         float floatVal;  // Float value for FLOAT tokens
+        char *stringVal; // String value for STRING tokens
     } value;             // Union to hold the token's value
 } T_TOKEN;
 

@@ -1,0 +1,11 @@
+const ifj = @import("ifj24.zig");
+
+
+pub fn main() void {
+    ifj.write("testing complex equation\n");
+    const x = 1;
+    const b = 2;
+    const res1 = ((1+x) - 16) * 2 / b;
+    ifj.write(res1);
+    ifj.write("\n");
+}
