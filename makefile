@@ -98,6 +98,8 @@ clean:
 	rm -f $(LOGIN).zip
 	rm -f *vgcore*
 	rm -rf temp
+	rm -rf IFJ24-tests-master/out
+	rm -rf tests/IFJ24-tests-master/out
 
 .PHONY: all debug clean bin test pack test_scanner test_token_buffer test_parser_retcode test_precedence test_symtable test_first_phase test debug_from_file debug_scanner debug_token_buffer debug_precedence debug_symtable debug_first_phase
 
