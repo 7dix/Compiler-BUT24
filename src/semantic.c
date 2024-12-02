@@ -206,33 +206,33 @@ int compare_var_types(VarType *existing, VarType *new) {
 T_RET_VAL check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
 
     // Create and initialize list for postfix notation
-    T_LIST_PTR listPostfix = list_init();
+    T_LIST_PTR list_postfix = list_init();
 
     // Check if list was created
-    if(listPostfix == NULL) return RET_VAL_INTERNAL_ERR;
+    if(list_postfix == NULL) return RET_VAL_INTERNAL_ERR;
     // Postorder traversal, get list of nodes in postfix notation
-    T_RET_VAL errExpr = postorder(tree, listPostfix);
+    T_RET_VAL err_expr = postorder(tree, list_postfix);
 
     // Check if postorder traversal and creating list was successful
-    if(errExpr){
-        if(listPostfix->size > 0) list_dispose(listPostfix);
-        return errExpr;
+    if(err_expr){
+        if(list_postfix->size > 0) list_dispose(list_postfix);
+        return err_expr;
     }
 
     // Set types of operands
-    errExpr = set_types(listPostfix, table);
+    err_expr = set_types(list_postfix, table);
 
     // Check compatibility of types
-    if(errExpr){
-        list_dispose(listPostfix);
-        return errExpr;
+    if(err_expr){
+        list_dispose(list_postfix);
+        return err_expr;
     }
     // Set first element as active
-    list_first(listPostfix);
+    list_first(list_postfix);
    
    // Set result type of expression with one operand
-    if(listPostfix->size == 1){
-        switch (listPostfix->active->literal_type){
+    if(list_postfix->size == 1){
+        switch (list_postfix->active->literal_type){
             case LITERAL_INT:{ 
                 (*tree)->result_type = TYPE_INT_RESULT;
                 break;
@@ -274,34 +274,34 @@ T_RET_VAL check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
                 break;
             }
             default:{
-                list_dispose(listPostfix);
+                list_dispose(list_postfix);
                 return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             }
         }
         // Dispose list
-        list_dispose(listPostfix);
+        list_dispose(list_postfix);
         // Return OK
         return RET_VAL_OK;
     }
 
-    while (listPostfix->size != 1 && listPostfix->active != NULL) {
+    while (list_postfix->size != 1 && list_postfix->active != NULL) {
 
         // Reduce the expression only if the active element is operator
-        if(listPostfix->active->literal_type != OPERATOR_OF_EXPR) {
-            list_next(listPostfix);
+        if(list_postfix->active->literal_type != OPERATOR_OF_EXPR) {
+            list_next(list_postfix);
             continue;
         }
 
         // Set the last three elements in the list
-        T_LIST_ELEMENT_PTR operator = listPostfix->active;
-        T_LIST_ELEMENT_PTR secondOperand = operator->prev;
-        T_LIST_ELEMENT_PTR firstOperand = secondOperand->prev;
+        T_LIST_ELEMENT_PTR operator = list_postfix->active;
+        T_LIST_ELEMENT_PTR operand_second = operator->prev;
+        T_LIST_ELEMENT_PTR operand_first = operand_second->prev;
 
         // Get the type of operator
         OPERATOR_TYPE_OF_RULE operatorType = get_operator_type(operator);
 
         // Result is NONLITERAL INT or BOOL
-        if((firstOperand->literal_type == LITERAL_INT && secondOperand->literal_type == LITERAL_INT) || (firstOperand->literal_type == NLITERAL_INT && secondOperand->literal_type == LITERAL_INT) || (firstOperand->literal_type == LITERAL_INT && secondOperand->literal_type == NLITERAL_INT) || (firstOperand->literal_type == NLITERAL_INT && secondOperand->literal_type == NLITERAL_INT)){
+        if((operand_first->literal_type == LITERAL_INT && operand_second->literal_type == LITERAL_INT) || (operand_first->literal_type == NLITERAL_INT && operand_second->literal_type == LITERAL_INT) || (operand_first->literal_type == LITERAL_INT && operand_second->literal_type == NLITERAL_INT) || (operand_first->literal_type == NLITERAL_INT && operand_second->literal_type == NLITERAL_INT)){
             // Set type of subexpression
             switch (operatorType){
                 case ARITMETIC:{ 
@@ -324,13 +324,13 @@ T_RET_VAL check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
             // Set type of literal
             operator->literal_type = NLITERAL_INT;
             // Delete two elements after active element, and move to next element
-            list_delete_two_after(listPostfix);
-            list_next(listPostfix);
+            list_delete_two_after(list_postfix);
+            list_next(list_postfix);
             continue;
         }
 
         // Result is NONLITERAL FLOAT or BOOL
-        if((firstOperand->literal_type == LITERAL_FLOAT && secondOperand->literal_type == LITERAL_FLOAT) || (firstOperand->literal_type == NLITERAL_FLOAT && secondOperand->literal_type == LITERAL_FLOAT) || (firstOperand->literal_type == LITERAL_FLOAT && secondOperand->literal_type == NLITERAL_FLOAT) || (firstOperand->literal_type == NLITERAL_FLOAT && secondOperand->literal_type == NLITERAL_FLOAT)){
+        if((operand_first->literal_type == LITERAL_FLOAT && operand_second->literal_type == LITERAL_FLOAT) || (operand_first->literal_type == NLITERAL_FLOAT && operand_second->literal_type == LITERAL_FLOAT) || (operand_first->literal_type == LITERAL_FLOAT && operand_second->literal_type == NLITERAL_FLOAT) || (operand_first->literal_type == NLITERAL_FLOAT && operand_second->literal_type == NLITERAL_FLOAT)){
             // Set type of subexpression
             switch (operatorType){
                 case ARITMETIC:{ 
@@ -353,13 +353,13 @@ T_RET_VAL check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
             // Set type of literal
             operator->literal_type = NLITERAL_FLOAT;
             // Delete two elements after active element, and move to next element
-            list_delete_two_after(listPostfix);
-            list_next(listPostfix);
+            list_delete_two_after(list_postfix);
+            list_next(list_postfix);
             continue;
         }
 
         // Result is NLITERAL FLOAT after rytype of INT, does not working for division
-        if((operatorType != DIVISION) && ((firstOperand->literal_type == LITERAL_INT && secondOperand->literal_type == NLITERAL_FLOAT) || (firstOperand->literal_type == NLITERAL_FLOAT && secondOperand->literal_type == LITERAL_INT) || (firstOperand->literal_type == LITERAL_INT && secondOperand->literal_type == LITERAL_FLOAT) || (firstOperand->literal_type == LITERAL_FLOAT && secondOperand->literal_type == LITERAL_INT))){
+        if((operatorType != DIVISION) && ((operand_first->literal_type == LITERAL_INT && operand_second->literal_type == NLITERAL_FLOAT) || (operand_first->literal_type == NLITERAL_FLOAT && operand_second->literal_type == LITERAL_INT) || (operand_first->literal_type == LITERAL_INT && operand_second->literal_type == LITERAL_FLOAT) || (operand_first->literal_type == LITERAL_FLOAT && operand_second->literal_type == LITERAL_INT))){
             // Set type of subexpression
             switch (operatorType){
                 case ARITMETIC:{ 
@@ -382,16 +382,16 @@ T_RET_VAL check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
             // Set type of literal
             operator->literal_type = NLITERAL_FLOAT;
             // Retype of INT to FLOAT
-            if(firstOperand->literal_type == LITERAL_INT) firstOperand->node->convert_to_float = true;
-            else secondOperand->node->convert_to_float = true;
+            if(operand_first->literal_type == LITERAL_INT) operand_first->node->convert_to_float = true;
+            else operand_second->node->convert_to_float = true;
             // Delete two elements after active element, and move to next element
-            list_delete_two_after(listPostfix);
-            list_next(listPostfix);
+            list_delete_two_after(list_postfix);
+            list_next(list_postfix);
             continue;
         }
 
         // Result is NLITERAL INT after rytype of FLOAT
-        if((firstOperand->literal_type == LITERAL_FLOAT && secondOperand->literal_type == NLITERAL_INT) || (firstOperand->literal_type == NLITERAL_INT && secondOperand->literal_type == LITERAL_FLOAT)){
+        if((operand_first->literal_type == LITERAL_FLOAT && operand_second->literal_type == NLITERAL_INT) || (operand_first->literal_type == NLITERAL_INT && operand_second->literal_type == LITERAL_FLOAT)){
             // Set type of subexpression
             switch (operatorType){
                 case ARITMETIC:{ 
@@ -414,123 +414,123 @@ T_RET_VAL check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
             // Set type of literal
             operator->literal_type = NLITERAL_INT;
             // Retype of FLOAT to INT, only if the value of float has evrything after the decimal point 0
-            if(firstOperand->literal_type == LITERAL_FLOAT && is_float_int(firstOperand->value)) firstOperand->node->convert_to_int = true;
-            else if(secondOperand->literal_type == LITERAL_FLOAT && is_float_int(secondOperand->value)) secondOperand->node->convert_to_int = true;
+            if(operand_first->literal_type == LITERAL_FLOAT && is_float_int(operand_first->value)) operand_first->node->convert_to_int = true;
+            else if(operand_second->literal_type == LITERAL_FLOAT && is_float_int(operand_second->value)) operand_second->node->convert_to_int = true;
             else{
-                list_dispose(listPostfix);
+                list_dispose(list_postfix);
                 return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             }
             // Delete two elements after active element, and move to next element
-            list_delete_two_after(listPostfix);
-            list_next(listPostfix);
+            list_delete_two_after(list_postfix);
+            list_next(list_postfix);
             continue;
         }
         
         // Compare two NULLS
-        if(operatorType == EQUALITY && (firstOperand->literal_type == LITERAL_NULL || secondOperand->literal_type == LITERAL_NULL)){
+        if(operatorType == EQUALITY && (operand_first->literal_type == LITERAL_NULL || operand_second->literal_type == LITERAL_NULL)){
             operator->node->result_type = TYPE_BOOL_RESULT;
             operator->literal_type = NLITERAL_NULL;
-            list_delete_two_after(listPostfix);
-            list_next(listPostfix);
+            list_delete_two_after(list_postfix);
+            list_next(list_postfix);
             continue;
         }
 
         // Compare null and nullable types variables
-        if(((operatorType == EQUALITY) && (firstOperand->literal_type == LITERAL_NULL) && (secondOperand->literal_type == NLITERAL_STRING_NULL || secondOperand->literal_type == NLITERAL_INT_NULL || secondOperand->literal_type == NLITERAL_FLOAT_NULL))){
+        if(((operatorType == EQUALITY) && (operand_first->literal_type == LITERAL_NULL) && (operand_second->literal_type == NLITERAL_STRING_NULL || operand_second->literal_type == NLITERAL_INT_NULL || operand_second->literal_type == NLITERAL_FLOAT_NULL))){
             operator->node->result_type = TYPE_BOOL_RESULT;
             operator->literal_type = NLITERAL_NULL;
-            list_delete_two_after(listPostfix);
-            list_next(listPostfix);
+            list_delete_two_after(list_postfix);
+            list_next(list_postfix);
             continue;
         }
 
         // Compare nullable types variables and null
-        if(((operatorType == EQUALITY) && (secondOperand->literal_type == LITERAL_NULL) && (firstOperand->literal_type == NLITERAL_STRING_NULL || firstOperand->literal_type == NLITERAL_INT_NULL || firstOperand->literal_type == NLITERAL_FLOAT_NULL))){
+        if(((operatorType == EQUALITY) && (operand_second->literal_type == LITERAL_NULL) && (operand_first->literal_type == NLITERAL_STRING_NULL || operand_first->literal_type == NLITERAL_INT_NULL || operand_first->literal_type == NLITERAL_FLOAT_NULL))){
             operator->node->result_type = TYPE_BOOL_RESULT;
             operator->literal_type = NLITERAL_NULL;
-            list_delete_two_after(listPostfix);
-            list_next(listPostfix);
+            list_delete_two_after(list_postfix);
+            list_next(list_postfix);
             continue;
         }
 
         // Compare two nullable variable and variable of same type(INT)
-        if((operatorType == EQUALITY) && ((firstOperand->literal_type == NLITERAL_INT_NULL && secondOperand->literal_type == NLITERAL_INT) || (firstOperand->literal_type == NLITERAL_INT && secondOperand->literal_type == NLITERAL_INT_NULL))){
+        if((operatorType == EQUALITY) && ((operand_first->literal_type == NLITERAL_INT_NULL && operand_second->literal_type == NLITERAL_INT) || (operand_first->literal_type == NLITERAL_INT && operand_second->literal_type == NLITERAL_INT_NULL))){
             operator->node->result_type = TYPE_BOOL_RESULT;
             operator->literal_type = NLITERAL_NULL;
-            list_delete_two_after(listPostfix);
-            list_next(listPostfix);
+            list_delete_two_after(list_postfix);
+            list_next(list_postfix);
             continue;
         }
 
         // Compare variable and nullable variable(INT)
-        if((operatorType == EQUALITY) && ((firstOperand->literal_type == NLITERAL_INT && secondOperand->literal_type == NLITERAL_INT_NULL) || (firstOperand->literal_type == NLITERAL_INT_NULL && secondOperand->literal_type == NLITERAL_INT))){
+        if((operatorType == EQUALITY) && ((operand_first->literal_type == NLITERAL_INT && operand_second->literal_type == NLITERAL_INT_NULL) || (operand_first->literal_type == NLITERAL_INT_NULL && operand_second->literal_type == NLITERAL_INT))){
             operator->node->result_type = TYPE_BOOL_RESULT;
             operator->literal_type = NLITERAL_NULL;
-            list_delete_two_after(listPostfix);
-            list_next(listPostfix);
+            list_delete_two_after(list_postfix);
+            list_next(list_postfix);
             continue;
         }
 
         // Compare two nullable variable and variable of same type(FLOAT)
-        if((operatorType == EQUALITY) && ((firstOperand->literal_type == NLITERAL_FLOAT_NULL && secondOperand->literal_type == NLITERAL_FLOAT) || (firstOperand->literal_type == NLITERAL_FLOAT && secondOperand->literal_type == NLITERAL_FLOAT_NULL))){
+        if((operatorType == EQUALITY) && ((operand_first->literal_type == NLITERAL_FLOAT_NULL && operand_second->literal_type == NLITERAL_FLOAT) || (operand_first->literal_type == NLITERAL_FLOAT && operand_second->literal_type == NLITERAL_FLOAT_NULL))){
             operator->node->result_type = TYPE_BOOL_RESULT;
             operator->literal_type = NLITERAL_NULL;
-            list_delete_two_after(listPostfix);
-            list_next(listPostfix);
+            list_delete_two_after(list_postfix);
+            list_next(list_postfix);
             continue;
         }
 
         // Compare variable and nullable variable(FLOAT)
-        if((operatorType == EQUALITY) && ((firstOperand->literal_type == NLITERAL_FLOAT && secondOperand->literal_type == NLITERAL_FLOAT_NULL) || (firstOperand->literal_type == NLITERAL_FLOAT_NULL && secondOperand->literal_type == NLITERAL_FLOAT))){
+        if((operatorType == EQUALITY) && ((operand_first->literal_type == NLITERAL_FLOAT && operand_second->literal_type == NLITERAL_FLOAT_NULL) || (operand_first->literal_type == NLITERAL_FLOAT_NULL && operand_second->literal_type == NLITERAL_FLOAT))){
             operator->node->result_type = TYPE_BOOL_RESULT;
             operator->literal_type = NLITERAL_NULL;
-            list_delete_two_after(listPostfix);
-            list_next(listPostfix);
+            list_delete_two_after(list_postfix);
+            list_next(list_postfix);
             continue;
         }
 
         // Result is nullable bool after retype of INT
-        if((operatorType == EQUALITY) && ((firstOperand->literal_type == LITERAL_INT && secondOperand->literal_type == NLITERAL_FLOAT_NULL) || (firstOperand->literal_type == NLITERAL_FLOAT_NULL && secondOperand->literal_type == LITERAL_INT))){
+        if((operatorType == EQUALITY) && ((operand_first->literal_type == LITERAL_INT && operand_second->literal_type == NLITERAL_FLOAT_NULL) || (operand_first->literal_type == NLITERAL_FLOAT_NULL && operand_second->literal_type == LITERAL_INT))){
             operator->node->result_type = TYPE_BOOL_RESULT;
             // Set type of literal
             operator->literal_type = NLITERAL_FLOAT;
             // Retype of INT to FLOAT
-            if(firstOperand->literal_type == LITERAL_INT) firstOperand->node->convert_to_float = true;
-            else secondOperand->node->convert_to_float = true;
+            if(operand_first->literal_type == LITERAL_INT) operand_first->node->convert_to_float = true;
+            else operand_second->node->convert_to_float = true;
             // Delete two elements after active element, and move to next element
-            list_delete_two_after(listPostfix);
-            list_next(listPostfix);
+            list_delete_two_after(list_postfix);
+            list_next(list_postfix);
             continue;
         }
 
         // Result is nullable bool after retype of FLOAT
-        if((operatorType == EQUALITY) && ((firstOperand->literal_type == LITERAL_FLOAT && secondOperand->literal_type == NLITERAL_INT) || (firstOperand->literal_type == NLITERAL_INT && secondOperand->literal_type == LITERAL_FLOAT))){
+        if((operatorType == EQUALITY) && ((operand_first->literal_type == LITERAL_FLOAT && operand_second->literal_type == NLITERAL_INT) || (operand_first->literal_type == NLITERAL_INT && operand_second->literal_type == LITERAL_FLOAT))){
             // Set type of subexpression
             operator->node->result_type = TYPE_BOOL_RESULT;
             // Set type of literal
             operator->literal_type = NLITERAL_NULL;
             // Retype of FLOAT to INT, only if the value of float has evrything after the decimal point 0
-            if(firstOperand->literal_type == LITERAL_FLOAT && is_float_int(firstOperand->value)) firstOperand->node->convert_to_int = true;
-            else if(secondOperand->literal_type == LITERAL_FLOAT && is_float_int(secondOperand->value)) secondOperand->node->convert_to_int = true;
+            if(operand_first->literal_type == LITERAL_FLOAT && is_float_int(operand_first->value)) operand_first->node->convert_to_int = true;
+            else if(operand_second->literal_type == LITERAL_FLOAT && is_float_int(operand_second->value)) operand_second->node->convert_to_int = true;
             else{
-                list_dispose(listPostfix);
+                list_dispose(list_postfix);
                 return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
             }
             // Delete two elements after active element, and move to next element
-            list_delete_two_after(listPostfix);
-            list_next(listPostfix);
+            list_delete_two_after(list_postfix);
+            list_next(list_postfix);
             continue;
         }
         
 
-        list_dispose(listPostfix);
+        list_dispose(list_postfix);
         return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
 
     }
     
 
     // Return OK
-    list_dispose(listPostfix);
+    list_dispose(list_postfix);
     return RET_VAL_OK;
 
 }
