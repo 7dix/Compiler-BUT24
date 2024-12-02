@@ -270,14 +270,18 @@ bool get_save_token(T_TOKEN_BUFFER *token_buffer, T_TOKEN **token) {
             error_flag_fp = RET_VAL_INTERNAL_ERR;
             return false;
         }
+        (*token)->lexeme = NULL;
+        (*token)->value.stringVal = NULL;
+
         error_flag_fp = get_token(*token);
-        if (error_flag_fp != 0) {
+        if (error_flag_fp != RET_VAL_OK) {
             free((*token));
             return false;
         }
 
         if (!add_token_as_last(token_buffer, *token)) {
             error_flag_fp = RET_VAL_INTERNAL_ERR;
+            free((*token));
             return false;
         }
     }
@@ -500,14 +504,25 @@ bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer) {
         return false;
     }
 
-    if (!get_save_token(buffer, &token)) 
-        return false; // )
+    if (!get_save_token(buffer, &token)) { // )
+        if (data.func.argv != NULL) {
+            free(data.func.argv);
+        }
+        return false; 
+    }
+
     if (token->type != BRACKET_RIGHT_SIMPLE) {
         error_flag_fp = RET_VAL_SYNTAX_ERR;
+        if (data.func.argv != NULL) {
+            free(data.func.argv);
+        }
         return false;
     }
 
     if (!syntax_fp_fn_def_remaining(buffer, &data)) { // FN_DEF_REMAINING
+        if (data.func.argv != NULL) {
+            free(data.func.argv);
+        }
         return false;
     }
 
@@ -515,11 +530,17 @@ bool syntax_fp_fn_def(T_TOKEN_BUFFER *buffer) {
     if (symtable_find_symbol(ST, fn_name) == NULL) {
         if (!symtable_add_symbol(ST, fn_name, SYM_FUNC, data)) {
             error_flag_fp = RET_VAL_INTERNAL_ERR;
+            if (data.func.argv != NULL) {
+                free(data.func.argv);
+            }
             return false;
         }
     }
     else {
         error_flag_fp = RET_VAL_SEMANTIC_REDEF_OR_BAD_ASSIGN_ERR;
+        if (data.func.argv != NULL) {
+            free(data.func.argv);
+        }
         return false;
     }
 

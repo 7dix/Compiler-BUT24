@@ -115,10 +115,10 @@ int add_arg_to_fn_call(T_FN_CALL *fn_call, T_TOKEN *arg) {
 
 // free function call arguments
 void free_fn_call_args(T_FN_CALL *fn_call) {
-    free(fn_call->argv);
+    if (fn_call->argv != NULL) {
+        free(fn_call->argv);
+    }
 }
-
-
 
 // Compare variable types
 int compare_var_types(VarType *existing, VarType *new) {
@@ -531,6 +531,7 @@ int put_param_to_symtable(char *name) {
             sym_data.var.type = data.func.argv[i].type;
             sym_data.var.is_const = true;
             sym_data.var.modified = true;
+            sym_data.var.const_expr = false;
             sym_data.var.used = false;
             sym_data.var.id = -1;
 

@@ -859,7 +859,6 @@ bool syntax_code_block(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
-    // TODO: add semantic checks, cleaning, etc.
     T_TOKEN *token;
 
     // Create new symbol data
@@ -946,7 +945,6 @@ bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
             return false;
         }
 
-        // TODO: need to check if this is correct based on right side of assignment
         // Check if variable type was set
         if (data.var.type == VAR_NONE) {
             error_flag = RET_VAL_SEMANTIC_TYPE_DERIVATION_ERR;
@@ -1084,12 +1082,14 @@ bool syntax_if_statement(T_TOKEN_BUFFER *buffer) {
     // get expression type
     error_flag = check_expression(ST, &tree);
     if (error_flag != 0){
+        tree_dispose(&tree);
         return false;
     }
 
     next_token(buffer, &token); // )
     if (token->type != BRACKET_RIGHT_SIMPLE) {
         error_flag = RET_VAL_SYNTAX_ERR;
+        tree_dispose(&tree);
         return false;
     }
 
@@ -1128,6 +1128,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         
         if ((*tree)->resultType != TYPE_BOOL_RESULT) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            tree_dispose(tree);
             return false;
         }
 
@@ -1233,14 +1234,15 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         
         if (!is_result_type_nullable((*tree)->resultType)) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            tree_dispose(tree);
             return false;
         }
 
         SymbolData data;
         data.var.type = fc_nullable_convert_type((*tree)->resultType);
-        // TODO: check behaviour of VAR_NULL !!
         if (data.var.type == VAR_NONE) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            tree_dispose(tree);
             return false;
         }
 
@@ -1274,6 +1276,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         // Add the | identifier | to the symtable
         data.var.is_const = true;
         data.var.modified = true;
+        data.var.const_expr = false;
         data.var.used = false;
         data.var.id = -1;
 
@@ -1437,12 +1440,14 @@ bool syntax_while_statement(T_TOKEN_BUFFER *buffer) {
     // get expression type
     error_flag = check_expression(ST, &tree);
     if (error_flag != 0){
+        tree_dispose(&tree);
         return false;
     }
 
     next_token(buffer, &token); // )
     if (token->type != BRACKET_RIGHT_SIMPLE) {
         error_flag = RET_VAL_SYNTAX_ERR;
+        tree_dispose(&tree);
         return false;
     }
 
@@ -1478,6 +1483,7 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
 
         if ((*tree)->resultType != TYPE_BOOL_RESULT) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            tree_dispose(tree);
             return false;
         }
 
@@ -1485,6 +1491,7 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
         char *labelEnd = NULL;
         if (!generate_labels(ST,&labelStart, &labelEnd)) {
             error_flag = RET_VAL_INTERNAL_ERR;
+            tree_dispose(tree);
             return false;
         }
 
@@ -1493,6 +1500,7 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
 
         // SCOPE INCREASE
         if (!symtable_add_scope(ST, true)) {
+            tree_dispose(tree);
             free(labelStart);
             free(labelEnd);
             error_flag = RET_VAL_INTERNAL_ERR;
@@ -1543,25 +1551,28 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
 
         if (!is_result_type_nullable((*tree)->resultType)) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            tree_dispose(tree);
             return false;
         }
 
         SymbolData data;
         data.var.type = fc_nullable_convert_type((*tree)->resultType);
-        // TODO: check behaviour of VAR_NULL !!
         if (data.var.type == VAR_NONE) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            tree_dispose(tree);
             return false;
         }
 
         next_token(buffer, &token); // identifier
         if (token->type != IDENTIFIER) {
             error_flag = RET_VAL_SYNTAX_ERR;
+            tree_dispose(tree);
             return false;
         }
 
         if (symtable_find_symbol(ST, token->lexeme) != NULL) {
             error_flag = RET_VAL_SEMANTIC_REDEF_OR_BAD_ASSIGN_ERR;
+            tree_dispose(tree);
             return false;
         }
 
@@ -1570,6 +1581,7 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
         // SCOPE INCREASE
         if (!symtable_add_scope(ST, true)) {
             error_flag = RET_VAL_INTERNAL_ERR;
+            tree_dispose(tree);
             return false; 
         }
 
@@ -1578,10 +1590,12 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
         // Add the | identifier | to the symtable
         data.var.is_const = true;
         data.var.modified = true;
+        data.var.const_expr = false;
         data.var.used = false;
         data.var.id = -1;
         if (!symtable_add_symbol(ST, token->lexeme, SYM_VAR, data)) {
             error_flag = RET_VAL_INTERNAL_ERR;
+            tree_dispose(tree);
             return false;
         }
 
@@ -1589,6 +1603,7 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
         char *labelEnd = NULL;
         if (!generate_labels(ST,&labelStart, &labelEnd)) {
             error_flag = RET_VAL_INTERNAL_ERR;
+            tree_dispose(tree);
             return false;
         }
 
@@ -1723,6 +1738,11 @@ bool syntax_return_remaining(T_TOKEN_BUFFER *buffer) {
 
         // Dummy for return type
         SymbolData data;
+        data.var.type = VAR_NONE;
+        data.var.is_const = false;
+        data.var.modified = false;
+        data.var.used = false;
+        data.var.const_expr = false;
 
         Symbol *symbol = symtable_find_symbol(ST, get_fn_name(ST));
         if (symbol == NULL) {
@@ -1827,6 +1847,7 @@ bool syntax_built_in_void_fn_call(T_TOKEN_BUFFER *buffer) {
     error_flag = check_function_call(ST, &fn_call);
     if (error_flag != RET_VAL_OK) {
         free(fn_name);
+        free_fn_call_args(&fn_call);
         return false;
     }
 
@@ -1962,7 +1983,6 @@ bool syntax_assign_discard_expr_or_fn_call(T_TOKEN_BUFFER *buffer) {
  * @retval `false` - syntax error
  */
 bool syntax_id_start(T_TOKEN_BUFFER *buffer, Symbol *symbol) {
-    // TODO: add semantic checks, cleaning, etc.
 
     T_TOKEN *token;
     // we have two branches, choose here
@@ -1970,7 +1990,7 @@ bool syntax_id_start(T_TOKEN_BUFFER *buffer, Symbol *symbol) {
     // first branch -> = ASSIGN
     if (token->type == ASSIGN) { // =
         if (symbol->type != SYM_VAR) {
-            error_flag = RET_VAL_SEMANTIC_UNDEFINED_ERR; // TODO: correct error code?
+            error_flag = RET_VAL_SEMANTIC_UNDEFINED_ERR;
             return false;
         }
         if (symbol->data.var.is_const) {
@@ -1985,8 +2005,6 @@ bool syntax_id_start(T_TOKEN_BUFFER *buffer, Symbol *symbol) {
             return false;
         }
 
-        // TODO: maybe check if the varType is not void
-
         return true;
     }
 
@@ -1994,7 +2012,7 @@ bool syntax_id_start(T_TOKEN_BUFFER *buffer, Symbol *symbol) {
     // second branch -> FUNCTION_ARGUMENTS
     if (token->type == BRACKET_LEFT_SIMPLE) { // (
         if (symbol->type != SYM_FUNC) {
-            error_flag = RET_VAL_SEMANTIC_UNDEFINED_ERR; // TODO: correct error code?
+            error_flag = RET_VAL_SEMANTIC_UNDEFINED_ERR;
             return false;
         }
         
@@ -2012,12 +2030,14 @@ bool syntax_id_start(T_TOKEN_BUFFER *buffer, Symbol *symbol) {
         // Check if the function call is correct
         error_flag = check_function_call(ST, &fn_call);
         if (error_flag != RET_VAL_OK) {
+            free_fn_call_args(&fn_call);
             return false;
         }
 
         // check function is non-void
         if (fn_call.ret_type != VAR_VOID) {
             error_flag = RET_VAL_SEMANTIC_FUNCTION_ERR;
+            free_fn_call_args(&fn_call);
             return false;
         }
 
@@ -2144,6 +2164,7 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
         Symbol *symbol = symtable_find_symbol(ST, fn_name);
         if (symbol == NULL || symbol->type != SYM_FUNC) {
             error_flag = RET_VAL_SEMANTIC_UNDEFINED_ERR;
+            free(fn_name);
             return false;
         }
         // Set the function call name
@@ -2152,27 +2173,33 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
 
         error_flag = compare_var_types(&(data->var.type), &(symbol->data.func.return_type));
         if (error_flag != RET_VAL_OK) {
+            free(fn_name);
             return false;
         }
 
         if (fn_call.ret_type == VAR_VOID) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            free(fn_name);
             return false;
         }
 
         next_token(buffer, &token); // (
         if (token->type != BRACKET_LEFT_SIMPLE) {
             error_flag = RET_VAL_SYNTAX_ERR;
+            free(fn_name);
             return false;
         }
 
         if (!syntax_arguments(buffer, &fn_call)) { // ARGUMENTS
+            free(fn_name);
             return false;
         }
 
         // Check if the function is void
         error_flag = check_function_call(ST, &fn_call);
         if (error_flag != RET_VAL_OK) {
+            free(fn_name);
+            free_fn_call_args(&fn_call);
             return false;
         }
 
@@ -2222,6 +2249,7 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
 
         error_flag = check_expression(ST, &tree);
         if (error_flag != RET_VAL_OK){
+            tree_dispose(&tree);
             return false;
         }
 
@@ -2268,6 +2296,7 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
 
         error_flag = compare_var_types(&(data->var.type), &exprRes);
         if (error_flag != RET_VAL_OK) {
+            tree_dispose(&tree);
             // TODO: change following when doing returns
             if (!is_return) {
                 return false;
@@ -2318,7 +2347,6 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, SymbolData *data) {
  * @retval `false` - syntax error
  */
 bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
-    // TODO: add semantic checks, cleaning, etc.
 
     T_TOKEN *token;
     // we have three branches, choose here
@@ -2357,6 +2385,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
         // Check if the function is void
         error_flag = check_function_call(ST, &fn_call);
         if (error_flag != RET_VAL_OK) {
+            free_fn_call_args(&fn_call);
             return false;
         }
         // CD: generate function call
@@ -2382,6 +2411,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
         // get expression type
         error_flag = check_expression(ST, &tree);
         if (error_flag != 0){
+            tree_dispose(&tree);
             return false;
         }
 
@@ -2429,6 +2459,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
         error_flag = compare_var_types(&(data->var.type), &exprRes);
         if (error_flag != RET_VAL_OK) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            tree_dispose(&tree);
             return false;
         }
 
@@ -2463,6 +2494,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
         // get expression type
         error_flag = check_expression(ST, &tree);
         if (error_flag != 0){
+            tree_dispose(&tree);
             return false;
         }
 
@@ -2510,6 +2542,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, SymbolData *data, char *id_name) {
         error_flag = compare_var_types(&(data->var.type), &exprRes);
         if (error_flag != RET_VAL_OK) {
             error_flag = RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            tree_dispose(&tree);
             return false;
         }
 
