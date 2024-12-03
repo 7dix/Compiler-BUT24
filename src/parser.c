@@ -1817,10 +1817,17 @@ bool syntax_return_remaining(T_TOKEN_BUFFER *buffer) {
     T_TOKEN *token;
     // we have two branches, choose here
     next_token(buffer, &token);
+
+    T_SYMBOL *fn = symtable_find_symbol(ST, get_fn_name(ST));
+    if (fn == NULL) {
+        error_flag = RET_VAL_INTERNAL_ERR;
+        return false;
+    }
+
     // first branch -> ;
     if (token->type == SEMICOLON) { // ;
         // Check if the function is void
-        if (symtable_find_symbol(ST, get_fn_name(ST))->data.func.return_type != VAR_VOID) {
+        if (fn->data.func.return_type != VAR_VOID) {
             error_flag = RET_VAL_SEMANTIC_FUNC_RETURN_ERR;
             return false;
         }
@@ -1830,6 +1837,12 @@ bool syntax_return_remaining(T_TOKEN_BUFFER *buffer) {
 
     // second branch -> ASSIGN, check first token in ASSIGN
     if (token->type == IDENTIFIER || token->type == IFJ || is_token_in_expr(token)) {
+        // Check if the function is not void
+        if (fn->data.func.return_type == VAR_VOID) {
+            error_flag = RET_VAL_SEMANTIC_FUNC_RETURN_ERR;
+            return false;
+        }
+        
         move_back(buffer); // token needed in ASSIGN
 
         // Dummy for return type
@@ -1839,16 +1852,9 @@ bool syntax_return_remaining(T_TOKEN_BUFFER *buffer) {
         data.var.modified = false;
         data.var.used = false;
         data.var.const_expr = false;
-        
-        // get symbol representing current function
-        T_SYMBOL *symbol = symtable_find_symbol(ST, get_fn_name(ST));
-        if (symbol == NULL) {
-            error_flag = RET_VAL_INTERNAL_ERR;
-            return false;
-        }
 
         // save its return type
-        data.var.type = symbol->data.func.return_type;
+        data.var.type = fn->data.func.return_type;
 
         // handling of expression
         if (!syntax_assign(buffer, &data)) { // ASSIGN

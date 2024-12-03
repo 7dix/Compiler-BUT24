@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Error: Memory allocation failed in symtable_init\n");
         return RET_VAL_INTERNAL_ERR;
     }
-    if (!symtable_add_scope(ST)) {
+    if (!symtable_add_scope(ST, false)) {
         free_token_buffer(&token_buffer);
         symtable_free(ST);
         fprintf(stderr, "Error: Memory allocation failed in symtable_add_scope\n");
@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
     // Run second phase of the compiler
     // TODO: give symtable to parser
     error_code = run_parser(token_buffer);
-    int line = token_buffer->current->token->line;
+    int line = token_buffer->curr->token->line;
     if (error_code != RET_VAL_OK) {
         switch (error_code) {
             case RET_VAL_LEXICAL_ERR:
