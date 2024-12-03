@@ -107,7 +107,6 @@ ASSIGN_DISCARD_EXPR_OR_FN_CALL -> discard_identifier = ASSIGN
 ID_START -> = ASSIGN
 ID_START -> FUNCTION_ARGUMENTS
 
-ASSIGN -> null ;
 ASSIGN -> EXPRESSION ;
 # cokoli z EXPRESSION krome identifier,
 # v tuto chvili do EXPRESSION spada i ";", pro osetreni jednoprvkovych vyrazu
