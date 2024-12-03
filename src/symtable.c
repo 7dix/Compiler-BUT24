@@ -319,6 +319,13 @@ int add_param_to_symbol_data(T_SYMBOL_DATA *data, T_PARAM param) {
             return RET_VAL_INTERNAL_ERR;
         }
     } else {
+        // first check that parameter with given name does not already exist
+        for (int i = 0; i < data->func.argc; i++) {
+            if (strcmp(data->func.argv[i].name, param.name) == 0) {
+                return RET_VAL_SEMANTIC_REDEF_OR_BAD_ASSIGN_ERR;
+            }
+        }
+
         T_PARAM *new_argv = (T_PARAM *) realloc(data->func.argv, (data->func.argc + 1) * sizeof(T_PARAM));
         if (new_argv == NULL) {
             return RET_VAL_INTERNAL_ERR;
