@@ -1063,7 +1063,7 @@ int get_token(T_TOKEN *token) {
                     // End of string
 
                     // check if the string is multiline
-                    if (multiline_start_line == line_number){
+                    if (multiline_start_line == line_number - 1){
                         // multiline with just 1 line is not multiline
                         fprintf(stderr, "Lexical error at line %d: Multiline string must have at least 2 lines\n", line_number);
                         free(lexeme);
