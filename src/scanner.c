@@ -574,6 +574,8 @@ int get_token(T_TOKEN *token) {
                     lexeme[lexeme_length++] = c;
                     state = 20;                
                 } else {
+                    fprintf(stderr, "Lexical error at line %d: Invalid character '%c' after '\\'\n", line_number, c);
+                    free(lexeme);
                     return RET_VAL_LEXICAL_ERR;
                 }
                 break;
@@ -945,6 +947,8 @@ int get_token(T_TOKEN *token) {
                 } else if (c == '\n'){
                     state = 25;
                 } else {
+                    fprintf(stderr, "Lexical error at line %d: Invalid character in multiline string\n", line_number);
+                    free(lexeme);
                     return RET_VAL_LEXICAL_ERR;
                 }
                 lexeme[lexeme_length++] = c;
@@ -960,6 +964,8 @@ int get_token(T_TOKEN *token) {
                 if (c == '\\') {
                     state = 20;
                 } else {
+                    fprintf(stderr, "Lexical error at line %d: Invalid character in multiline string\n", line_number);
+                    free(lexeme);
                     return RET_VAL_LEXICAL_ERR;
                 }
                 lexeme[lexeme_length++] = c;
@@ -1017,6 +1023,8 @@ int get_token(T_TOKEN *token) {
                 if (c == '\\'){
                     state = 20;
                 } else {
+                    fprintf(stderr, "Lexical error at line %d: Invalid character in multiline string\n", line_number);
+                    free(lexeme);
                     return RET_VAL_LEXICAL_ERR;
                 }
                 lexeme[lexeme_length++] = c;
