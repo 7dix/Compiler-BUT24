@@ -45,7 +45,7 @@ bool syntax_fp_param(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data);
 bool syntax_fp_param_next(T_TOKEN_BUFFER *buffe, T_SYMBOL_DATA *data);
 bool syntax_fp_param_after_comma(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data);
 bool syntax_fp_end(T_TOKEN_BUFFER *buffer);
-bool simulate_fn_body(T_TOKEN_BUFFER *buffer);
+bool simulate_fn_body(T_TOKEN_BUFFER *buffer, bool needs_return);
 
 
 /**
@@ -645,7 +645,7 @@ bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data) {
             return false;
         }
 
-        if (!simulate_fn_body(buffer)) { // CODE_BLOCK_NEXT
+        if (!simulate_fn_body(buffer, true)) { // CODE_BLOCK_NEXT
             return false;
         }
 
@@ -662,7 +662,7 @@ bool syntax_fp_fn_def_remaining(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data) {
             return false;
         }
 
-        if (!simulate_fn_body(buffer)) { // CODE_BLOCK_NEXT
+        if (!simulate_fn_body(buffer, false)) { // CODE_BLOCK_NEXT
             return false;
         }
         // Set return type to void
@@ -970,13 +970,15 @@ bool syntax_fp_end(T_TOKEN_BUFFER *buffer) {
  * All tokens are stored in the token buffer.
  * 
  * @param *token_buffer pointer to token buffer
+ * @param needs_return `bool` flag indicating whether function needs to return a value
  * @return `bool`
  * @retval `true` - correct syntax
  * @retval `false` - syntax error
  */
-bool simulate_fn_body(T_TOKEN_BUFFER *buffer) {
+bool simulate_fn_body(T_TOKEN_BUFFER *buffer, bool needs_return) {
 
     int bracket_count = 1; // to correctly find function end
+    bool return_found = false;
     T_TOKEN *token;
 
     while (true) {
@@ -984,7 +986,7 @@ bool simulate_fn_body(T_TOKEN_BUFFER *buffer) {
             return false;
         }
         
-        // check for brackets
+        // check for brackets and return (if needed)
         switch (token->type) {
             case BRACKET_LEFT_CURLY:
                 bracket_count++;
@@ -992,6 +994,10 @@ bool simulate_fn_body(T_TOKEN_BUFFER *buffer) {
 
             case BRACKET_RIGHT_CURLY:
                 bracket_count--;
+                break;
+
+            case RETURN:
+                return_found = true;
                 break;
 
             case EOF_TOKEN:
@@ -1003,6 +1009,13 @@ bool simulate_fn_body(T_TOKEN_BUFFER *buffer) {
 
         // found correct end of function
         if (bracket_count == 0) {
+
+            // check if function needs to return a value
+            if (needs_return && !return_found) {
+                error_flag_fp = RET_VAL_SEMANTIC_FUNC_RETURN_ERR;
+                return false;
+            }
+
             return true;
         }
     }
