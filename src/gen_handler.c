@@ -125,7 +125,7 @@ void callFunction(T_FN_CALL *fn) {
             free(uniq);
         }
         else if (fn->argv[i]->type == INT) {
-            generatePushsInt(fn->argv[i]->value.intVal);
+            generatePushsInt(fn->argv[i]->value.int_val);
         }
         else if (fn->argv[i]->type == FLOAT) {
             generatePushsFloat(fn->argv[i]->value.float_val);
@@ -203,7 +203,7 @@ void createStackByPostorder(T_TREE_NODE *tree) {
         }
     }
     else if (tree->token->type == INT) {
-        generatePushsInt(tree->token->value.intVal);
+        generatePushsInt(tree->token->value.int_val);
         if (tree->convert_to_float) {
             generateInt2Floats();
         }
@@ -402,7 +402,7 @@ void callBIInt2Float(T_TOKEN *var) {
         free(uniq);
     }
     else if (var->type == INT) {
-        generatePushsInt(var->value.intVal);
+        generatePushsInt(var->value.int_val);
     }
     generateInt2Floats();
 }
@@ -512,9 +512,9 @@ void callBISubstring(T_TOKEN *var, T_TOKEN *beg, T_TOKEN *end) {
 
 
     if (beg->type == INT) {
-        len = snprintf(_beg, 0, "int@%d", beg->value.intVal);
+        len = snprintf(_beg, 0, "int@%d", beg->value.int_val);
         _beg = (char *) malloc((len+1)*sizeof(char));
-        sprintf(_beg, "int@%d", beg->value.intVal);
+        sprintf(_beg, "int@%d", beg->value.int_val);
     }
     else if (beg->type == IDENTIFIER) {
         generateUniqueIdentifier(beg->lexeme, &uniq_beg);
@@ -524,9 +524,9 @@ void callBISubstring(T_TOKEN *var, T_TOKEN *beg, T_TOKEN *end) {
     }
 
     if (end->type == INT) {
-        len = snprintf(_end, 0, "int@%d", end->value.intVal);
+        len = snprintf(_end, 0, "int@%d", end->value.int_val);
         _end = (char *) malloc((len+1)*sizeof(char));
-        sprintf(_end, "int@%d", end->value.intVal);
+        sprintf(_end, "int@%d", end->value.int_val);
     }
     else if (end->type == IDENTIFIER) {
         generateUniqueIdentifier(end->lexeme, &uniq_end);
@@ -679,9 +679,9 @@ void callBIOrd (T_TOKEN *var, T_TOKEN *index) {
     sprintf(ord_ret, "ord_ret%d", ord_counter);
 
     if (index->type == INT) {
-        len = snprintf(_index, 0, "int@%d", index->value.intVal);
+        len = snprintf(_index, 0, "int@%d", index->value.int_val);
         _index = (char *) malloc((len+1)*sizeof(char));
-        sprintf(_index, "int@%d", index->value.intVal);
+        sprintf(_index, "int@%d", index->value.int_val);
     }
     else if (index->type == IDENTIFIER) {
         generateUniqueIdentifier(index->lexeme, &uniq);
@@ -753,7 +753,7 @@ void callBIWrite(T_TOKEN *var) {
         free(uniq);
     }
     else if (var->type == INT) {
-        printf("WRITE int@%d\n", var->value.intVal);
+        printf("WRITE int@%d\n", var->value.int_val);
     }
     else if (var->type == FLOAT) {
         printf("WRITE float@%a\n", var->value.float_val);

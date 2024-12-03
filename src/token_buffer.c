@@ -47,7 +47,7 @@ T_TOKEN_BUFFER *init_token_buffer() {
     buffer->dummy_eof_token->lexeme = NULL;
     buffer->dummy_eof_token->line = 0;
     buffer->dummy_eof_token->length = 0;
-    buffer->dummy_eof_token->value.intVal = 0;
+    buffer->dummy_eof_token->value.int_val = 0;
 
     return buffer;
 }

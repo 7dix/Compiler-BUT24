@@ -13,9 +13,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "token_buffer.h"
+#include "return_values.h"
 
 //-------------- PUBLIC FUNCTION PROTOTYPES -----------------//
 
-int run_parser(T_TOKEN_BUFFER *token_buffer);
+RET_VAL run_parser(T_TOKEN_BUFFER *token_buffer);
 
 #endif // H_PARSER

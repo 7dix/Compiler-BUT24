@@ -40,7 +40,7 @@ int main() {
         return RET_VAL_INTERNAL_ERR;
     }
 
-    // Add global scope
+    // Add global scope to symtable
     if (!symtable_add_scope(ST, false)) {
         free_token_buffer(&token_buffer);
         symtable_free(ST);
@@ -50,7 +50,7 @@ int main() {
 
     // Run first phase of the compiler
     // first phase also fills symtable with built-in functions
-    int error_code = first_phase(token_buffer);
+    RET_VAL error_code = first_phase(token_buffer);
     if (error_code != RET_VAL_OK) {
         // print error to stderr
         fprintf(stderr, "Error: First phase failed with error code %d\n", error_code);

@@ -654,7 +654,7 @@ int get_token(T_TOKEN *token) {
                     token->type = INT;
                     token->lexeme = strdup(lexeme);
                             token->length = lexeme_length;
-                    token->value.intVal = atoi(lexeme);
+                    token->value.int_val = atoi(lexeme);
                     free(lexeme);
                     return RET_VAL_OK;
                 }
@@ -676,7 +676,7 @@ int get_token(T_TOKEN *token) {
                     token->type = INT;
                     token->lexeme = strdup(lexeme);
                             token->length = lexeme_length;
-                    token->value.intVal = 0;
+                    token->value.int_val = 0;
                     free(lexeme);
                     return RET_VAL_OK;
                 }

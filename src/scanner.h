@@ -69,7 +69,7 @@ typedef struct T_TOKEN {
     int line;            // Line number where the token was found
     int length;          // Length of the lexeme
     union {
-        int intVal;      // Integer value for INT tokens
+        int int_val;      // Integer value for INT tokens
         float float_val;  // Float value for FLOAT tokens
         char *str_val; // String value for STRING tokens
     } value;             // Union to hold the token's value

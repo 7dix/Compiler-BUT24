@@ -75,7 +75,7 @@ void print_token_json(T_TOKEN *token, int is_first) {
 
     switch (token->type) {
         case INT:
-            snprintf(value_str, sizeof(value_str), "%d", token->value.intVal);
+            snprintf(value_str, sizeof(value_str), "%d", token->value.int_val);
             break;
         case FLOAT:
             snprintf(value_str, sizeof(value_str), "%f", token->value.float_val);

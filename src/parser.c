@@ -84,7 +84,7 @@ bool syntax_argument(T_TOKEN_BUFFER *buffer, T_FN_CALL *fn_call);
  * @retval `RET_VAL_SEMANTIC_OTHER_ERR` sematics
  * @retval `RET_VAL_INTERNAL_ERR` compiler error
  */
-int run_parser(T_TOKEN_BUFFER *token_buffer) {
+RET_VAL run_parser(T_TOKEN_BUFFER *token_buffer) {
     // Start of recursive parser
     if (!syntax_start(token_buffer)) {
         return error_flag;
@@ -236,6 +236,8 @@ bool syntax_prolog(T_TOKEN_BUFFER *buffer) {
  * This function uses following global variables:
  * 
  * - `int error_flag`
+ * 
+ * - `T_SYM_TABLE *ST`
  * @param *token_buffer pointer to token buffer
  * @return `bool`
  * @retval `true` - correct syntax
@@ -975,7 +977,7 @@ bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
         return true;
     }
 
-    // we should not reach this point, anyway ...
+    // we should not reach this point
     error_flag = RET_VAL_SYNTAX_ERR;
     return false;
 }
