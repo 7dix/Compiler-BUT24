@@ -319,11 +319,11 @@ bool reduce(T_STACK_PTR stack, T_TREE_NODE_PTR *tree, int rule, bool make_tree_f
  * @brief Main function for precedence syntax analysis
  * @param buffer Pointer on buffer of tokens
  * @param tree Pointer on tree
- * @param typeEnd Type of end of expression
+ * @param type_end Type of end of expression
  * @parammake_tree_flag Flag for create tree
  * @return 0 if analysis is successful, 2 if syntax error, 99 if internal error (malloc for example)
 */
-RET_VAL precedence_syntax_main(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_END typeEnd){
+RET_VAL precedence_syntax_main(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_END type_end){
 
     // Create and init stack
     T_STACK stack;
@@ -358,7 +358,7 @@ RET_VAL precedence_syntax_main(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TY
         T_STACK_ITEM_PTR topTerminal = stack_top_terminal(&stack);
 
         // Search for end of expression
-        if(!conntionue_reduce && (not_end_dollar || begin_dollar) && ((token->type == BRACKET_RIGHT_SIMPLE && count_brac == 0 && count_rel_operators <= 1 && typeEnd == IF_WHILE_END) || (token->type == SEMICOLON && count_brac == 0 && count_rel_operators <= 1 && typeEnd == ASS_END))) not_end_dollar = false;
+        if(!conntionue_reduce && (not_end_dollar || begin_dollar) && ((token->type == BRACKET_RIGHT_SIMPLE && count_brac == 0 && count_rel_operators <= 1 && type_end == IF_WHILE_END) || (token->type == SEMICOLON && count_brac == 0 && count_rel_operators <= 1 && type_end == ASS_END))) not_end_dollar = false;
 
         // Counting relational operators in an expression  
         if (!conntionue_reduce && (not_end_dollar || begin_dollar) && (token->type == EQUAL || token->type == NOT_EQUAL || token->type == LESS_THAN || token->type == LESS_THAN_EQUAL || token->type == GREATER_THAN || token->type == GREATER_THAN_EQUAL)) count_rel_operators++;

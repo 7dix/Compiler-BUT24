@@ -55,7 +55,7 @@ OPERATOR_INDEX prec_index_table(TOKEN_TYPE type);
 PRECEDENCE get_precedence(OPERATOR_INDEX row, OPERATOR_INDEX coll);
 
 // Function declarations for main function of precedence syntax analysis
-RET_VAL precedence_syntax_main(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_END typeEnd);
+RET_VAL precedence_syntax_main(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree, TYPE_END type_end);
 
 // Function declarations for set count of reduced items
 int count_reduce(T_STACK_PTR stack);

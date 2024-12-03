@@ -391,6 +391,26 @@ RET_VAL check_expression(T_SYM_TABLE *table, T_TREE_NODE_PTR *tree) {
             continue;
         }
 
+        // Retype of FLOAT to INT, for division
+        if ((operatorType == DIVISION) && ((operand_first->literal_type == LITERAL_INT && operand_second->literal_type == NLITERAL_FLOAT) || (operand_first->literal_type == NLITERAL_FLOAT && operand_second->literal_type == LITERAL_INT) || (operand_first->literal_type == NLITERAL_INT && operand_second->literal_type == LITERAL_FLOAT) || (operand_first->literal_type == LITERAL_FLOAT && operand_second->literal_type == NLITERAL_INT) || (operand_first->literal_type == LITERAL_INT && operand_second->literal_type == LITERAL_FLOAT) || (operand_first->literal_type == LITERAL_FLOAT && operand_second->literal_type == LITERAL_INT) || (operand_first->literal_type == NLITERAL_INT && operand_second->literal_type == NLITERAL_FLOAT) || (operand_first->literal_type == NLITERAL_FLOAT && operand_second->literal_type == NLITERAL_INT))){
+            operator->literal_type = NLITERAL_INT;
+            // Retype of FLOAT to INT, only if the value of float has evrything after the decimal point 0
+            if((operand_first->literal_type == NLITERAL_FLOAT || operand_first->literal_type == LITERAL_FLOAT) && is_float_int(operand_first->value)) operand_first->node->convert_to_int = true;
+            else if((operand_second->literal_type == NLITERAL_FLOAT || operand_second->literal_type == LITERAL_FLOAT) && is_float_int(operand_second->value)) operand_second->node->convert_to_int = true;
+            else{
+                list_dispose(list_postfix);
+                return RET_VAL_SEMANTIC_TYPE_COMPATIBILITY_ERR;
+            }
+            // Set type of subexpression
+            operator->node->result_type = TYPE_INT_RESULT;
+            // Delete two elements after active element, and move to next element
+            list_delete_two_after(list_postfix);
+            list_next(list_postfix);
+            continue;
+        }
+       
+       
+
         // Result is NLITERAL INT after rytype of FLOAT
         if((operand_first->literal_type == LITERAL_FLOAT && operand_second->literal_type == NLITERAL_INT) || (operand_first->literal_type == NLITERAL_INT && operand_second->literal_type == LITERAL_FLOAT)){
             // Set type of subexpression

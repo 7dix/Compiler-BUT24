@@ -88,7 +88,6 @@ RET_VAL postorder(T_TREE_NODE_PTR *tree, T_LIST_PTR list){
 
     // Postorder traversal
     if((*tree)->right != NULL) postorder(&((*tree)->left), list);
-    
     if((*tree)->right != NULL) postorder(&((*tree)->right), list);
 
     // Insert node to list
@@ -147,7 +146,7 @@ RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table){
                 }
                 case VAR_FLOAT:{ // const :f64
                     list->active->literal_type = LITERAL_FLOAT;
-                    if (symbol->data.var.const_expr) list->active->value = symbol->data.var.float_value;
+                    if (symbol->data.var.const_expr) list->active->value = (float)symbol->data.var.float_value;
                     //else if (list->active->node->token->type == FLOAT) list->active->value = list->active->node->token->value.float_val;
                     break;
                 }
@@ -208,7 +207,7 @@ RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table){
         // LITERAL FLOAT
         if(list->active->node->token->type == FLOAT){
             list->active->literal_type = LITERAL_FLOAT;
-            list->active->value = list->active->node->token->value.float_val;
+            list->active->value = (float)list->active->node->token->value.float_val;
             list_next(list);
             continue;
         }
