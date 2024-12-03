@@ -2062,6 +2062,10 @@ bool syntax_assign_discard_expr_or_fn_call(T_TOKEN_BUFFER *buffer) {
     // Dummy for return type
     T_SYMBOL_DATA data;
     data.var.type = VAR_NONE;
+    data.var.is_const = false;
+    data.var.modified = false;
+    data.var.used = false;
+    data.var.const_expr = false;
 
     // handling of expression
     if (!syntax_assign(buffer, &data)) { // ASSIGN
