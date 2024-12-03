@@ -934,6 +934,10 @@ int get_token(T_TOKEN *token) {
                 break;
             case 20: // mlStr01
                 token->type = STRING;
+
+                // we will later check if the string is multiline (in case 25)
+                token->line = line_number;
+
                 if (c == '\\'){
                     state = 21;
                 } else if (c >= 32 || c == '\"' || c == '\r' || c == '\t'){
@@ -1041,6 +1045,15 @@ int get_token(T_TOKEN *token) {
                 }
                 else {
                     // End of string
+
+                    // check if the string is multiline
+                    if (token->line == line_number){
+                        // multiline with just 1 line is not multiline
+                        fprintf(stderr, "Lexical error at line %d: Multiline string must have at least 2 lines\n", line_number);
+                        free(lexeme);
+                        return RET_VAL_LEXICAL_ERR;
+                    }
+
                     lexeme[lexeme_length] = '\0';
                     token->lexeme = strdup(lexeme);
                     token->value.str_val = strdup(lexeme);
