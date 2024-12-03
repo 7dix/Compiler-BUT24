@@ -334,7 +334,7 @@ int get_token(T_TOKEN *token) {
                 } else if (c == '_') {
                     // Start of voidID
                     lexeme[lexeme_length++] = c;
-                    state = 1;  // Transition to id (voidID behaves like id)
+                    state = 2;  // Transition to voidID (voidID behaves like id, but '_' alone is IDENTIFIER_DISCARD)
                 } else if (c == '?') {
                     // Transition to question_mark
                     state = 4;  // State for handling '?'
@@ -482,6 +482,40 @@ int get_token(T_TOKEN *token) {
                     } else {
                         // Lexeme is an identifier
                         token->type = IDENTIFIER;
+                    }
+                    token->lexeme = strdup(lexeme);
+                            token->length = lexeme_length;
+                    free(lexeme);
+                    return RET_VAL_OK;
+                }
+                break;
+            case 2:  // State '_'
+                if (isalnum(c) || c == '_') {
+                    // Continue building identifier
+                    lexeme[lexeme_length++] = c;
+                    if (lexeme_length >= lexeme_size) {
+                        lexeme_size *= 2;
+                        lexeme = realloc(lexeme, lexeme_size);
+                        if (lexeme == NULL) {
+                            return RET_VAL_INTERNAL_ERR;
+                        }
+                    }
+                } else {
+                    // End of identifier
+                    unget_char(c);
+                    lexeme[lexeme_length] = '\0';
+                    if (is_keyword(lexeme)) {
+                        // Lexeme is a keyword
+                        token->type = get_keyword_token_type(lexeme);
+                    } else if (strcmp(lexeme, "ifj") == 0) {
+                        // Lexeme is 'ifj'
+                        token->type = IFJ;
+                    } else if (is_type_identifier(lexeme)) {
+                        // Lexeme is a type identifier
+                        token->type = get_type_identifier_token_type(lexeme);
+                    } else {
+                        // Lexeme is an identifier discard
+                        token->type = IDENTIFIER_DISCARD;
                     }
                     token->lexeme = strdup(lexeme);
                             token->length = lexeme_length;
