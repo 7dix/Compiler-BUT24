@@ -14,14 +14,14 @@
 #include "symtable.h"
 
 // Label counter definition
-int labelCounter = 0;
+int label_counter = 0;
 
 /***********************************************************************
  *                  CONVERSION TO PRINTABLE STRING
  ***********************************************************************
 */
  
-void handleCorrectStringFormat(char *input, char **output) {
+void handle_correct_string_format(char *input, char **output) {
     *output = (char *)malloc(4 * strlen(input) + 1); // Allocate enough memory for the worst case
     *output[0] = '\0'; // Init the output string
 
@@ -69,197 +69,197 @@ void handleCorrectStringFormat(char *input, char **output) {
  * interpreter.
 */
 
-void generateHeader() {
+void generate_header() {
     printf(".IFJcode24\n");
 }
 
-void generateMove(char *frame, char *var, char *_frame, char *_var) {
+void generate_move(char *frame, char *var, char *_frame, char *_var) {
     printf("MOVE %s@%s %s@%s\n", frame, var, _frame, _var);
 }
 
-void generateCreateFrame() {
+void generate_create_frame() {
     printf("CREATEFRAME\n");
 }
 
-void generatePushFrame() {
+void generate_push_frame() {
     printf("PUSHFRAME\n");
 }
 
-void generatePopFrame() {
+void generate_pop_frame() {
     printf("POPFRAME\n");
 }
 
-void generateDefvar(char *frame, char *var) {
+void generate_defvar(char *frame, char *var) {
     int fcDefId;
     fcDefId = is_in_fc(ST);
 
     if (fcDefId >= 0) {
-        printf("JUMPIFEQ skipDefvar$%d LF@defined$%d bool@true\n", labelCounter, fcDefId);
+        printf("JUMPIFEQ skipDefvar$%d LF@defined$%d bool@true\n", label_counter, fcDefId);
         printf("DEFVAR LF@%s\n", var);
-        printf("LABEL skipDefvar$%d\n", labelCounter);
-        labelCounter++;
+        printf("LABEL skipDefvar$%d\n", label_counter);
+        label_counter++;
     }
     else {
         printf("DEFVAR %s@%s\n", frame, var);
     }
 }
 
-void generateCall(char *label) {
+void generate_call(char *label) {
     printf("CALL %s\n", label);
 }
 
-void generateReturn() {
+void generate_return() {
     printf("RETURN\n");
 }
 
-void generatePushs(char *frame, char *var) {
+void generate_pushs(char *frame, char *var) {
     printf("PUSHS %s@%s\n", frame, var);
 }
 
-void generatePushsInt(int var) {
+void generate_pushs_int(int var) {
     printf("PUSHS int@%d\n", var);
 }
 
-void generatePushsFloat(float var) {
+void generate_pushs_float(float var) {
     printf("PUSHS float@%a\n", var);
 }
 
-void generatePushsString(char *var) {
+void generate_pushs_string(char *var) {
     char *out = NULL;
-    handleCorrectStringFormat(var, &out);
+    handle_correct_string_format(var, &out);
     printf("PUSHS string@%s\n", out);
     free(out);
 }
 
-void generatePops(char *frame, char *var) {
+void generate_pops(char *frame, char *var) {
     printf("POPS %s@%s\n", frame, var);
 }
 
-void generateClears() {
+void generate_clears() {
     printf("CLEARS\n");
 }
 
-void generateAdd(char *frame, char *var, char *_frame, char *_var, char *__frame, char *__var) {
+void generate_add(char *frame, char *var, char *_frame, char *_var, char *__frame, char *__var) {
     printf("ADD %s@%s %s@%s %s@%s\n", frame, var, _frame, _var, __frame, __var);
 }
 
-void generateSub(char *frame, char *var, char *_frame, char *_var, char *__frame, char *__var) {
+void generate_sub(char *frame, char *var, char *_frame, char *_var, char *__frame, char *__var) {
     printf("SUB %s@%s %s@%s %s@%s\n", frame, var, _frame, _var, __frame, __var);
 }
 
-void generateMul(char *frame, char *var, char *_frame, char *_var, char *__frame, char *__var) {
+void generate_mul(char *frame, char *var, char *_frame, char *_var, char *__frame, char *__var) {
     printf("MUL %s@%s %s@%s %s@%s\n", frame, var, _frame, _var, __frame, __var);
 }
 
-void generateDiv(char *frame, char *var, char *_frame, char *_var, char *__frame, char *__var) {
+void generate_div(char *frame, char *var, char *_frame, char *_var, char *__frame, char *__var) {
     printf("DIV %s@%s %s@%s %s@%s\n", frame, var, _frame, _var, __frame, __var);
 }
 
-void generateIdiv(char *frame, char *var, char *_frame, char *_var, char *__frame, char *__var) {
+void generate_idiv(char *frame, char *var, char *_frame, char *_var, char *__frame, char *__var) {
     printf("IDIV %s@%s %s@%s %s@%s\n", frame, var, _frame, _var, __frame, __var);
 }
 
-void generateAdds() {
+void generate_adds() {
     printf("ADDS\n");
 }
 
-void generateSubs() {
+void generate_subs() {
     printf("SUBS\n");
 }
 
-void generateMuls() {
+void generate_muls() {
     printf("MULS\n");
 }
 
-void generateDivs() {
+void generate_divs() {
     printf("DIVS\n");
 }
 
-void generateIdivs() {
+void generate_idivs() {
     printf("IDIVS\n");
 }
 
-void generateLt(char *frame, char *var, char *_frame, char *_var, char *__frame, char *__var) {
+void generate_lt(char *frame, char *var, char *_frame, char *_var, char *__frame, char *__var) {
     printf("LT %s@%s %s@%s %s@%s\n", frame, var, _frame, _var, __frame, __var);
 }
 
-void generateGt(char *frame, char *var, char *_frame, char *_var, char *__frame, char *__var) {
+void generate_gt(char *frame, char *var, char *_frame, char *_var, char *__frame, char *__var) {
     printf("GT %s@%s %s@%s %s@%s\n", frame, var, _frame, _var, __frame, __var);
 }
 
-void generateEq(char *frame, char *var, char *_frame, char *_var, char *__frame, char *__var) {
+void generate_eq(char *frame, char *var, char *_frame, char *_var, char *__frame, char *__var) {
     printf("EQ %s@%s %s@%s %s@%s\n", frame, var, _frame, _var, __frame, __var);
 }
 
-void generateLts() {
+void generate_lts() {
     printf("LTS\n");
 }
 
-void generateGts() {
+void generate_gts() {
     printf("GTS\n");
 }
 
-void generateEqs() {
+void generate_eqs() {
     printf("EQS\n");
 }
 
-void generateAnd(char *frame, char *var, char *_frame, char *_symb, char *__frame, char *__symb) {
+void generate_and(char *frame, char *var, char *_frame, char *_symb, char *__frame, char *__symb) {
     printf("AND %s@%s %s@%s %s@%s\n", frame, var, _frame, _symb, __frame, __symb);
 }
 
-void generateOr(char *frame, char *var, char *_frame, char *_symb, char *__frame, char *__symb) {
+void generate_or(char *frame, char *var, char *_frame, char *_symb, char *__frame, char *__symb) {
     printf("OR %s@%s %s@%s %s@%s\n", frame, var, _frame, _symb, __frame, __symb);
 }
 
-void generateNot(char *frame, char *var, char *_frame, char *_symb) {
+void generate_not(char *frame, char *var, char *_frame, char *_symb) {
     printf("NOT %s@%s %s@%s\n", frame, var, _frame, _symb);
 }
 
-void generateAnds() {
+void generate_ands() {
     printf("ANDS\n");
 }
 
-void generateOrs() {
+void generate_ors() {
     printf("ORS\n");
 }
 
-void generateNots() {
+void generate_nots() {
     printf("NOTS\n");
 }
 
-void generateInt2Float(char *frame, char *var, char *_frame, char *_symb) {
+void generate_int2float(char *frame, char *var, char *_frame, char *_symb) {
     printf("INT2FLOAT %s@%s %s@%s\n", frame, var, _frame, _symb);
 }
 
-void generateFloat2Int(char *frame, char *var, char *_frame, char *_symb) {
+void generate_float2int(char *frame, char *var, char *_frame, char *_symb) {
     printf("FLOAT2INT %s@%s %s@%s\n", frame, var, _frame, _symb);
 }
 
-void generateInt2Char(char *frame, char *var, char *_frame, char *_symb) {
+void generate_int2char(char *frame, char *var, char *_frame, char *_symb) {
     printf("INT2CHAR %s@%s %s@%s\n", frame, var, _frame, _symb);
 }
 
-void generateStrI2Int(char *frame, char *var, char *_frame, char *_symb, char *__frame, char *__symb) {
+void generate_stri2int(char *frame, char *var, char *_frame, char *_symb, char *__frame, char *__symb) {
     printf("STRI2INT %s@%s %s@%s %s@%s\n", frame, var, _frame, _symb, __frame, __symb);
 }
 
-void generateInt2Floats() {
+void generate_int2floats() {
     printf("INT2FLOATS\n");
 }
 
-void generateFloat2Ints() {
+void generate_float2ints() {
     printf("FLOAT2INTS\n");
 }
 
-void generateInt2Chars() {
+void generate_int2chars() {
     printf("INT2CHARS\n");
 }
 
-void generateStrI2Ints() {
+void generate_stri2ints() {
     printf("STRI2INTS\n");
 }
 
-void generateRead(char *frame, char *var, char *type) {
+void generate_read(char *frame, char *var, char *type) {
     if (strcmp(type, "int") == 0) {
         printf("READ %s@%s int\n", frame, var);
     }
@@ -281,63 +281,63 @@ void generateRead(char *frame, char *var, char *type) {
     }
 }
 
-void generateWrite(char *frame, char *var) {
+void generate_write(char *frame, char *var) {
     printf("WRITE %s@%s\n", frame, var);
 }
 
-void generateConcat(char *frame, char *var, char *_frame, char *_symb, char *__frame, char *__symb) {
+void generate_concat(char *frame, char *var, char *_frame, char *_symb, char *__frame, char *__symb) {
     printf("CONCAT %s@%s %s@%s %s@%s\n", frame, var, _frame, _symb, __frame, __symb);
 }
 
-void generateStrlen(char *frame, char *var, char *_frame, char *_symb) {
+void generate_strlen(char *frame, char *var, char *_frame, char *_symb) {
     printf("STRLEN %s@%s %s@%s\n", frame, var, _frame, _symb);
 }
 
-void generateGetchar(char *frame, char *var, char *_frame, char *_symb, char *__frame, char *__symb) {
+void generate_getchar(char *frame, char *var, char *_frame, char *_symb, char *__frame, char *__symb) {
     printf("GETCHAR %s@%s %s@%s %s@%s\n", frame, var, _frame, _symb, __frame, __symb);
 }
 
-void generateSetchaar(char *frame, char *var, char *_frame, char *_symb, char *__frame, char *__symb) {
+void generate_setchar(char *frame, char *var, char *_frame, char *_symb, char *__frame, char *__symb) {
     printf("SETCHAR %s@%s %s@%s %s@%s\n", frame, var, _frame, _symb, __frame, __symb);
 }
 
-void generateType(char *frame, char *var, char *_frame, char *_symb) {
+void generate_type(char *frame, char *var, char *_frame, char *_symb) {
     printf("TYPE %s@%s %s@%s\n", frame, var, _frame, _symb);
 }
 
-void generateLabel(char *label) {
+void generate_label(char *label) {
     printf("LABEL %s\n", label);
 }
 
-void generateJump(char *label) {
+void generate_jump(char *label) {
     printf("JUMP %s\n", label);
 }
 
-void generateJumpifeq(char *label, char *frame, char *symb, char *_frame, char *_symb) {
+void generate_jumpifeq(char *label, char *frame, char *symb, char *_frame, char *_symb) {
     printf("JUMPIFEQ %s %s@%s %s@%s\n", label, frame, symb, _frame, _symb);
 }
 
-void generateJumpifneq(char *label, char *frame, char *symb, char *_frame, char *_symb) {
+void generate_jumpifneq(char *label, char *frame, char *symb, char *_frame, char *_symb) {
     printf("JUMPIFNEQ %s %s@%s %s@%s\n", label, frame, symb, _frame, _symb);
 }
 
-void generateJumpifeqs(char *label) {
+void generate_jumpifeqs(char *label) {
     printf("JUMPIFEQS %s\n", label);
 }
 
-void generateJumpifneqs(char *label) {
+void generate_jumpifneqs(char *label) {
     printf("JUMPIFNEQS %s\n", label);
 }
 
-void generateExit(int symb) {
+void generate_exit(int symb) {
     printf("EXIT int@%d\n", symb);
 }
 
-void generateBreak() {
+void generate_break() {
     printf("BREAK\n");
 }
 
-void generateDprint(char *frame, char *symb) {
+void generate_dprint(char *frame, char *symb) {
     printf("DPRINT %s@%s\n", frame, symb);
 }
 
