@@ -16,6 +16,9 @@
 #include <stdbool.h>
 #include "symtable.h"
 
+// Global label counter
+extern int label_counter;
+
 // Function declarations
 void handle_correct_string_format(char *input, char **output);
 void generate_header();
