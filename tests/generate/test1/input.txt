@@ -1,2 +1,2 @@
 
-createFnHeader main [] 0
+create_fn_header main [] 0

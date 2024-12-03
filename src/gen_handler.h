@@ -20,38 +20,39 @@
 #include "symtable.h"
 #include "semantic.h"
 
-void createProgramHeader();
-void generateUniqueIdentifier(char *name, char **uniq_name);
-void createFnHeader(char *name);
-void callFunction(T_FN_CALL *fn);
-void createReturn();
-void handleDiscard();
-void handleUniqDefvar(T_TOKEN *var);
-void createStackByPostorder(T_TREE_NODE *tree);
-void handleAssign(char *var);
-void callBIReadInt();
-void callBIReadFloat();
-void callBIReadString();
-void callBIInt2Float(T_TOKEN *var);
-void callBIFloat2Int(T_TOKEN *var);
-void callBIString(T_TOKEN *var);
-void callBILength(T_TOKEN *var);
-void callBIConcat(T_TOKEN *var, T_TOKEN *_var);
-void callBISubstring(T_TOKEN *var, T_TOKEN *beg, T_TOKEN *end);
-void callBIStrcmp(T_TOKEN *var, T_TOKEN *_var);
-void callBIOrd(T_TOKEN *var, T_TOKEN *index);
-void callBIChr(T_TOKEN *var);
-void callBIWrite(T_TOKEN *var);
-void callBIFn(T_FN_CALL *fn);
-void handleIfStartBool(char *labelElse, int upper, int current);
-void handleIfStartNil(char *labelElse, T_TOKEN *var, int upper, int current);
-void createIfElse(char *labelEnd, char *labelElse, int upper, int currIf, int currElse);
-void createIfEnd(char *labelEnd, int current);
-void createWhileBoolHeader(char *labelStart, int upper, int current);
-void createWhileNilHeader(char *labelStart, T_TOKEN *var, int upper, int current);
-void handleWhileBool(char *labelEnd);
-void handleWhileNil(char *labelEnd, T_TOKEN *var);
-void createWhileEnd(char *labelStart, char *labelEnd, int whileDefCounter);
+// Function declarations
+void create_program_header();
+void generate_unique_identifier(char *name, char **uniq_name);
+void create_fn_header(char *name);
+void call_function(T_FN_CALL *fn);
+void create_return();
+void handle_discard();
+void handle_uniq_defvar(T_TOKEN *var);
+void solve_exp_by_postorder(T_TREE_NODE *tree);
+void handle_assign(char *var);
+void call_bi_readint();
+void call_bi_readfloat();
+void call_bi_readstring();
+void call_bi_int2float(T_TOKEN *var);
+void call_bi_float2int(T_TOKEN *var);
+void call_bi_string(T_TOKEN *var);
+void call_bi_length(T_TOKEN *var);
+void call_bi_concat(T_TOKEN *var, T_TOKEN *_var);
+void call_bi_substring(T_TOKEN *var, T_TOKEN *beg, T_TOKEN *end);
+void call_bi_strcmp(T_TOKEN *var, T_TOKEN *_var);
+void call_bi_ord(T_TOKEN *var, T_TOKEN *index);
+void call_bi_chr(T_TOKEN *var);
+void call_bi_write(T_TOKEN *var);
+void call_bi_fn(T_FN_CALL *fn);
+void handle_if_start_bool(char *label_else, int upper, int current);
+void handle_if_start_nil(char *label_else, T_TOKEN *var, int upper, int current);
+void create_if_else(char *label_end, char *label_else, int upper, int current_if, int current_else);
+void create_if_end(char *label_end, int current);
+void create_while_bool_header(char *label_start, int upper, int current);
+void create_while_nil_header(char *label_start, T_TOKEN *var, int upper, int current);
+void handle_while_bool(char *label_end);
+void handle_while_nil(char *label_end, T_TOKEN *var);
+void create_while_end(char *label_start, char *label_end, int while_def_counter);
 
 #endif // GEN_HANDLER_H
 

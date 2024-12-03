@@ -68,7 +68,7 @@ int main() {
     set_current_to_first(token_buffer);
 
     // CD: generate ifj bytecode header, init global vars
-    createProgramHeader();
+    create_program_header();
 
     // Run second phase of the compiler
     error_code = run_parser(token_buffer);

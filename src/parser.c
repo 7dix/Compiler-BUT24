@@ -292,7 +292,7 @@ bool syntax_fn_def(T_TOKEN_BUFFER *buffer) {
     set_fn_name(ST, NULL);
 
     // CD: generate implicit return
-    createReturn();
+    create_return();
 
     return true;
 }
@@ -397,7 +397,7 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
         }
 
         // CD: generate function header
-        createFnHeader(get_fn_name(ST));
+        create_fn_header(get_fn_name(ST));
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;
@@ -439,7 +439,7 @@ bool syntax_fn_def_remaining(T_TOKEN_BUFFER *buffer) {
         }
 
         // CD: generate function header
-        createFnHeader(get_fn_name(ST));
+        create_fn_header(get_fn_name(ST));
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
             return false;
@@ -925,9 +925,9 @@ bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
         }
 
         // CD: generate variable definition
-        handleUniqDefvar(token);
+        handle_uniq_defvar(token);
         // CD: generate mov for right side
-        handleAssign(name);
+        handle_assign(name);
 
         return true;
     }
@@ -970,9 +970,9 @@ bool syntax_var_def(T_TOKEN_BUFFER *buffer) {
         }
 
         // codegen print var definition
-        handleUniqDefvar(token);
+        handle_uniq_defvar(token);
         // codegen print mov for right side
-        handleAssign(name);
+        handle_assign(name);
 
         return true;
     }
@@ -1151,7 +1151,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         }
 
         // CD: generate expression
-        createStackByPostorder(*tree);
+        solve_exp_by_postorder(*tree);
 
         // not needed anymore
         tree_dispose(tree);
@@ -1168,11 +1168,11 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             return false;
         }
 
-        char *labelElse = NULL;
-        char *labelEnd = NULL;
+        char *label_else = NULL;
+        char *label_end = NULL;
 
         // generate labels for if - else/end blocks
-        if (!generate_labels(ST,&labelElse, &labelEnd)) {
+        if (!generate_labels(ST,&label_else, &label_end)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false;
         }
@@ -1185,27 +1185,27 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
 
         // CD: generate if header with special variable for checking
         // whether its inner var definitions were already defined
-        handleIfStartBool(labelElse, fc_defined_upper, fc_defined_if);
+        handle_if_start_bool(label_else, fc_defined_upper, fc_defined_if);
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
-            free(labelElse);
-            free(labelEnd);
+            free(label_else);
+            free(label_end);
             return false;
         }
 
         // leaving if scope, check unused variables
         error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
-            free(labelElse);
-            free(labelEnd);
+            free(label_else);
+            free(label_end);
             return false;
         }
 
         // enter else scope
         if (!symtable_add_scope(ST, true)) {
             error_flag = RET_VAL_INTERNAL_ERR;
-            free(labelElse);
-            free(labelEnd);
+            free(label_else);
+            free(label_end);
             return false;
         }
 
@@ -1218,44 +1218,44 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         // CD: generate if else header, also generates handling of
         // special variables for checking whether its inner var definitions
         // were already defined
-        createIfElse(labelEnd, labelElse, fc_defined_upper, fc_defined_if, fc_defined_else);
+        create_if_else(label_end, label_else, fc_defined_upper, fc_defined_if, fc_defined_else);
 
         next_token(buffer, &token); // }
         if (token->type != BRACKET_RIGHT_CURLY) {
             error_flag = RET_VAL_SYNTAX_ERR;
-            free(labelElse);
-            free(labelEnd);
+            free(label_else);
+            free(label_end);
             return false;
         }
 
         next_token(buffer, &token); // else
         if (token->type != ELSE) {
             error_flag = RET_VAL_SYNTAX_ERR;
-            free(labelElse);
-            free(labelEnd);
+            free(label_else);
+            free(label_end);
             return false;
         }
 
         next_token(buffer, &token); // {
         if (token->type != BRACKET_LEFT_CURLY) {
             error_flag = RET_VAL_SYNTAX_ERR;
-            free(labelElse);
-            free(labelEnd);
+            free(label_else);
+            free(label_end);
             return false;
         }
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
-            free(labelElse);
-            free(labelEnd);
+            free(label_else);
+            free(label_end);
             return false;
         }
 
         // CD: generate end of if-else block, handles special variable
         // for checking inner else block DEFVAR statements
-        createIfEnd(labelEnd, fc_defined_else);
+        create_if_end(label_end, fc_defined_else);
 
-        free(labelElse);
-        free(labelEnd);
+        free(label_else);
+        free(label_end);
 
         // leaving else scope, check unused vars
         error_flag = symtable_remove_scope(ST, true);
@@ -1291,7 +1291,7 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         }
 
         // CD: generate expression
-        createStackByPostorder(*tree);
+        solve_exp_by_postorder(*tree);
         // not needed anymore
         tree_dispose(tree);
 
@@ -1313,10 +1313,10 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
             return false; 
         }
 
-        char *labelElse = NULL;
-        char *labelEnd = NULL;
+        char *label_else = NULL;
+        char *label_end = NULL;
         // generate labels for if - else/end blocks
-        if (!generate_labels(ST,&labelElse, &labelEnd)) {
+        if (!generate_labels(ST,&label_else, &label_end)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             return false;
         }
@@ -1331,16 +1331,16 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         // non nullable variable should not be defined now
         if (symtable_find_symbol(ST, token->lexeme) != NULL) {
             error_flag = RET_VAL_SEMANTIC_REDEF_OR_BAD_ASSIGN_ERR;
-            free(labelElse);
-            free(labelEnd);
+            free(label_else);
+            free(label_end);
             return false;
         }
 
         // Add variable to symtable
         if (!symtable_add_symbol(ST, token->lexeme, SYM_VAR, data)) {
             error_flag = RET_VAL_INTERNAL_ERR;
-            free(labelElse);
-            free(labelEnd);
+            free(label_else);
+            free(label_end);
             return false;
         }
 
@@ -1353,67 +1353,67 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
         // CD: generate if nullable header, also generates handling of
         // special variables for checking whether its inner var definitions
         // were already defined
-        handleIfStartNil(labelElse, token, fc_defined_upper, fc_defined_if);
+        handle_if_start_nil(label_else, token, fc_defined_upper, fc_defined_if);
 
         next_token(buffer, &token); // |
         if (token->type != PIPE) {
             error_flag = RET_VAL_SYNTAX_ERR;
-            free(labelElse);
-            free(labelEnd);
+            free(label_else);
+            free(label_end);
             return false;
         }
 
         next_token(buffer, &token); // {
         if (token->type != BRACKET_LEFT_CURLY) {
             error_flag = RET_VAL_SYNTAX_ERR;
-            free(labelElse);
-            free(labelEnd);
+            free(label_else);
+            free(label_end);
             return false;
         }
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
-            free(labelElse);
-            free(labelEnd);
+            free(label_else);
+            free(label_end);
             return false;
         }
 
         // leaving if scope, check unused variables
         error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
-            free(labelElse);
-            free(labelEnd);
+            free(label_else);
+            free(label_end);
             return false;
         }
 
         next_token(buffer, &token); // }
         if (token->type != BRACKET_RIGHT_CURLY) {
             error_flag = RET_VAL_SYNTAX_ERR;
-            free(labelElse);
-            free(labelEnd);
+            free(label_else);
+            free(label_end);
             return false;
         }
 
         next_token(buffer, &token); // else
         if (token->type != ELSE) {
             error_flag = RET_VAL_SYNTAX_ERR;
-            free(labelElse);
-            free(labelEnd);
+            free(label_else);
+            free(label_end);
             return false;
         }
 
         next_token(buffer, &token); // {
         if (token->type != BRACKET_LEFT_CURLY) {
             error_flag = RET_VAL_SYNTAX_ERR;
-            free(labelElse);
-            free(labelEnd);
+            free(label_else);
+            free(label_end);
             return false;
         }
 
         // enter else scope
         if (!symtable_add_scope(ST, true)) {
             error_flag = RET_VAL_INTERNAL_ERR;
-            free(labelElse);
-            free(labelEnd);
+            free(label_else);
+            free(label_end);
             return false; 
         }
 
@@ -1425,28 +1425,28 @@ bool syntax_if_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *tree
 
         // CD: generate if nullable else, also generates handling of
         // special variables for inner var definitions checks
-        createIfElse(labelEnd, labelElse, fc_defined_upper, fc_defined_if, fc_defined_else);
+        create_if_else(label_end, label_else, fc_defined_upper, fc_defined_if, fc_defined_else);
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
-            free(labelElse);
-            free(labelEnd);
+            free(label_else);
+            free(label_end);
             return false;
         }
 
         // leaving else scope, check for unused variables
         error_flag = symtable_remove_scope(ST, true);
         if (error_flag != RET_VAL_OK) {
-            free(labelElse);
-            free(labelEnd);
+            free(label_else);
+            free(label_end);
             return false;
         }
 
         // CD: generate if nullable end, also generates handling of
         // special variables for inner else block DEFVARs
-        createIfEnd(labelEnd, fc_defined_else);
+        create_if_end(label_end, fc_defined_else);
         
-        free(labelElse);
-        free(labelEnd);
+        free(label_else);
+        free(label_end);
 
         next_token(buffer, &token); // }
         if (token->type != BRACKET_RIGHT_CURLY) {
@@ -1554,10 +1554,10 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
             return false;
         }
 
-        char *labelStart = NULL;
-        char *labelEnd = NULL;
+        char *label_start = NULL;
+        char *label_end = NULL;
         // generate labels for while
-        if (!generate_labels(ST,&labelStart, &labelEnd)) {
+        if (!generate_labels(ST,&label_start, &label_end)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             tree_dispose(tree);
             return false;
@@ -1572,8 +1572,8 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
         // enter while scope
         if (!symtable_add_scope(ST, true)) {
             tree_dispose(tree);
-            free(labelStart);
-            free(labelEnd);
+            free(label_start);
+            free(label_end);
             error_flag = RET_VAL_INTERNAL_ERR;
             return false; 
         }
@@ -1587,28 +1587,28 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
         // CD: generate while start, also generates handling of
         // special var (defined$N) for checking whether its inner var
         // definitions were already defined
-        createWhileBoolHeader(labelStart, fc_defined_upper, fc_defined_current);
+        create_while_bool_header(label_start, fc_defined_upper, fc_defined_current);
 
         // CD: generate expression
-        createStackByPostorder(*tree);
+        solve_exp_by_postorder(*tree);
 
         // CD: generate while condition
-        handleWhileBool(labelEnd);
+        handle_while_bool(label_end);
         // not needed anymore
         tree_dispose(tree);
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
-            free(labelStart);
-            free(labelEnd);
+            free(label_start);
+            free(label_end);
             return false;
         }
 
         // CD: generate while end, also generates handling for
         // special var (defined$N) for checking whether its inner var
         // definitions were already defined
-        createWhileEnd(labelStart, labelEnd, fc_defined_current);
-        free(labelStart);
-        free(labelEnd);
+        create_while_end(label_start, label_end, fc_defined_current);
+        free(label_start);
+        free(label_end);
 
         // leaving while scope, check unused variables
         error_flag = symtable_remove_scope(ST, true);
@@ -1688,10 +1688,10 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
             return false;
         }
 
-        char *labelStart = NULL;
-        char *labelEnd = NULL;
+        char *label_start = NULL;
+        char *label_end = NULL;
         // generate labels for while
-        if (!generate_labels(ST,&labelStart, &labelEnd)) {
+        if (!generate_labels(ST,&label_start, &label_end)) {
             error_flag = RET_VAL_INTERNAL_ERR;
             tree_dispose(tree);
             return false;
@@ -1700,44 +1700,44 @@ bool syntax_while_statement_remaining(T_TOKEN_BUFFER *buffer, T_TREE_NODE_PTR *t
         // CD: generate while start, also generates handling of
         // special var for checking whether its inner variable
         // definitions were already defined or not
-        createWhileNilHeader(labelStart, token, fc_defined_upper, fc_defined_current);
+        create_while_nil_header(label_start, token, fc_defined_upper, fc_defined_current);
 
         // CD: generate expression
-        createStackByPostorder(*tree);
+        solve_exp_by_postorder(*tree);
 
         // CD: generate while condition
-        handleWhileNil(labelEnd, token);
+        handle_while_nil(label_end, token);
         // not needed anymore
         tree_dispose(tree);
 
         next_token(buffer, &token); // |
         if (token->type != PIPE) {
             error_flag = RET_VAL_SYNTAX_ERR;
-            free(labelStart);
-            free(labelEnd);
+            free(label_start);
+            free(label_end);
             return false;
         }
 
         next_token(buffer, &token); // {
         if (token->type != BRACKET_LEFT_CURLY) {
             error_flag = RET_VAL_SYNTAX_ERR;
-            free(labelStart);
-            free(labelEnd);
+            free(label_start);
+            free(label_end);
             return false;
         }
 
         if (!syntax_code_block_next(buffer)) { // CODE_BLOCK_NEXT
-            free(labelStart);
-            free(labelEnd);
+            free(label_start);
+            free(label_end);
             return false;
         }
 
         // CD: generate while end, also generates sets helping
         // variable defined to true, as everything should be
         // already defined in this while block
-        createWhileEnd(labelStart, labelEnd, fc_defined_current);
-        free(labelStart);
-        free(labelEnd);
+        create_while_end(label_start, label_end, fc_defined_current);
+        free(label_start);
+        free(label_end);
 
         // leaving while scope, check for unused variables
         error_flag = symtable_remove_scope(ST, true);
@@ -1788,7 +1788,7 @@ bool syntax_return(T_TOKEN_BUFFER *buffer) {
     }
 
     // CD: generate return
-    createReturn();
+    create_return();
 
     return true;
 }
@@ -1959,7 +1959,7 @@ bool syntax_built_in_void_fn_call(T_TOKEN_BUFFER *buffer) {
     }
 
     // CD: generate built-in function call
-    callBIFn(&fn_call);
+    call_bi_fn(&fn_call);
 
     free(fn_name);
 
@@ -2022,7 +2022,7 @@ bool syntax_assign_expr_or_fn_call(T_TOKEN_BUFFER *buffer) {
 
     // CD print mov for right side
     if (symbol->type == SYM_VAR) {
-        handleAssign(token->lexeme);
+        handle_assign(token->lexeme);
     }
 
     return true;
@@ -2069,7 +2069,7 @@ bool syntax_assign_discard_expr_or_fn_call(T_TOKEN_BUFFER *buffer) {
     }
 
     // CD: generate discard
-    handleDiscard();
+    handle_discard();
 
     return true;
 }
@@ -2156,7 +2156,7 @@ bool syntax_id_start(T_TOKEN_BUFFER *buffer, T_SYMBOL *symbol) {
         }
 
         // CD: generate function call
-        callFunction(&fn_call);
+        call_function(&fn_call);
 
         free_fn_call_args(&fn_call);
 
@@ -2322,7 +2322,7 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data) {
         }
 
         // CD: generate built-in function call
-        callBIFn(&fn_call);
+        call_bi_fn(&fn_call);
 
         free(fn_name);
 
@@ -2431,7 +2431,7 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data) {
         }
 
         // CD: generate expression
-        createStackByPostorder(tree);
+        solve_exp_by_postorder(tree);
         // not needed anymore
         tree_dispose(&tree);
 
@@ -2513,7 +2513,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data, char *id_name
             return false;
         }
         // CD: generate function call
-        callFunction(&fn_call);
+        call_function(&fn_call);
 
         free_fn_call_args(&fn_call);
 
@@ -2590,7 +2590,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data, char *id_name
         }
 
         // CD: generate expression
-        createStackByPostorder(tree);
+        solve_exp_by_postorder(tree);
         // not needed anymore
         tree_dispose(&tree);
         
@@ -2674,7 +2674,7 @@ bool syntax_id_assign(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data, char *id_name
         }
 
         // CD: generate expression
-        createStackByPostorder(tree);
+        solve_exp_by_postorder(tree);
         // not needed anymore
         tree_dispose(&tree);
 
