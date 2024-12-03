@@ -1,4 +1,4 @@
-// FILE: generator.h
+// FILE: generate.h
 // PROJECT: IFJ24 - Compiler for the IFJ24 language @ FIT BUT 2BIT
 // TEAM: Martin Zůbek (253206)
 // AUTHORS:
