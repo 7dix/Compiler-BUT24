@@ -11,7 +11,7 @@ int main() {
         return 1;
     }
 
-    if (!symtable_add_scope(table)) {
+    if (!symtable_add_scope(table, false)) {
         fprintf(stderr, "Error: Memory allocation failed in symtable_add_scope\n");
         return 1;
     }
@@ -39,7 +39,7 @@ int main() {
         return 1;
     }
 
-    if (!symtable_add_scope(table)) {
+    if (!symtable_add_scope(table, false)) {
         fprintf(stderr, "Error: Memory allocation failed in symtable_add_scope\n");
         return 1;
     }
@@ -76,7 +76,7 @@ int main() {
     }
 
     symtable_remove_scope(table, false);
-    if (!symtable_add_scope(table)) {
+    if (!symtable_add_scope(table, false)) {
         fprintf(stderr, "Error code when adding new scope\n");
         return 1;
     };
