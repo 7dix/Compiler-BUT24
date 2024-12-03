@@ -288,6 +288,7 @@ int get_token(T_TOKEN *token) {
         return RET_VAL_INTERNAL_ERR;
     }
     token->length = 0;
+    int multiline_start_line = 0;
 
     while (1) {
         c = get_next_char();
@@ -573,6 +574,9 @@ int get_token(T_TOKEN *token) {
                     // Going to mlStr01
                     lexeme[lexeme_length++] = c;
                     state = 20;                
+                    
+                    // we will later check if the string is multiline (in case 25)
+                    multiline_start_line = line_number;
                 } else {
                     fprintf(stderr, "Lexical error at line %d: Invalid character '%c' after '\\'\n", line_number, c);
                     free(lexeme);
@@ -937,11 +941,14 @@ int get_token(T_TOKEN *token) {
             case 20: // mlStr01
                 token->type = STRING;
 
-                // we will later check if the string is multiline (in case 25)
-                token->line = line_number;
-
                 if (c == '\\'){
-                    state = 21;
+                    get_next_char();
+                    if (c == '\\' || c == 'n' || c == 't' || c == 'r'){
+                        state = 20;
+                    } else {
+                        unget_char(c);
+                        state = 21;
+                    }
                 } else if (c >= 32 || c == '\"' || c == '\r' || c == '\t'){
                     state = 20;
                 } else if (c == '\n'){
@@ -1055,7 +1062,7 @@ int get_token(T_TOKEN *token) {
                     // End of string
 
                     // check if the string is multiline
-                    if (token->line == line_number){
+                    if (multiline_start_line == line_number){
                         // multiline with just 1 line is not multiline
                         fprintf(stderr, "Lexical error at line %d: Multiline string must have at least 2 lines\n", line_number);
                         free(lexeme);
