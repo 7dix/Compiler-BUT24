@@ -501,6 +501,7 @@ int get_token(T_TOKEN *token) {
                             return RET_VAL_INTERNAL_ERR;
                         }
                     }
+                    state = 1;  // Transition to id
                 } else {
                     // End of identifier
                     unget_char(c);
