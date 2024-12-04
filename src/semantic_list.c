@@ -147,7 +147,6 @@ RET_VAL set_types(T_LIST_PTR list, T_SYM_TABLE *table){
                 case VAR_FLOAT:{ // const :f64
                     list->active->literal_type = LITERAL_FLOAT;
                     if (symbol->data.var.const_expr) list->active->value = (float)symbol->data.var.float_value;
-                    //else if (list->active->node->token->type == FLOAT) list->active->value = list->active->node->token->value.float_val;
                     break;
                 }
                 default:{

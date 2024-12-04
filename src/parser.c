@@ -2423,7 +2423,6 @@ bool syntax_assign(T_TOKEN_BUFFER *buffer, T_SYMBOL_DATA *data) {
         error_flag = compare_var_types(&(data->var.type), &expr_res);
         if (error_flag != RET_VAL_OK) {
             tree_dispose(&tree);
-            // TODO: change following when doing returns
             if (!is_return) {
                 return false;
             }

@@ -96,7 +96,6 @@ int check_function_call(T_SYM_TABLE *table, T_FN_CALL *fn_call) {
                 break;
 
             default:
-                // TOOD: correct return value?
                 return RET_VAL_SEMANTIC_FUNCTION_ERR;
                 break;
         }

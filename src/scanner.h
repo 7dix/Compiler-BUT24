@@ -15,7 +15,7 @@
 typedef enum TOKEN_TYPE{
     IMPORT,
     NOT_EQUAL,
-    STRING, // MULTILINE_STRING by spadal pod string
+    STRING, // MULTILINE_STRING goes here as well
     INT,
     FLOAT,
     LESS_THAN,
@@ -29,7 +29,7 @@ typedef enum TOKEN_TYPE{
     MULTIPLY,
     DIVIDE,
     COLON,
-    SEMICOLON, // EOL
+    SEMICOLON,
     BRACKET_LEFT_SIMPLE,
     BRACKET_RIGHT_SIMPLE,
     BRACKET_LEFT_CURLY,
