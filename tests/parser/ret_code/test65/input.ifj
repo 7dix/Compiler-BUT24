@@ -1,0 +1,9 @@
+const ifj = @import("ifj24.zig");
+
+pub fn main() void {
+    const a = 5;
+    const b = 0;
+    const res = a / b;
+    ifj.write("Division by zero | Expected: RUNTIME ERROR");
+    ifj.write(res);
+}

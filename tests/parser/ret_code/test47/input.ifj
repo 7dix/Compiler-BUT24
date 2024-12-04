@@ -1,0 +1,19 @@
+const ifj = @import("ifj24.zig");
+
+pub fn fibonacci(n: i32) i32 {
+    if (n <= 1) {
+        return n;
+    } else {}
+    const fib_1_input = n - 1;
+    const fib_2_input = n - 2;
+    const fib_1 = fibonacci(fib_1_input);
+    const fib_2 = fibonacci(fib_2_input);
+    return fib_1 + fib_2;
+}
+
+pub fn main() void {
+    const result: i32 = fibonacci(10);
+    ifj.write("10th Fibonacci num\nExpected: 55\nResult: ");
+    ifj.write(result);
+    ifj.write("\n");
+}

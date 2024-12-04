@@ -1,0 +1,41 @@
+
+const ifj = @import("ifj24.zig");
+
+pub fn main() void {
+    ifj.write("TEST IFJ.ORD\n");
+    ifj.write("----------------\n");
+    
+    var string = ifj.string("");
+    var ord = ifj.ord(string, 0);
+    ifj.write("Test v retezci |");
+    ifj.write(string);
+    ifj.write("| na pozici 0 je znak s ordinalni hodnotou: ");
+    ifj.write(ord);
+    ifj.write("\n");
+
+    string = ifj.string("ahoj");
+    const num = 0 -1;
+    ord = ifj.ord(string, num);
+    ifj.write("Test v retezci |");
+    ifj.write(string);
+    ifj.write("| na pozici -1 je znak s ordinalni hodnotou: ");
+    ifj.write(ord);
+    ifj.write("\n");
+
+    string = ifj.string("ahoj");
+    ord = ifj.ord(string, 4);
+    ifj.write("Test v retezci |");
+    ifj.write(string);
+    ifj.write("| na pozici 4 je znak s ordinalni hodnotou: ");
+    ifj.write(ord);
+    ifj.write("\n");
+
+    string = ifj.string("ahoj");
+    ord = ifj.ord(string, 2);
+    ifj.write("Test v retezci |");
+    ifj.write(string);
+    ifj.write("| na pozici 2 je znak s ordinalni hodnotou: ");
+    ifj.write(ord);
+    ifj.write("\n");
+
+}       

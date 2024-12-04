@@ -1,0 +1,31 @@
+const ifj = @import("ifj24.zig");
+
+pub fn main() void {
+    const str = ifj.string("123");
+    const num1 = ifj.ord(str, 0);
+    const num2 = ifj.ord(str, 1);
+    const num3 = ifj.ord(str, 2);
+    const num4 = ifj.ord(str, 3);
+    const m1 = 0 -1;
+    const num5 = ifj.ord(str, m1);
+    ifj.write("Expected: 49\nResult: ");
+    ifj.write(num1);
+    ifj.write("\n");
+    ifj.write("Expected: 50\nResult: ");
+    ifj.write(num2);
+    ifj.write("\n");
+    ifj.write("Expected: 51\nResult: ");
+    ifj.write(num3);
+    ifj.write("\n");
+    ifj.write("Expected: 0\nResult: ");
+    ifj.write(num4);
+    ifj.write("\n");
+    ifj.write("Expected: 0\nResult: ");
+    ifj.write(num5);
+    ifj.write("\n");
+    const str2 = ifj.string("");
+    const num6 = ifj.ord(str2, 0);
+    ifj.write("Expected: 0\nResult: ");
+    ifj.write(num6);
+    ifj.write("\n");
+}

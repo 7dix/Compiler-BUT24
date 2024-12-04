@@ -1,0 +1,43 @@
+const ifj = @import("ifj24.zig");
+
+pub fn main() void {
+    ifj.write("TEST IFJ.WRITE\n");
+    ifj.write(1);
+    ifj.write("\n");
+    ifj.write(5.0);
+    ifj.write("\n");
+    ifj.write("ahoj\n");
+    ifj.write("");
+    ifj.write("\n");
+    const a = 4.3;
+    ifj.write(a);
+    ifj.write("\n");
+    const b = 5;
+    ifj.write(b);
+    ifj.write("\n");
+    const c = 0 - 4.4;
+    ifj.write(c);
+    ifj.write("\n");
+    const d = 0-10;
+    ifj.write(d);
+    ifj.write("\n");
+    const e = ifj.string("");
+    ifj.write(e);
+    ifj.write("\n");
+    const f = ifj.string(e);
+    ifj.write(f);
+    ifj.write("\n");
+    const g = ifj.string("ahoj\n");
+    ifj.write(g);
+    ifj.write(null);
+    ifj.write("\n");
+    const h :?i32 = null;
+    ifj.write(h);
+    ifj.write("\n");
+    const i :?f64 = null;
+    ifj.write(i);
+    ifj.write("\n");
+    const j :?[]u8 = null;
+    ifj.write(j);
+    ifj.write("\n");
+}

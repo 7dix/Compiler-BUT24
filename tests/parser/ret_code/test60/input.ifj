@@ -1,0 +1,6 @@
+const ifj = @import("ifj24.zig");
+pub fn main() void {
+    const valid: i32;
+    @invalidToken;
+    ifj.write("Mixed valid and invalid tokens | Expected: SYNTAX ERROR");
+}

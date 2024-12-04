@@ -1,0 +1,11 @@
+const ifj = @import("ifj24.zig");
+
+pub fn test() void {
+    ifj.write("ahoj");
+}
+
+pub fn main() void {
+    var str = test();
+    str = ifj.string("gaga");
+    ifj.write("Invalid function call, assigning void function to a variable");
+}

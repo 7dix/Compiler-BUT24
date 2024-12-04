@@ -1,0 +1,79 @@
+[
+  {
+    "type": "VAR",
+    "lexeme": "var",
+    "line": 2,
+    "length": 3,
+    "value": null
+  },
+  {
+    "type": "IDENTIFIER",
+    "lexeme": "x",
+    "line": 2,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "ASSIGN",
+    "lexeme": "=",
+    "line": 2,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "INT",
+    "lexeme": "10",
+    "line": 2,
+    "length": 2,
+    "value": 10
+  },
+  {
+    "type": "SEMICOLON",
+    "lexeme": ";",
+    "line": 2,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "IDENTIFIER",
+    "lexeme": "x",
+    "line": 3,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "ASSIGN",
+    "lexeme": "=",
+    "line": 3,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "IDENTIFIER",
+    "lexeme": "x",
+    "line": 3,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "PLUS",
+    "lexeme": "+",
+    "line": 3,
+    "length": 1,
+    "value": null
+  },
+  {
+    "type": "INT",
+    "lexeme": "1",
+    "line": 3,
+    "length": 1,
+    "value": 1
+  },
+  {
+    "type": "SEMICOLON",
+    "lexeme": ";",
+    "line": 3,
+    "length": 1,
+    "value": null
+  }
+]

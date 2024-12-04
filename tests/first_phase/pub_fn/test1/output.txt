@@ -1,0 +1,2 @@
+pub fn main() void
+pub fn goo() []u8

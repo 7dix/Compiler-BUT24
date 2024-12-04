@@ -1,6 +1,6 @@
 //FILE: scanner.h
 //PROJEKT: IFJ24 - Compiler for the IFJ24 lang @ FIT BUT 2BIT
-//TEAM: Martin Zůbek (253226)
+//TEAM: Martin Zůbek (253206)
 //AUTHORS:
 // Otakar Kočí (xkocio00, 247555)
 //
@@ -13,10 +13,6 @@
 // TYPE DEFINITIONS
 
 typedef enum TOKEN_TYPE{
-    /*
-    trochu detailneji jsem prepsal typy tokenu podle automatu,
-    dal by to chtelo jeste probrat (aspon call) 
-    */
     IMPORT,
     NOT_EQUAL,
     STRING, // MULTILINE_STRING by spadal pod string
@@ -61,6 +57,7 @@ typedef enum TOKEN_TYPE{
     VOID,
     IFJ,
     EOF_TOKEN,
+    VOID_TOKEN // Special token used in token buffer to return when no token is found
 } TOKEN_TYPE;
 
 /**
@@ -72,8 +69,9 @@ typedef struct T_TOKEN {
     int line;            // Line number where the token was found
     int length;          // Length of the lexeme
     union {
-        int intVal;      // Integer value for INT tokens
-        float floatVal;  // Float value for FLOAT tokens
+        int int_val;      // Integer value for INT tokens
+        float float_val;  // Float value for FLOAT tokens
+        char *str_val; // String value for STRING tokens
     } value;             // Union to hold the token's value
 } T_TOKEN;
 

@@ -1,0 +1,39 @@
+const ifj = @import("ifj24.zig");
+
+pub fn main() void {
+    const str1 = ifj.string("OTASEK");
+    const str2 = ifj.string("OTAK02CZLP");
+    const str3 = ifj.string("MARTINEK");
+    const str4 = ifj.string("ZUBOS");
+    const str5 = ifj.string("EXTRADLOUHYRETEZECJAKLOFAS");
+    const err1 = 128;
+    const err2 = 3.14;
+    ifj.write("STR: OTASEK | Expected: 6 | Result: ");
+    var ret = ifj.length(str1);
+    ifj.write(ret);
+    ifj.write("\n");
+    ifj.write("STR: OTAK02CZLP | Expected: 10 | Result: ");
+    ret = ifj.length(str2);
+    ifj.write(ret);
+    ifj.write("\n");
+    ifj.write("STR: MARTINEK | Expected: 8 | Result: ");
+    ret = ifj.length(str3);
+    ifj.write(ret);
+    ifj.write("\n");
+    ifj.write("STR: ZUBOS | Expected: 5 | Result: ");
+    ret = ifj.length(str4);
+    ifj.write(ret);
+    ifj.write("\n");
+    ifj.write("STR: EXTRADLOUHYRETEZECJAKLOFAS | Expected: 26 | Result: ");
+    ret = ifj.length(str5);
+    ifj.write(ret);
+    ifj.write("\n");
+    ifj.write("INPUT IS A NUM | Expected: ERR | Result: ");
+    ret = ifj.length(err1);
+    ifj.write(ret);
+    ifj.write("\n");
+    ifj.write("INPUT IS A FLOAT | Expected: ERR | Result: ");
+    ret = ifj.length(err2);
+    ifj.write(ret);
+    ifj.write("\n");
+}

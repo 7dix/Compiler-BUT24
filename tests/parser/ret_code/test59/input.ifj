@@ -1,0 +1,5 @@
+const ifj = @import("ifj24.zig");
+pub fn main() void {
+    const x: i3&2;
+    ifj.write("Invalid character in type declaration | Expected: SYNTAX ERROR");
+}

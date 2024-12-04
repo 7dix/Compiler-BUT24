@@ -1,0 +1,10 @@
+const ifj = @import("ifj24.zig");
+
+pub fn main() void {
+    const a: i32 = 10;
+    const b: i32 = 20;
+    const result = a + b;
+    ifj.write("Valid arithmetic operation\nExpected: 30\nResult: ");
+    ifj.write(result);
+    ifj.write("\n");
+}
