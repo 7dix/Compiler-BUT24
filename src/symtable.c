@@ -115,7 +115,6 @@ T_SYMBOL *hashtable_find(T_HASHTABLE *ht, const char *key) {
 
     while (ht->table[index].occupied || ht->table[index].deleted) { // Only continue if the slot is occupied or was deleted
         if (ht->table[index].occupied && strcmp(ht->table[index].name, key) == 0) {
-            //ht->table[index].data.var.used = true;
             return &ht->table[index];
         }
         if (probe_count++ >= HASHTABLE_SIZE) break; // Avoid infinite loop if table is full
