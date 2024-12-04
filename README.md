@@ -1,7 +1,6 @@
 # IFJ24 Compiler
 
-![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
-![License](https://img.shields.io/badge/license-MIT-blue)
+![License](https://img.shields.io/badge/license-GPL3-0)
 
 ## Table of Contents
 - [Introduction](#introduction)
@@ -53,5 +52,8 @@ To run the project, use the following command:
 - [Kryštof Valenta](https://github.com/chadmee)
 - [Martin Zůbek](https://github.com/MiroSantona)
 
+## Project Motivation
+Our primary [motivation](https://youtu.be/K4XqeVWG7uo?si=wObYDwwN5HvTuQaw) while building this project.
+
 ## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GPL-3.0 License - see the [LICENSE](LICENSE) file for details.
