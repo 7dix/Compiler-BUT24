@@ -1,4 +1,4 @@
-# IFJ24 Compiler
+# BUT24 Compiler
 
 ![License](https://img.shields.io/badge/license-GPL3-0)
 
